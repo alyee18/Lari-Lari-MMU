@@ -29,6 +29,15 @@ def restaurant_list():
 
     return render_template("restaurants.html", restaurants=filtered_list)
 
+@app.route("/restaurant/<int:restaurant_id>")
+def restaurant_detail(restaurant_id):
+    restaurant = next((r for r in restaurants if r["id"] == restaurant_id), None)
+    if restaurant:
+        return render_template("restaurant_detail.html", restaurant=restaurant)
+    else:
+        return "Restaurant not found", 404
+
+
 def filter_restaurants(restaurants, cuisine=None, min_price=None, max_price=None, max_delivery_time=None, min_rating=None):
     filtered = []
     
@@ -54,13 +63,14 @@ def filter_restaurants(restaurants, cuisine=None, min_price=None, max_price=None
     return filtered
 
 restaurants = [
-    {"name": "Haji Tapah", "cuisine": "Mamak", "price_range": "2-20", "delivery_time": 30, "rating": 3.7 },
-    {"name": "STC Deen Cafe(STAD)", "cuisine": "Cafe", "price_range": "1-20", "delivery_time": 45, "rating": 3.6},
-    {"name": "7-Eleven", "cuisine": "Convenience", "price_range": "5-30", "delivery_time": 15, "rating": 5.0},
-    {"name": "Starbee", "cuisine": "Cafe", "price_range": "1-20", "delivery_time": 60, "rating": 3.8},
-    {"name": "D' light bakery", "cuisine": "Bakery", "price_range": "3-20", "delivery_time": 20, "rating": 4.5},
-    {"name": "He & She Coffee", "cuisine": "Cafe", "price_range": "4-20", "delivery_time": 25, "rating": 5.0},
+    {"id": 1, "name": "Haji Tapah", "cuisine": "Mamak", "price_range": "2-20", "delivery_time": 30, "rating": 3.7, "menu": ["Maggie Goreng", "Roti Canai", "Teh Tarik"]},
+    {"id": 2, "name": "STC Deen Cafe(STAD)", "cuisine": "Cafe", "price_range": "1-20", "delivery_time": 45, "rating": 3.6, "menu": ["Maggie Goreng", "Roti Canai", "Teh Tarik"]},
+    {"id": 3, "name": "7-Eleven", "cuisine": "Convenience", "price_range": "5-30", "delivery_time": 15, "rating": 5.0, "menu": ["Snacks", "Beverages", "Instant Noodles"]},
+    {"id": 4, "name": "Starbee", "cuisine": "Cafe", "price_range": "1-20", "delivery_time": 60, "rating": 3.8, "menu": ["(havent find yet)"]},
+    {"id": 5, "name": "D' light bakery", "cuisine": "Bakery", "price_range": "3-20", "delivery_time": 20, "rating": 4.5, "menu": ["Bread", "Espresso", "White Coffee", "Black Coffee"]},
+    {"id": 6, "name": "He & She Coffee", "cuisine": "Cafe", "price_range": "4-20", "delivery_time": 25, "rating": 5.0, "menu": ["Espresso", "White Coffee", "Black Coffee", "Cake", "Cookies", "Pasta"]},
 ]
+
 
 if __name__ == "__main__":
     app.run(debug=True)

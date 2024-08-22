@@ -8,15 +8,19 @@
 <body>
     <h1>Restaurants</h1>
     <ul>
-        {% for restaurant in restaurants %}
-            <li>
-                <strong>{{ restaurant.name }}</strong><br>
-                Cuisine: {{ restaurant.cuisine }}<br>
-                Price Range: {{ restaurant.price_range }}<br>
-                Delivery Time: {{ restaurant.delivery_time }} minutes<br>
-                Rating: {{ restaurant.rating }}
-            </li>
-        {% endfor %}
+        {% if restaurants %}
+            {% for restaurant in restaurants %}
+                <li>
+                    <strong><a href="/restaurant/{{ restaurant.id }}">{{ restaurant.name }}</a></strong><br>
+                    Cuisine: {{ restaurant.cuisine }}<br>
+                    Price Range: {{ restaurant.price_range }}<br>
+                    Delivery Time: {{ restaurant.delivery_time }} minutes<br>
+                    Rating: {{ restaurant.rating }}
+                </li>
+            {% endfor %}
+        {% else %}
+            <li>No restaurants found.</li>
+        {% endif %}
     </ul>
     <p><a href="/">Back to Home</a></p>
 </body>

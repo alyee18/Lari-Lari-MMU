@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ restaurant.name }} - Menu</title>
+</head>
+<body>
+    <h1>{{ restaurant.name }}</h1>
+    <p><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+    <p><strong>Price Range:</strong> {{ restaurant.price_range }}</p>
+    <p><strong>Delivery Time:</strong> {{ restaurant.delivery_time }} minutes</p>
+    <p><strong>Rating:</strong> {{ restaurant.rating }}</p>
+
+    <h2>Menu</h2>
+    <ul>
+        {% for item in restaurant.menu %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><a href="/restaurants">Back to Restaurant List</a></p>
+</body>
+</html>
