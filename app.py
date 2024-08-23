@@ -29,7 +29,7 @@ def signup():
    })
    
     #redirect a success template after processing
-    return redirect(url_for("signup"))
+    return redirect(url_for('signup'))
 
     #render the html template with the categories data
     return render_template("signup.html", users=users)
