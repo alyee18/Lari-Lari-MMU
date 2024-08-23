@@ -11,16 +11,21 @@ con = sqlite3.connect("database.db")
 cur = con.cursor()
 
 
-
-
 cur.execute(
     """CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        role TEXT NOT NULL,
-        faculty TEXT NOT NULL,
-        username TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
-        phone_number TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        role TEXT NOT NULL,
+        phone_no TEXT NOT NULL 
         )"""
 )
+
+# Commit the transaction and close the connection
+con.commit()
+con.close()
+
+print("Table created successfully.")
+
