@@ -21,7 +21,7 @@ body{
     border-radius: 30px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.35);
     position: relative;
-    height: 450px;
+    height: 500px;
     width: 400px;
     display: flex;
     justify-content: center;
@@ -39,7 +39,7 @@ body{
     font-size: 15px;   
 }
 .form-box a{
-    color: #ccc;
+    color: #9391a3;
     font-size: 13px;
     margin: 15px 0 10px;
 }
