@@ -11,7 +11,7 @@
         {% if restaurants %}
             {% for restaurant in restaurants %}
                 <li>
-                    <strong><a href="/restaurant/{{ restaurant.id }}">{{ restaurant.name }}</a></strong><br>
+                    <strong><a href="{{ url_for('restaurant_detail', restaurant_id=restaurant.id) }}">{{ restaurant.name }}</a></strong><br>
                     Cuisine: {{ restaurant.cuisine }}<br>
                     Price Range: {{ restaurant.price_range }}<br>
                     Delivery Time: {{ restaurant.delivery_time }} minutes<br>
@@ -22,6 +22,6 @@
             <li>No restaurants found.</li>
         {% endif %}
     </ul>
-    <p><a href="/">Back to Home</a></p>
+    <p><a href="{{ url_for('home') }}">Back to Home</a></p>
 </body>
 </html>

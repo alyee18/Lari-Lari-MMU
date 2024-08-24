@@ -6,34 +6,10 @@
     <title>Home</title>
 </head>
 <body>
-    <h1>Welcome to the Lari Lari MMU</h1>
-    <h2>Food Listing</h2>
-    <p><a href="/restaurants">View All Restaurants</a></p>
-    
-    <h2>Filter Restaurants by Category</h2>
-    <form action="/restaurants" method="get">
-        <label for="cuisine">Cuisine:</label>
-        <select name="cuisine" id="cuisine">
-            <option value="">--Select--</option>
-            <option value="Cafe">Cafe</option>
-            <option value="Bakery">Bakery</option>
-            <option value="Mamak">Mamak</option>
-            <option value="Convenience">Convenience</option>
-        </select>
-        
-        <label for="min_price">Min Price:</label>
-        <input type="number" id="min_price" name="min_price" min="0">
-        
-        <label for="max_price">Max Price:</label>
-        <input type="number" id="max_price" name="max_price" min="0">
-        
-        <label for="max_delivery_time">Max Delivery Time (minutes):</label>
-        <input type="number" id="max_delivery_time" name="max_delivery_time" min="0">
-        
-        <label for="min_rating">Min Rating:</label>
-        <input type="number" id="min_rating" name="min_rating" step="0.1" min="0" max="5">
-        
-        <button type="submit">Filter</button>
-    </form>
+    <h1>Welcome to Lari Lari MMU</h1>
+    <nav>
+        <a href="{{ url_for('restaurant_list') }}">View Restaurants</a>
+        <a href="{{ url_for('view_cart') }}">View Cart</a>
+    </nav>
 </body>
 </html>
