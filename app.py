@@ -3,31 +3,44 @@ from flask import Flask, render_template, redirect, url_for, session, flash, req
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+
 ######### signup ##########
-@app.route('/signup', methods=('GET', 'POST'))
+@app.route('/')
+def index():
+    # Redirect to signup page
+    return redirect(url_for('signup'))
+
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        username = request.form['username']
-        password = request.form['password']
-        role = request.form['role']
-        phone_no = request.form['phone_no']
-   
-    #redirect a success template after processing
-    flash('Signup successful! Please log in.', 'success')
-    return redirect(url_for('login'))
+        name = request.form.get('name')
+        email = request.form.get('email')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        role = request.form.get('role')
+        phone_no = request.form.get('phone_no')
 
-    #render the html template with the categories data
-    return render_template("signup.html")
+        # Check if all required fields are present
+        if not all([name, email, username, password, role, phone_no]):
+            flash('All fields are required!', 'error')
+            return render_template('signup.html')
 
-######### login ##########
-@app.route('/login' , methods=['POST'])
+        # Save the user details to your database or data structure
+        # For example, add the user to a dictionary (replace this with real database code)
+        username[username] = {'password': password, 'role': role}
+        
+        flash('Signup successful! Please log in.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('signup.html')
+
+######### login##########
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        user = user.get(username)
+        username = request.form.get("username")
+        password = request.form.get("password")
+        user = username.get(username)
 
         if user and user['password'] == password:
             session['username'] = username
@@ -36,6 +49,9 @@ def login():
             return redirect(url_for(f'{user["role"]}_page'))
         else:
             flash('Invalid username or password.', 'error')
+
+    if 'username' in session:
+        return redirect(url_for(f'{session["role"]}_page'))
 
     return render_template('login.html')
 
@@ -78,7 +94,3 @@ def logout():
 if __name__ == "__main__":
     app.run(debug=True)
 
-
-
-
-        
