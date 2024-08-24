@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../static/style1.css">
-    <title>SignIn Page</title>
+    <title>Logout</title>
 
 <!--------------------------box-icon-link---------------------------------------------------->
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
@@ -19,32 +19,26 @@
 
 <!--------------------------aos-animation-link---------------------------------------------------->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-
 </head>
 <body>
-    <section>
-        <div class="form-box">
-            <div class="form-value">
-            <form method="POST" action="signin.html">
-                <h1>Sign In</h1>
-                <span>haven't register?</span>
-                <div class="inputbox">
-                    <input type="text" class="input-field" placeholder="Email" required>
-                    <i class="bx bx-envelope"></i>
-                </div>
-                <div class="inputbox">
-                    <input type="password" class="input-field" placeholder="Password" required>
-                    <i class="bx bx-lock-alt"></i>
-                </div>
-                <div class="forget">
-                    <a href="#">Forget Password?</a>
-                </div>
-                    <button>Sign In</button>
-                <div class="register">
-                        <p>Don't have account? <a href="signup.html">Register</a></p>
-                </div>
-            </form>
+    <div class="form-box">
+        <div class="form-value">
+            <h1>Logout</h1>
+                    <!-- Display flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash-{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    
+    <p class="message">You have been successfully logged out.</p>
+    <button><a class="button" href="signin.html">Return to Login Page</a></button>
         </div>
-    </section>
+
+    </div>
 </body>
 </html>
