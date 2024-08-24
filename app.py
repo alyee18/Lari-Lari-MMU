@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, session, flash, request
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 
 ######### signup ##########
 @app.route('/signup', methods=('GET', 'POST'))
@@ -14,78 +15,68 @@ def signup():
         phone_no = request.form['phone_no']
    
     #redirect a success template after processing
+    flash('Signup successful! Please log in.', 'success')
     return redirect(url_for('login'))
 
     #render the html template with the categories data
     return render_template("signup.html")
 
-if __name__ == "__main__":
-   app.run(debug=True)
-
 ######### login ##########
-app.secret_key = 'your_secret_key'
-
-@app.route('/')
-def index():
-    return render_template('login.html')
-
 @app.route('/login' , methods=['POST'])
 def login():
-    username = request.form['username']
-    password = request.form['password']
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        user = user.get(username)
 
-    user = user.get(username)
+        if user and user['password'] == password:
+            session['username'] = username
+            session['role'] = user['role']
+            flash('Login successful!', 'success')
+            return redirect(url_for(f'{user["role"]}_page'))
+        else:
+            flash('Invalid username or password.', 'error')
 
-    if user and user['password'] == password:
-        session['username'] = username
-        session['role'] =user['role']
+    return render_template('login.html')
 
-        if user['role'] =='seller':
-            return redirect(url_for('seller_page'))
-        elif user ['role'] =='runner':
-            return redirect(url_for('runner_page'))
-        elif user ['role'] =='buyer':
-            return redirect(url_for('buyer_page'))
-        elif user ['role'] =='admin':
-            return redirect(url_for('admin_page'))
-    else:
-        return redirect(url_for('index',_external=True, category='danger'))
-    
 @app.route('/seller')
 def seller_page():
-    if 'username' not in session:
-        return redirect(url_for('index', message='Please log in to access this page.'))
-    elif session.get('role') != 'seller':
-        return redirect(url_for('index', message='You do not have permission to access this page.'))
+    if 'role' not in session or session['role'] != 'seller':
+        flash('You do not have permission to access this page.', 'error')
+        return redirect(url_for('login'))
     return 'Welcome to the Seller Page!'
+
+@app.route('/buyer')
+def buyer_page():
+    if 'role' not in session or session['role'] != 'buyer':
+        flash('You do not have permission to access this page.', 'error')
+        return redirect(url_for('login'))
+    return 'Welcome to the Buyer Page!'
 
 @app.route('/runner')
 def runner_page():
-    if 'username' not in session:
-        return redirect(url_for('index', message='Please log in to access this page.'))
-    elif session.get('role') != 'runner':
-        return redirect(url_for('index', message='You do not have permission to access this page.'))
+    if 'role' not in session or session['role'] != 'runner':
+        flash('You do not have permission to access this page.', 'error')
+        return redirect(url_for('login'))
     return 'Welcome to the Runner Page!'
 
-@app.route('/buyer')
-def seller_page():
-    if 'username' not in session:
-        return redirect(url_for('index', message='Please log in to access this page.'))
-    elif session.get('role') != 'buyer':
-        return redirect(url_for('index', message='You do not have permission to access this page.'))
-    return 'Welcome to the Buyer Page!'
-
 @app.route('/admin')
-def seller_page():
-    if 'username' not in session:
-        return redirect(url_for('index', message='Please log in to access this page.'))
-    elif session.get('role') != 'admin':
-        return redirect(url_for('index', message='You do not have permission to access this page.'))
+def admin_page():
+    if 'role' not in session or session['role'] != 'admin':
+        flash('You do not have permission to access this page.', 'error')
+        return redirect(url_for('login'))
     return 'Welcome to the Admin Page!'
 
-if __name__ == "__main__":
-   app.run(debug=True)
+######### logout ##########
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    session.pop('role', None)
+    flash("You have been logged out.", "info")
+    return redirect(url_for('login'))
 
+if __name__ == "__main__":
+    app.run(debug=True)
 
 
 
