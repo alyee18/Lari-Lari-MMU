@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = "your_secret_key"
 
 @app.route("/")
-def home():
+def index():
     return render_template("index.html")
 
 @app.route("/name/<name>")
@@ -125,7 +125,6 @@ def confirm_order():
     return render_template("order_confirmation.html", message="Your order has been placed successfully!")
 
 # ---------------------------------------------------------------Runner Page------------------------------------------------------------------------------------
-
 
 if __name__ == "__main__":
     app.run(debug=True)
