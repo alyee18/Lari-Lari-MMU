@@ -29,13 +29,13 @@
         <form action="{{ url_for('confirm_order') }}" method="POST">
             <button type="submit">Confirm Order</button>
         </form>
-        
+
     {% else %}
         <p>Your cart is empty.</p>
     {% endif %}
 
     <h2>Total: ${{ total_price }}</h2>
     <li><a href="{{ url_for('restaurant_list') }}">Back to Restaurants</a></li>
-    <li><a href="{{ url_for('home') }}">Back to Home</a></li>
+    <li><a href="{{ url_for('index') }}">Back to Home</a></li>
 </body>
 </html>

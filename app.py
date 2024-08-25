@@ -3,7 +3,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"  # Necessary for session management
+app.secret_key = "your_secret_key"
 
 @app.route("/")
 def home():
