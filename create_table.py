@@ -1,6 +1,6 @@
 import sqlite3
 
-DATABASE = 'site.db'
+DATABASE = 'database.db'
 
 def create_tables():
     conn = sqlite3.connect(DATABASE)

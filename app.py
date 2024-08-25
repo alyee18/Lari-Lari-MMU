@@ -6,7 +6,7 @@ from create_table import create_tables
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-DATABASE = 'site.db'
+DATABASE = 'database.db'
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
