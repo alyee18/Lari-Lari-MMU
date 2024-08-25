@@ -209,6 +209,7 @@ def view_cart():
     # Calculate total price and gather restaurant data
     total_price = 0
     for item in cart_items:
+        restaurant_id = item['restaurant_id']
         item_price = item['price'] * item['quantity']
         total_price += item_price
 
@@ -219,7 +220,8 @@ def view_cart():
     for item in cart_items:
         item['restaurant_name'] = restaurants_data.get(item['restaurant_id'], "Unknown")
 
-    return render_template("cart.html", cart_items=cart_items, total_price=total_price)
+    print("Session Cart Data:", session.get("cart"))  # Debugging line
+    return render_template("cart.html", cart_items=cart_items, total_price=total_price, restaurants=restaurants)
 
 @app.route("/update_cart", methods=["POST"])
 def update_cart():
@@ -244,16 +246,6 @@ def remove_from_cart():
 
     return redirect(url_for("view_cart"))
 
-@app.route("/confirm_order", methods=["POST"])
-def confirm_order():
-    cart_items = session.get("cart", [])
-    if not cart_items:
-        return redirect(url_for("view_cart"))
-    
-    session.pop("cart", None)  # Clear the cart
-    return render_template("order_confirmation.html", message="Your order has been placed successfully!")
-
-######### Mock Data ##########
 restaurants = [
     {"id": 1, "name": "Haji Tapah", "cuisine": "Mamak", "price_range": "2-20", "delivery_time": 30, "rating": 3.7, 
      "menu": {"Maggie Goreng": 8, "Nasi Goreng": 10, "Roti Kosong": 3, "Roti Telur": 4, "Roti Planta": 5, 
@@ -272,6 +264,18 @@ restaurants = [
     {"id": 6, "name": "He & She Coffee", "cuisine": "Cafe", "price_range": "4-20", "delivery_time": 30, "rating": 5.0, 
      "menu": {"Espresso": 5, "White Coffee": 4, "Black Coffee": 4, "Cake": 6, "Cookies": 3, "Pasta": 10}},
 ]
+
+@app.route("/confirm_order", methods=["POST"])
+def confirm_order():
+    cart_items = session.get("cart", [])
+    if not cart_items:
+        return redirect(url_for("view_cart"))
+    
+    session.pop("cart", None)  # Clear the cart
+    return render_template("order_confirmation.html", message="Your order has been placed successfully!")
+
+# ---------------------------------------------------------------Runner Page------------------------------------------------------------------------------------
+
 
 if __name__ == "__main__":
     app.run(debug=True)

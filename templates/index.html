@@ -47,7 +47,8 @@
             <p data-aos="fade-right" data-aos-duration="1700" data-aos-delay="300"> YOO YOO YOO wanna find something tasty??<br> Here LARI LARI MMU is the best choice for you !!</p>
             
             <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
-                <a href="{{ url_for('restaurant_list') }}" class="btn">Order NOW</a>
+                <li><a href="{{ url_for('restaurant_list') }}">Order Now</a></li>
+                <li><a href="{{ url_for('view_cart') }}">View Cart</a></li>      
             </div>
         </div>
     </section>
@@ -60,5 +61,4 @@
 </html>
 
 <!--------------------------Restaurant---------------------------------------------------->    
-        <li><a href="{{ url_for('restaurant_list') }}">View Restaurants</a></li>
         <li><a href="{{ url_for('view_cart') }}">View Cart</a></li>      

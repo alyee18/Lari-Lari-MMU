@@ -11,14 +11,14 @@
     <p>Price Range: {{ restaurant.price_range }}</p>
     <p>Delivery Time: {{ restaurant.delivery_time }} minutes</p>
     <p>Rating: {{ restaurant.rating }}</p>
-    
+
     <h2>Menu</h2>
     <ul>
         {% for item, price in restaurant.menu.items() %}
             <li>{{ item }} - ${{ price }}</li>
         {% endfor %}
     </ul>
-    
+
     <form action="{{ url_for('add_to_cart') }}" method="post">
         <input type="hidden" name="restaurant_id" value="{{ restaurant.id }}">
         <label for="item_name">Choose an item:</label>
