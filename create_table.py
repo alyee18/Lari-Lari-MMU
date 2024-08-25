@@ -1,31 +1,30 @@
 import sqlite3
 
-# Function to get database connection
-def get_db_connection():
-        con = sqlite3.connect("database.db")
-        con.row_factory = sqlite3.Row
-        return con
+DATABASE = 'site.db'
 
-# Connect with db
-con = sqlite3.connect("database.db")
-cur = con.cursor()
+def create_tables():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
 
+    # create  user table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL,
+            phone_no TEXT NOT NULL 
+        )
+    ''')
 
-cur.execute(
-    """CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL,
-        role TEXT NOT NULL,
-        phone_no TEXT NOT NULL 
-        )"""
-)
+ # Commit the transaction and close the connection
+    conn.commit()
+    conn.close()
 
-# Commit the transaction and close the connection
-con.commit()
-con.close()
+if __name__ == '__main__':
+    create_tables()
+    print("Tables created successfully!")
 
-print("Table created successfully.")
 

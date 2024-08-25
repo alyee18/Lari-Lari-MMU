@@ -1,15 +1,25 @@
 from flask import Flask, render_template, redirect, url_for, session, flash, request
+import sqlite3
 
+# Import the function to create tables
+from create_table import create_tables
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+DATABASE = 'site.db'
 
-######### signup ##########
+def get_db():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+######### home ##########
 @app.route('/')
 def index():
-    # Redirect to signup page
-    return redirect(url_for('signup'))
+    return render_template('index.html')
 
+######### signup ##########
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -24,7 +34,11 @@ def signup():
         if not all([name, email, username, password, role, phone_no]):
             flash('All fields are required!', 'error')
             return render_template('signup.html')
-
+        # Check if username already exists
+        if username in username:
+            flash('Username already exists!', 'error')
+            return render_template('signup.html')
+        
         # Save the user details to your database or data structure
         # For example, add the user to a dictionary (replace this with real database code)
         username[username] = {'password': password, 'role': role}
@@ -40,7 +54,8 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        user = username.get(username)
+
+        user = user.get(username)
 
         if user and user['password'] == password:
             session['username'] = username
@@ -55,12 +70,12 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/seller')
-def seller_page():
-    if 'role' not in session or session['role'] != 'seller':
+@app.route('/restaurant')
+def restaurant_page():
+    if 'role' not in session or session['role'] != 'restaurant':
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('login'))
-    return 'Welcome to the Seller Page!'
+    return 'Welcome to the Restaurant Page!'
 
 @app.route('/buyer')
 def buyer_page():
@@ -91,6 +106,11 @@ def logout():
     flash("You have been logged out.", "info")
     return redirect(url_for('login'))
 
+######### Restaurant ##########
+@app.route('/restaurant')
+def restaurant():
+
+    return render_template('restaurant.html')
+
 if __name__ == "__main__":
     app.run(debug=True)
-
