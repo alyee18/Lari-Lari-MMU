@@ -11,7 +11,7 @@ def home():
 def user(name):
     return f"Hello {name}!"
 
-#---------------------------------------------------------Restaurants Listing---------------------------------------------------------------------------------
+#--------------------------------------------------------------Buyer Page--------------------------------------------------------------------------------------
 @app.route("/restaurants")
 def restaurant_list():
     # Directly pass the full list of restaurants
@@ -112,6 +112,17 @@ restaurants = [
     {"id": 6, "name": "He & She Coffee", "cuisine": "Cafe", "price_range": "4-20", "delivery_time": 30, "rating": 5.0, 
      "menu": {"Espresso": 5, "White Coffee": 4, "Black Coffee": 4, "Cake": 6, "Cookies": 3, "Pasta": 10}},
 ]
+
+@app.route("/confirm_order", methods=["POST"])
+def confirm_order():
+    cart_items = session.get("cart", [])
+    if not cart_items:
+        return redirect(url_for("view_cart"))
+    
+    session.pop("cart", None)  # Clear the cart
+    return render_template("order_confirmation.html", message="Your order has been placed successfully!")
+
+# ---------------------------------------------------------------Runner Page------------------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
