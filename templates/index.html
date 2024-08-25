@@ -27,13 +27,13 @@
         <img src="../static/img-logo.jpg">
         </a>
         <ul class="nav-list">
-            <li><a href="home.html">HOME</a></li>
+            <li><a href="index.html">HOME</a></li>
             <li><a href="#">AAA</a></li>
             <li><a href="#">BBB</a></li>
             <li><a href="#">MY ACCOUNT</a></li>
         </ul>
         <div class="right-content">
-            <a href="signin.html" class="nav-btn">Sign In</a>
+            <a href="login.html" class="nav-btn">Log In</a>
             <a href="signup.html" class="nav-btn">Sign Up</a>
             <div class="bx bx-menu" id="menu-icon"></div>
         </div>
@@ -46,7 +46,7 @@
             <p data-aos="fade-right" data-aos-duration="1700" data-aos-delay="300"> YOO YOO YOO wanna find something tasty??<br> Here LARI LARI MMU is the best choice for you !!</p>
             
             <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
-                <a href="restaurants.html" class="btn">Order NOW</a>
+                <a href="{{ url_for('restaurant_list') }}" class="btn">Order NOW</a>
             </div>
         </div>
     </section>

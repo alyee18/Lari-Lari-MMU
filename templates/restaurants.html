@@ -63,7 +63,6 @@
         </div>
     </div>
     <ul>
-        {% if restaurants %}
             {% for restaurant in restaurants %}
                 <li>
                     <strong><a href="{{ url_for('restaurant_detail', restaurant_id=restaurant.id) }}">{{ restaurant.name }}</a></strong><br>
@@ -75,9 +74,7 @@
                     </div>
                 </li>
             {% endfor %}
-        {% else %}
-            <li>No restaurants found.</li>
-        {% endif %}
+
     </ul>
     <p><a href="index.html">Back to Home</a></p>
 </body>
