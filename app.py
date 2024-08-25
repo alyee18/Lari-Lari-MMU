@@ -139,19 +139,39 @@ def admin_page():
 
 
 ######### logout ##########
-@app.route("/logout")
+@app.route("/logout" , methods=["GET" , "POST"])
 def logout():
     session.pop("username", None)
-    session.pop("role", None)
-    flash("You have been logged out.", "info")
-    return redirect(url_for("login"))
+    session.pop("password", None)
+    flash("You have been logged out successully.", "info")
 
+    return render_template("logout.html")
+
+######### Delete User ##########
+@app.route("/delete_user/<username>", methods=["POST"])
+def delete_user(username):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE username = ?", (username,))
+    conn.commit()
+    conn.close()
+    flash(f"User {username} has been deleted.", "info")
+    return redirect(url_for("admin_page"))
+
+######### Admin Page ##########
+@app.route("/admin")
+def admin():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users")
+    users = cursor.fetchall()
+    conn.close()
+    return render_template("admin.html", users=users)
 
 ######### Restaurant page ##########
-@app.route("/restaurant")
-def restaurant():
-    return render_template("restaurant.html")
-
+@app.route("/restaurants")
+def restaurants():
+    return render_template("restaurants.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
