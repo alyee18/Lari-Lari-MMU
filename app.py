@@ -99,53 +99,14 @@ def login():
             session["username"] = username
             session["role"] = user["role"]
             flash("Login successful!", "success")
-            return redirect(url_for(f'{user["role"]}_page'))
+            return redirect(url_for("index"))
         else:
             flash("Invalid username or password.", "error")
 
     if "username" in session:
-        return redirect(url_for(f'{session["role"]}_page'))
+        return redirect(url_for("index"))
 
     return render_template("login.html")
-
-
-######### Role-based pages ##########
-@app.route("/restaurant_page")
-def restaurant_page():
-    if "role" not in session or session["role"] != "restaurant":
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for("login"))
-    return render_template("restaurants.html")
-
-
-@app.route("/buyer_page")
-def buyer_page():
-    if "role" not in session or session["role"] != "buyer":
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for("login"))
-    return "Welcome to the Buyer Page!"
-
-
-@app.route("/runner_page")
-def runner_page():
-    if "role" not in session or session["role"] != "runner":
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for("login"))
-    return "Welcome to the Runner Page!"
-
-
-@app.route("/admin_page")
-def admin_page():
-    if "role" not in session or session["role"] != "admin":
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for("login"))
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users")
-    users = cursor.fetchall()
-    conn.close()
-    return render_template("admin.html", users=users)
 
 
 ######### logout ##########
