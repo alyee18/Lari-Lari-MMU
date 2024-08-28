@@ -22,20 +22,18 @@
 
 </head>
 <body>
+
     <header>
         <a href="#" class="logo">
         <img src="../static/img-logo.jpg">
         </a>
-        <ul class="nav-list">
-            <li><a href="{{ url_for('index') }}">HOME</a></li>
-            <li><a href="#">AAA</a></li>
-            <li><a href="#">BBB</a></li>
-            <li><a href="#">MY ACCOUNT</a></li>
-        </ul>
         <div class="right-content">
-            <a href="{{ url_for('login') }}" class="nav-btn">Log In</a>
-            <a href="{{ url_for('signup') }}" class="nav-btn">Sign Up</a>
-            <a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a>
+            {% if 'username' in session %}
+                <a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a>
+            {% else %}
+                <a href="{{ url_for('signup') }}" class="nav-btn">Sign Up</a>
+                <a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a>
+            {% endif %}
             <div class="bx bx-menu" id="menu-icon"></div>
         </div>
     </header>
@@ -47,9 +45,11 @@
             <p data-aos="fade-right" data-aos-duration="1700" data-aos-delay="300"> YOO YOO YOO wanna find something tasty??<br> Here LARI LARI MMU is the best choice for you !!</p>
             
             <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
-                <li><a href="{{ url_for('restaurant_list') }}">Order Now</a></li>
-                <li><a href="{{ url_for('view_cart') }}">View Cart</a></li>      
-            </div>
+                {% if 'username' in session and session['role'] == 'buyer' %}
+                    <li><a href="{{ url_for('restaurant_list') }}">Order Now</a></li>
+                {% else %}
+                    <p><a href="{{ url_for('login') }}">Log in as a buyer to place an order</a></p>
+                {% endif %}
         </div>
     </section>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>

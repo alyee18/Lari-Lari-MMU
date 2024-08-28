@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, session, flash, request
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
@@ -17,7 +18,44 @@ def get_db_connection():
 def index():
     return render_template("index.html")
 
+@app.route('/runner_home')
+def runner_home():
+    if session.get('role') != 'runner':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    return render_template('runner_home.html')
 
+@app.route('/seller_home')
+def seller_home():
+    if session.get('role') != 'seller':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    return render_template('seller_home.html')
+
+@app.route('/buyer_home')
+def buyer_home():
+    if session.get('role') != 'seller':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    return render_template('buyer_home.html')
+
+def login_required(role=None):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'username' not in session:
+                flash("You need to log in to access this page.", "error")
+                return redirect(url_for('login'))
+
+            if role and session.get('role') != role:
+                flash("You do not have permission to access this page.", "error")
+                return redirect(url_for('index'))
+
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+######### signup ##########
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
@@ -99,12 +137,29 @@ def login():
             session["username"] = username
             session["role"] = user["role"]
             flash("Login successful!", "success")
-            return redirect(url_for("index"))
+            
+            # Redirect based on the user's role
+            if user["role"] == "seller":
+                return redirect(url_for("seller_home"))
+            elif user["role"] == "runner":
+                return redirect(url_for("runner_home"))
+            elif user["role"] == "buyer":
+                return redirect(url_for("buyer_home"))
+            else:
+                return redirect(url_for("index"))
         else:
             flash("Invalid username or password.", "error")
 
     if "username" in session:
-        return redirect(url_for("index"))
+        role = session.get("role")
+        if role == "seller":
+            return redirect(url_for("seller_home"))
+        elif role == "runner":
+            return redirect(url_for("runner_home"))
+        elif role == "buyer":
+            return redirect(url_for("buyer_home"))
+        else:
+            return redirect(url_for("index"))
 
     return render_template("login.html")
 
@@ -133,6 +188,7 @@ def delete_user(username):
 
 ######### Buyer Page ##########
 @app.route("/restaurants")
+@login_required(role='buyer')
 def restaurant_list():
     # Directly pass the full list of restaurants
     return render_template("restaurants.html", restaurants=restaurants)
