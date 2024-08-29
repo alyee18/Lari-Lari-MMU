@@ -19,7 +19,19 @@ def createtables():
             role TEXT NOT NULL,
             phone_no TEXT NOT NULL
         )
-    """
+        """
+    )
+
+    # Create tasks table
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            task_type TEXT NOT NULL,
+            description TEXT NOT NULL,
+            status TEXT NOT NULL
+        )
+        """
     )
 
     # Commit the transaction and close the connection

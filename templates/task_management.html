@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management</title>
+    
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Task Management</a></li>
+                <li><a href="{{ url_for('task_management', task_type='available') }}">Available Deliveries</a></li>
+                <li><a href="{{ url_for('task_management', task_type='current') }}">Current Deliveries</a></li>
+                <li><a href="{{ url_for('task_management', task_type='completed') }}">Completed Deliveries</a></li>
+
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="task-section">
+            <h2>{{ task_type.replace('_', ' ').title() }}</h2>
+            {% if tasks %}
+                <ul>
+                    {% for task in tasks %}
+                        <li class="task-item">{{ task.description }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tasks available.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

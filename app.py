@@ -12,18 +12,36 @@ def get_db_connection():
     con.row_factory = sqlite3.Row
     return con
 
+def get_tasks(task_type):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM tasks WHERE task_type = ?", (task_type,))
+    tasks = cursor.fetchall()
+
+    conn.close()
+    return tasks
 
 ######### home ##########
 @app.route("/")
 def index():
     return render_template("index.html")
 
+######### Runner ##########
 @app.route('/runner_home')
 def runner_home():
     if session.get('role') != 'runner':
         flash("You do not have permission to access this page.", "error")
         return redirect(url_for('index'))
     return render_template('runner_home.html')
+
+@app.route('/task_management/<task_type>')
+def task_management(task_type):
+    task_list = get_tasks(task_type)
+
+    task_list = [{'id': task['id'], 'description': task['description']} for task in task_list]
+
+    return render_template('task_management.html', tasks=task_list, task_type=task_type)
 
 @app.route('/seller_home')
 def seller_home():
