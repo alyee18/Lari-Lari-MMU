@@ -43,19 +43,16 @@ def task_management(task_type):
 
     return render_template('task_management.html', tasks=task_list, task_type=task_type)
 
+@app.route('/progress_tracking')
+def progress_tracking():
+    return render_template('progress_tracking.html')
+
 @app.route('/seller_home')
 def seller_home():
     if session.get('role') != 'seller':
         flash("You do not have permission to access this page.", "error")
         return redirect(url_for('index'))
     return render_template('seller_home.html')
-
-@app.route('/buyer_home')
-def buyer_home():
-    if session.get('role') != 'buyer':
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for('index'))
-    return render_template('buyer_home.html')
 
 def login_required(role=None):
     def decorator(f):
@@ -205,12 +202,18 @@ def delete_user(username):
 
 
 ######### Buyer Page ##########
-@app.route("/restaurants")
+@app.route('/buyer_home')
 @login_required(role='buyer')
+def buyer_home():
+    if session.get('role') != 'buyer':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    return render_template('buyer_home.html')
+
+@app.route("/restaurants")
 def restaurant_list():
     # Directly pass the full list of restaurants
     return render_template("restaurants.html", restaurants=restaurants)
-
 
 @app.route("/restaurant/<int:restaurant_id>")
 def restaurant_detail(restaurant_id):
