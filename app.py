@@ -418,7 +418,7 @@ def add_menu_item(restaurant_id):
             conn.close()
 
         flash("Menu item added successfully!", "success")
-        return redirect(url_for("restaurant_detail", restaurant_id=restaurant_id))
+        return redirect(url_for("seller_home"))  # Redirect to seller's home page
 
     return render_template("add_menu_item.html", restaurant_id=restaurant_id)
 
