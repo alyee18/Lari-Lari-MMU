@@ -12,25 +12,28 @@ def get_db_connection():
     con.row_factory = sqlite3.Row
     return con
 
+def get_tasks(task_type):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM tasks WHERE task_type = ?", (task_type,))
+    tasks = cursor.fetchall()
+
+    conn.close()
+    return tasks
 
 ######### home ##########
 @app.route("/")
 def index():
     return render_template("index.html")
 
+######### Runner ##########
 @app.route('/runner_home')
 def runner_home():
     if session.get('role') != 'runner':
         flash("You do not have permission to access this page.", "error")
         return redirect(url_for('index'))
     return render_template('runner_home.html')
-
-@app.route('/seller_home')
-def seller_home():
-    if session.get('role') != 'seller':
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for('index'))
-    return render_template('seller_home.html')
 
 def login_required(role=None):
     def decorator(f):
@@ -130,6 +133,9 @@ def login():
             session["username"] = username
             session["role"] = user["role"]
             flash("Login successful!", "success")
+
+            print(f"Logged in as: {username}")
+            print(f"User role: {session['role']}")
             
             # Redirect based on the user's role
             if user["role"] == "seller":
@@ -142,9 +148,11 @@ def login():
                 return redirect(url_for("index"))
         else:
             flash("Invalid username or password.", "error")
+            print("Invalid credentials")
 
     if "username" in session:
         role = session.get("role")
+        print(f"Redirecting based on role: {role}")
         if role == "seller":
             return redirect(url_for("seller_home"))
         elif role == "runner":
@@ -178,6 +186,13 @@ def delete_user(username):
     flash(f"User {username} has been deleted.", "info")
     return redirect(url_for("admin_page"))
 
+######### SellerPage ##########
+@app.route('/seller_home')
+def seller_home():
+    if session.get('role') != 'seller':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    return render_template('seller_home.html')
 
 ######### Buyer Page ##########
 @app.route('/buyer_home')
@@ -192,7 +207,6 @@ def buyer_home():
 def restaurant_list():
     # Directly pass the full list of restaurants
     return render_template("restaurants.html", restaurants=restaurants)
-
 
 @app.route("/restaurant/<int:restaurant_id>")
 def restaurant_detail(restaurant_id):
