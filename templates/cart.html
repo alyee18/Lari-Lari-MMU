@@ -4,14 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart</title>
+    <link rel="stylesheet" type="text/css" href="../static/style2(RT).css">
+
+<!--------------------------box-icon-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+
+<!--------------------------remix-icon-link---------------------------------------------------->
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+    
+<!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+
+<!--------------------------aos-animation-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
-    <h1>Your Cart</h1>
-
+    <div class="cart">
+        <div class="cart-header">
+            <div class="cart-icon">
+                <i class='bx bx-cart'></i>
+            </div>
+            <h1>Your Cart</h1>
+        </div>
     {% if cart_items %}
-        <ul>
+        <ul class="cart-item">
             {% for item in cart_items %}
-                <li>
+                <li class="item-info">
                     {{ item['item_name'] }} - {{ item['quantity'] }} x ${{ item['price'] }} from {{ restaurants[item['restaurant_id'] - 1]['name'] }}
                     <form action="{{ url_for('update_cart') }}" method="post" style="display:inline;">
                         <input type="hidden" name="item_index" value="{{ loop.index0 }}">
@@ -28,14 +48,17 @@
 
         <form action="{{ url_for('confirm_order') }}" method="POST">
             <button type="submit">Confirm Order</button>
+
         </form>
 
     {% else %}
         <p>Your cart is empty.</p>
     {% endif %}
-
+    <div class="total">
     <h2>Total: ${{ total_price }}</h2>
     <li><a href="{{ url_for('restaurant_list') }}">Back to Restaurants</a></li>
     <li><a href="{{ url_for('index') }}">Back to Home</a></li>
+
+    </div>
 </body>
 </html>

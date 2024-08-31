@@ -46,7 +46,7 @@
             
             <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
                 {% if 'username' in session and session['role'] == 'buyer' %}
-                    <li><a href="{{ url_for('buyer_home') }}">Order Now</a></li>
+                    <button><a href="{{ url_for('restaurant_list') }}">Order Now</a></button>
                 {% else %}
                     <p><a href="{{ url_for('login') }}">Log in as a buyer to place an order</a></p>
                 {% endif %}
