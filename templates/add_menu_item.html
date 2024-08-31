@@ -6,10 +6,22 @@
     <title>Add Menu Item</title>
 </head>
 <body>
-    <form method="POST" action="{{ url_for('add_menu_item', restaurant_id=restaurant_id) }}">
-        <input type="text" name="item_name" placeholder="Item Name" required><br>
-        <input type="number" name="price" placeholder="Price" step="0.01" required><br>
-        <button type="submit">Add Menu Item</button>
+    <h1>Add Menu Item for {{ restaurant_name }}</h1>
+
+    <!--adding a menu item -->
+
+    <form method="post">
+        <!-- menu item -->
+        <label for="name">Item Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" step="0.01" required><br><br>
+        
+        <button type="submit">Add Item</button>
     </form>
+
+    <a href="{{ url_for('seller_home') }}">Back to Homepage</a>
+
 </body>
 </html>

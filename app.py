@@ -30,7 +30,17 @@ def seller_home():
     if session.get('role') != 'seller':
         flash("You do not have permission to access this page.", "error")
         return redirect(url_for('index'))
-    return render_template('seller_home.html')
+    
+    # Fetch the seller's restaurants
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM restaurants WHERE owner_username = ?", (session['username'],))
+    restaurants = cursor.fetchall()
+    conn.close()
+
+    # Pass the restaurants to the template
+    return render_template('seller_home.html', restaurants=restaurants)
+
 
 @app.route('/buyer_home')
 def buyer_home():
@@ -187,13 +197,6 @@ def delete_user(username):
 
 
 ######### Buyer Page ##########
-@app.route('/buyer_home')
-@login_required(role='buyer')
-def buyer_home():
-    if session.get('role') != 'buyer':
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for('index'))
-    return render_template('buyer_home.html')
 
 @app.route("/restaurants")
 def restaurant_list():
@@ -206,6 +209,24 @@ def restaurant_list():
 
     return render_template("restaurants.html", restaurants=restaurants)
 
+@app.route("/confirm_order", methods=["POST"])
+@login_required(role='buyer')
+def confirm_order():
+    cart_items = session.get("cart", [])
+
+    if not cart_items:
+        flash("Your cart is empty.", "error")
+        return redirect(url_for("view_cart"))
+
+    # Process the order here
+    # For example, save order details to the database, send a confirmation email, etc.
+
+    # Clear the cart after confirming the order
+    session.pop("cart", None)
+
+    flash("Your order has been confirmed!", "success")
+    return redirect(url_for("index"))
+
 
 @app.route("/restaurant/<int:restaurant_id>")
 @login_required(role='buyer')
@@ -213,32 +234,47 @@ def restaurant_detail(restaurant_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM restaurants WHERE id = ?", (restaurant_id,))
-    restaurant = cursor.fetchone()
+    try:
+        # Fetch the restaurant details
+        cursor.execute("SELECT * FROM restaurants WHERE id = ?", (restaurant_id,))
+        restaurant = cursor.fetchone()
 
-    cursor.execute("SELECT * FROM menu_items WHERE restaurant_id = ?", (restaurant_id,))
-    menu_items = cursor.fetchall()
+        if not restaurant:
+            return "Restaurant not found", 404
 
-    conn.close()
+        # Fetch the menu items for the restaurant
+        cursor.execute("SELECT * FROM menu_items WHERE restaurant_id = ?", (restaurant_id,))
+        menu_items = cursor.fetchall()
 
-    if restaurant:
-        return render_template("restaurant_detail.html", restaurant=restaurant, menu_items=menu_items)
-    else:
-        return "Restaurant not found", 404
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+        return "An error occurred", 500
 
+    finally:
+        conn.close()
+
+    return render_template("restaurant_detail.html", restaurant=restaurant, menu_items=menu_items)
 
 @app.route("/add_to_cart", methods=["POST"])
 @login_required(role='buyer')
 def add_to_cart():
-    restaurant_id = int(request.form.get("restaurant_id"))
+    restaurant_id = request.form.get("restaurant_id")
     item_name = request.form.get("item_name")
-    quantity = int(request.form.get("quantity", 1))
+    quantity = request.form.get("quantity")
+
+    if not restaurant_id or not item_name or not quantity:
+        flash("Missing data. Please check your form.", "error")
+        return redirect(url_for("restaurant_list"))
+
+    restaurant_id = int(restaurant_id)
+    quantity = int(quantity)
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM menu_items WHERE restaurant_id = ? AND name = ?", (restaurant_id, item_name))
     menu_item = cursor.fetchone()
+    conn.close()
 
     if menu_item:
         item_price = menu_item["price"]
@@ -256,11 +292,10 @@ def add_to_cart():
         )
 
         session.modified = True
-
         return redirect(url_for("view_cart"))
     else:
-        return "Item not found", 404
-
+        flash("Item not found", "error")
+        return redirect(url_for("restaurant_detail", restaurant_id=restaurant_id))
 
 @app.route("/cart")
 @login_required(role='buyer')
@@ -271,16 +306,17 @@ def view_cart():
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # Fetch all restaurants to be used in the template
     cursor.execute("SELECT id, name FROM restaurants")
     restaurants = {row["id"]: row["name"] for row in cursor.fetchall()}
 
     conn.close()
 
+    # Add restaurant names to cart items
     for item in cart_items:
         item["restaurant_name"] = restaurants.get(item["restaurant_id"], "Unknown")
 
-    return render_template("cart.html", cart_items=cart_items, total_price=total_price)
-
+    return render_template("cart.html", cart_items=cart_items, total_price=total_price, restaurants=restaurants)
 
 @app.route("/update_cart", methods=["POST"])
 @login_required(role='buyer')
@@ -309,42 +345,109 @@ def remove_from_cart():
     return redirect(url_for("view_cart"))
 
 
-######### Restaurant Page ##########
-@app.route('/add_restaurant', methods=['GET', 'POST'])
+######### Seller Page ##########
+
+@app.route("/add_restaurant", methods=["GET", "POST"])
 @login_required(role='seller')
 def add_restaurant():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        cuisine = request.form.get('cuisine')
-        price_range = request.form.get('price_range')
-        delivery_time = request.form.get('delivery_time')
-        rating = request.form.get('rating')
+    if request.method == "POST":
+        name = request.form.get("name")
+        cuisine = request.form.get("cuisine")
+        price_range = request.form.get("price_range")
+        delivery_time = int(request.form.get("delivery_time", 0))
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        if not all([name, cuisine, price_range]) or delivery_time <= 0:
+            flash("All fields are required and delivery time must be positive!", "error")
+            return render_template("add_restaurant.html")
 
-        cursor.execute('''
-            INSERT INTO restaurants (name, cuisine, price_range, delivery_time, rating, owner_username)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (name, cuisine, price_range, delivery_time, rating, session['username']))
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
 
-        conn.commit()
-        conn.close()
+            cursor.execute(
+                """
+                INSERT INTO restaurants (name, cuisine, price_range, delivery_time, owner_username)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (name, cuisine, price_range, delivery_time, session["username"]),
+            )
+            conn.commit()
+            restaurant_id = cursor.lastrowid
 
-        flash("Restaurant added successfully!", "success")
-        return redirect(url_for('seller_home'))
+        except sqlite3.Error as e:
+            flash(f"An error occurred: {e}", "error")
+            print(f"SQLite error: {e}")
 
-    return render_template('add_restaurant.html')
+        finally:
+            conn.close()
 
+        flash("Restaurant added successfully! You can now add menu items.", "success")
+        return redirect(url_for("add_menu_item", restaurant_id=restaurant_id))
 
-@app.route('/add_menu_item/<int:restaurant_id>', methods=['GET', 'POST'])
+    return render_template("add_restaurant.html")
+
+@app.route("/add_menu_item/<int:restaurant_id>", methods=["GET", "POST"])
 @login_required(role='seller')
 def add_menu_item(restaurant_id):
-    if request.method == 'POST':
-        item_name = request
+    if request.method == "POST":
+        name = request.form.get("name")
+        price = float(request.form.get("price", 0))
 
-# ---------------------------------------------------------------Runner Page------------------------------------------------------------------------------------
+        # Debug: Print received data
+        print(f"Received menu item data: {name}, {price}, {restaurant_id}")
 
+        # Check if all required fields are present
+        if not name or price <= 0:
+            flash("All fields are required and price must be positive!", "error")
+            return render_template("add_menu_item.html", restaurant_id=restaurant_id)
+
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            # Save the menu item details to the database
+            cursor.execute(
+                """
+                INSERT INTO menu_items (restaurant_id, name, price)
+                VALUES (?, ?, ?)
+                """,
+                (restaurant_id, name, price),
+            )
+            conn.commit()
+
+        except sqlite3.Error as e:
+            flash(f"An error occurred: {e}", "error")
+            print(f"SQLite error: {e}")  # Debug: Print SQLite error message
+
+        finally:
+            conn.close()
+
+        flash("Menu item added successfully!", "success")
+        return redirect(url_for("restaurant_detail", restaurant_id=restaurant_id))
+
+    return render_template("add_menu_item.html", restaurant_id=restaurant_id)
+
+@app.route('/restaurant_items/<int:restaurant_id>')
+@login_required(role='seller')
+def restaurant_items(restaurant_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch the restaurant details
+    cursor.execute("SELECT * FROM restaurants WHERE id = ? AND owner_username = ?", (restaurant_id, session['username']))
+    restaurant = cursor.fetchone()
+
+    if not restaurant:
+        flash("Restaurant not found or you do not have permission to view it.", "error")
+        return redirect(url_for('seller_home'))
+
+    # Fetch the menu items for the restaurant
+    cursor.execute("SELECT * FROM menu_items WHERE restaurant_id = ?", (restaurant_id,))
+    menu_items = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('restaurant_items.html', restaurant=restaurant, menu_items=menu_items)
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -6,16 +6,23 @@
     <title>Add Restaurant</title>
 </head>
 <body>
-    <!-- Add Restaurant Form -->
-    <section class="add-restaurant">
-        <form method="POST" action="{{ url_for('add_restaurant') }}">
-            <input type="text" name="name" placeholder="Restaurant Name" required><br>
-            <input type="text" name="cuisine" placeholder="Cuisine" required><br>
-            <input type="text" name="price_range" placeholder="Price Range (e.g., 10-30)" required><br>
-            <input type="number" name="delivery_time" placeholder="Delivery Time in Minutes" required><br>
-            <input type="number" name="rating" placeholder="Rating (1-5)" step="0.1" required><br>
-            <button type="submit">Add Restaurant</button>
-        </form>
-    </section>
+    <h1>Add New Restaurant</h1>
+    <form action="{{ url_for('add_restaurant') }}" method="post">
+        <label for="name">Restaurant Name:</label>
+        <input type="text" id="name" name="name" required><br>
+
+        <label for="cuisine">Cuisine:</label>
+        <input type="text" id="cuisine" name="cuisine" required><br>
+
+        <label for="price_range">Price Range:</label>
+        <input type="text" id="price_range" name="price_range" required><br>
+
+        <label for="delivery_time">Delivery Time (in minutes):</label>
+        <input type="number" id="delivery_time" name="delivery_time" required><br>
+
+        <input type="submit" value="Add Restaurant">
+    </form>
+
+    <a href="{{ url_for('seller_home') }}">Back to Home</a>
 </body>
 </html>

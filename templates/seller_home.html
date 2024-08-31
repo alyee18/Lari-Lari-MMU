@@ -1,70 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seller Home</title>
-    
 </head>
-
 <body>
+    <h1>Welcome, {{ session['username'] }}!</h1>
 
-    <header>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="dropdown">
-                    <a href="#" class="dropbtn">Dashboard</a>
-                    <div class="dropdown-content">
-                        <a href="#" onclick="showDashBoard('recent orders')">Recent orders</a>
-                    </div>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropbtn">Menu Management</a>
-                    <div class="dropdown-content">
-                        <a href="#" onclick="showMenu('edit menu')">Add or Delete items</a>
-                    </div>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropbtn">Order Management</a>
-                    <div class="dropdown-content">
-                        <a href="#" onclick="showOrder('current orders')">Current order</a>
-                        <a href="#" onclick="showOrder('order status')">Order status</a>
-                        <a href="#" onclick="showOrder('order history')">Order history</a>
-                    </div>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropbtn">Profile</a>
-                    <div class="dropdown-content">
-                        <a href="#" onclick="showProfileOption('info')">Profile info</a>
-                        <a href="#" onclick="showProfileOption('notification')">Notification</a>
-                    </div>
-                </li>
-            </ul>
-        </nav>
-    </header>
+    <h2>Your Restaurants</h2>
+    <ul>
+    {% for restaurant in restaurants %}
+        <li>
+            <a href="{{ url_for('restaurant_items', restaurant_id=restaurant['id']) }}">
+                <strong>{{ restaurant['name'] }}</strong>
+            </a> - {{ restaurant['cuisine'] }}
+        </li>
+    {% endfor %}
+    </ul>
 
-    <h1>Welcome, Seller!</h1>
+    <h2>Add a New Restaurant</h2>
+    <a href="{{ url_for('add_restaurant') }}">Add Restaurant</a>
 
-    <!-- Add Restaurant Section -->
-    <section class="topic">
-        <h2>Manage Your Restaurants</h2>
-        
-        <!-- Link to Add New Restaurant -->
-        <a href="{{ url_for('add_restaurant') }}">Add Restaurant</a>
+    <br><br>
+    <a href="{{ url_for('index') }}">Back to Homepage</a>
 
-        <!-- Form to Choose a Restaurant and Add Menu Item -->
-        <h3>Add Menu Item</h3>
-        <form action="{{ url_for('add_menu_item_select') }}" method="get">
-            <label for="restaurant_id">Select Restaurant:</label>
-            <select id="restaurant_id" name="restaurant_id">
-                {% for restaurant in restaurants %}
-                    <option value="{{ restaurant.id }}">{{ restaurant.name }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit">Add Menu Item</button>
-        </form>
-    </section>
 </body>
 </html>
