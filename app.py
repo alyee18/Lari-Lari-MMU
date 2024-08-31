@@ -47,13 +47,6 @@ def task_management(task_type):
 def progress_tracking():
     return render_template('progress_tracking.html')
 
-@app.route('/seller_home')
-def seller_home():
-    if session.get('role') != 'seller':
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for('index'))
-    return render_template('seller_home.html')
-
 def login_required(role=None):
     def decorator(f):
         @wraps(f)
@@ -152,6 +145,9 @@ def login():
             session["username"] = username
             session["role"] = user["role"]
             flash("Login successful!", "success")
+
+            print(f"Logged in as: {username}")
+            print(f"User role: {session['role']}")
             
             # Redirect based on the user's role
             if user["role"] == "seller":
@@ -164,9 +160,11 @@ def login():
                 return redirect(url_for("index"))
         else:
             flash("Invalid username or password.", "error")
+            print("Invalid credentials")
 
     if "username" in session:
         role = session.get("role")
+        print(f"Redirecting based on role: {role}")
         if role == "seller":
             return redirect(url_for("seller_home"))
         elif role == "runner":
@@ -200,6 +198,13 @@ def delete_user(username):
     flash(f"User {username} has been deleted.", "info")
     return redirect(url_for("admin_page"))
 
+######### SellerPage ##########
+@app.route('/seller_home')
+def seller_home():
+    if session.get('role') != 'seller':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    return render_template('seller_home.html')
 
 ######### Buyer Page ##########
 @app.route('/buyer_home')
