@@ -32,6 +32,13 @@ def seller_home():
         return redirect(url_for('index'))
     return render_template('seller_home.html')
 
+@app.route('/buyer_home')
+def buyer_home():
+    if session.get('role') != 'buyer':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    return render_template('buyer_home.html')
+
 def login_required(role=None):
     def decorator(f):
         @wraps(f)

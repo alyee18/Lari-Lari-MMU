@@ -30,7 +30,6 @@ def createtables():
             cuisine TEXT NOT NULL,
             price_range TEXT NOT NULL,
             delivery_time INTEGER NOT NULL,
-            rating REAL NOT NULL,
             owner_username TEXT NOT NULL,
             FOREIGN KEY (owner_username) REFERENCES users(username)
         )
