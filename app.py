@@ -218,15 +218,10 @@ def confirm_order():
         flash("Your cart is empty.", "error")
         return redirect(url_for("view_cart"))
 
-    # Process the order here
-    # For example, save order details to the database, send a confirmation email, etc.
-
-    # Clear the cart after confirming the order
     session.pop("cart", None)
 
     flash("Your order has been confirmed!", "success")
     return redirect(url_for("index"))
-
 
 @app.route("/restaurant/<int:restaurant_id>")
 @login_required(role='buyer')
@@ -316,7 +311,7 @@ def view_cart():
     for item in cart_items:
         item["restaurant_name"] = restaurants.get(item["restaurant_id"], "Unknown")
 
-    return render_template("cart.html", cart_items=cart_items, total_price=total_price, restaurants=restaurants)
+    return render_template("cart.html", cart_items=cart_items, total_price=total_price)
 
 @app.route("/update_cart", methods=["POST"])
 @login_required(role='buyer')
