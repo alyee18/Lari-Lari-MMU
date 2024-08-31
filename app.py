@@ -1,4 +1,4 @@
-from flask_socketio import SocketIO, emit
+
 from flask import Flask, render_template, redirect, url_for, session, flash, request
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,7 +6,6 @@ from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
-socketio = SocketIO(app)
 
 def get_db_connection():
     con = sqlite3.connect("database.db")
@@ -229,7 +228,6 @@ def restaurant_detail(restaurant_id):
     else:
         return "Restaurant not found", 404
 
-
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
     restaurant_id = int(request.form.get("restaurant_id"))
@@ -435,4 +433,4 @@ def confirm_order():
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    app.run(app, debug=True)
