@@ -10,7 +10,6 @@
     <header>
         <nav>
             <ul>
-                <li><a href="/">Task Management</a></li>
                 <li><a href="{{ url_for('task_management', task_type='available') }}">Available Deliveries</a></li>
                 <li><a href="{{ url_for('task_management', task_type='current') }}">Current Deliveries</a></li>
                 <li><a href="{{ url_for('task_management', task_type='completed') }}">Completed Deliveries</a></li>
