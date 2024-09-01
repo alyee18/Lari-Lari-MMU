@@ -422,6 +422,73 @@ def add_menu_item(restaurant_id):
 
     return render_template("add_menu_item.html", restaurant_id=restaurant_id)
 
+@app.route('/restaurant/<int:restaurant_id>/menu/update/<int:item_id>', methods=['POST'])
+@login_required(role='seller')
+def update_menu_item(restaurant_id, item_id):
+    name = request.form['name']
+    price = request.form['price']
+
+    try:
+        price = float(price)
+        if price <= 0:
+            raise ValueError("Price must be positive")
+    except ValueError as ve:
+        flash(f"Invalid price: {ve}", "error")
+        return redirect(url_for('restaurant_items', restaurant_id=restaurant_id))
+
+    if not name:
+        flash("Item name is required!", "error")
+        return redirect(url_for('restaurant_items', restaurant_id=restaurant_id))
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            UPDATE menu_items
+            SET name = ?, price = ?
+            WHERE id = ? AND restaurant_id = ?
+            """,
+            (name, price, item_id, restaurant_id),
+        )
+        conn.commit()
+
+    except sqlite3.Error as e:
+        flash(f"An error occurred: {e}", "error")
+        print(f"SQLite error: {e}")
+        return redirect(url_for('restaurant_items', restaurant_id=restaurant_id))
+
+    finally:
+        conn.close()
+
+    flash('Menu item updated successfully!', "success")
+    return redirect(url_for('restaurant_items', restaurant_id=restaurant_id))
+
+@app.route('/restaurant/<int:restaurant_id>/menu/delete/<int:item_id>', methods=['POST'])
+@login_required(role='seller')
+def delete_menu_item(restaurant_id, item_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "DELETE FROM menu_items WHERE id = ? AND restaurant_id = ?",
+            (item_id, restaurant_id)
+        )
+        conn.commit()
+
+    except sqlite3.Error as e:
+        flash(f"An error occurred: {e}", "error")
+        print(f"SQLite error: {e}")
+        return redirect(url_for('restaurant_items', restaurant_id=restaurant_id))
+
+    finally:
+        conn.close()
+
+    flash('Menu item deleted successfully!', "success")
+    return redirect(url_for('restaurant_items', restaurant_id=restaurant_id))
+
 @app.route('/restaurant_items/<int:restaurant_id>')
 @login_required(role='seller')
 def restaurant_items(restaurant_id):

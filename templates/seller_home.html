@@ -7,6 +7,7 @@
 </head>
 <body>
     <h1>Welcome, {{ session['username'] }}!</h1>
+    <a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a>
 
     <h2>Your Restaurants</h2>
     <ul>

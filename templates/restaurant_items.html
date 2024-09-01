@@ -10,7 +10,17 @@
 
     <ul>
     {% for item in menu_items %}
-        <li>{{ item['name'] }} - ${{ item['price'] }}</li>
+        <li>
+            <form method="post" action="{{ url_for('update_menu_item', restaurant_id=restaurant['id'], item_id=item['id']) }}" style="display: inline;">
+                <input type="text" name="name" value="{{ item['name'] }}" required>
+                <input type="number" name="price" value="{{ item['price'] }}" step="0.01" required>
+                <button type="submit">Update</button>
+            </form>
+            
+            <form method="post" action="{{ url_for('delete_menu_item', restaurant_id=restaurant['id'], item_id=item['id']) }}" style="display: inline;">
+                <button type="submit" onclick="return confirm('Are you sure you want to delete this item?');">Delete</button>
+            </form>            
+        </li>
     {% endfor %}
     </ul>
 
