@@ -57,17 +57,16 @@
             </ul>
           </li>
 
-          <li class="nav-link profile">
-            <a href="#" class="dropbtn">Profile
+          <li class="nav-link">
+            <a href="{{ url_for('runner_profile') }}" class="dropbtn">Profile
             <i class='bx bx-user'></i>
-            <span class="dropdown-icon">
-              <i class='bx bx-chevron-down'></i>
-            </span>
             </a>
-            <ul class="dropdown-content">
-              <li><a href="#" onclick="showProfileOption('info')">Profile info</a></li>
-              <li><a href="#" onclick="showProfileOption('notification')">Notification</a></li>
-            </ul>
+          </li>
+
+          <li class="nav-link">
+            <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
+            <i class='bx bx-log-out'></i>
+            </a>
           </li>
         </ul>
       </nav>

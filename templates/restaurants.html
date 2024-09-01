@@ -23,19 +23,25 @@
 </head>
 <body>
     <h1>Restaurants</h1>
-    <ul>
+    <div class="container">
+        <div class="card-container">
             {% for restaurant in restaurants %}
-                <li>
-                    <strong><a href="{{ url_for('restaurant_detail', restaurant_id=restaurant.id) }}">{{ restaurant.name }}</a></strong><br>
+            <article class="card-article">
+                <img src="{{ restaurant.image.url }}" alt="{{ restaurant.name }}" class="card-img">
+                <div class="card-data">
+                    <h2 class="card-title>">{{ restaurant.name }}</h2>
                     <div class="card-discription">
                         Cuisine: {{ restaurant.cuisine }}<br>
                         Price Range: {{ restaurant.price_range }}<br>
                         Delivery Time: {{ restaurant.delivery_time }} minutes<br>
                         Rating: {{ restaurant.rating }}
                     </div>
-                </li>
+                    <a href="{{ url_for('restaurant_detail', restaurant_id=restaurant.id) }}"class="card-button">View Details</a>
+                </div>
+            </article>
             {% endfor %}
-    </ul>
+        </div>
+    </div>
     <p><a href="{{ url_for('index') }}">Back to Home</a></p>
 </body>
 </html>

@@ -34,7 +34,7 @@ body{
     font-size: 30px;
     margin-right: 20px;
 }
-.cart-item,.total{
+.cart-item, .total{
     text-align: center;
     font-size: 15px;
     letter-spacing: 1px;
