@@ -34,6 +34,7 @@ def createtables():
         """
     )
 
+    
     # Commit the transaction and close the connection
     conn.commit()
     conn.close()

@@ -38,6 +38,7 @@
         </div>
     </header>
 <!--------------------------TOPIC---------------------------------------------------->    
+    <!-- TOPIC -->    
     <section class="topic">
         <div class="topic-text">
             <h5 data-aos="fade-right" data-aos-duration="1500"> #Welcome to the Restaurant Finder </h5>
@@ -46,19 +47,18 @@
             
             <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
                 {% if 'username' in session and session['role'] == 'buyer' %}
-                    <li><a href="{{ url_for('buyer_home') }}">Order Now</a></li>
+                    <li><a href="{{ url_for('restaurant_list') }}">Order Now</a></li>
                 {% else %}
                     <p><a href="{{ url_for('login') }}">Log in as a buyer to place an order</a></p>
                 {% endif %}
+            </div>
         </div>
     </section>
+
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-  <script>
-    AOS.init({offset:1,});
-  </script>
+    <script>
+        AOS.init({offset: 1,});
+    </script>
     
 </body>
 </html>
-
-<!--------------------------Restaurant---------------------------------------------------->    
-   
