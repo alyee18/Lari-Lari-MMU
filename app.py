@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, redirect, url_for, session, flash, request
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -52,17 +51,6 @@ def runner_profile():
     if session.get('role') != 'runner':
         flash("You do not have permission to access this page.", "error")
         return redirect(url_for('index'))
-    
-    # Fetch the seller's restaurants
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM restaurants WHERE owner_username = ?", (session['username'],))
-    restaurants = cursor.fetchall()
-    conn.close()
-
-    # Pass the restaurants to the template
-    return render_template('seller_home.html', restaurants=restaurants)
-
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -124,12 +112,6 @@ def delete_account():
 
     flash("Account deleted successfully.", "success")
     return redirect(url_for('index'))
-@app.route('/buyer_home')
-def buyer_home():
-    if session.get('role') != 'buyer':
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for('index'))
-    return render_template('buyer_home.html')
 
 def login_required(role=None):
     def decorator(f):
@@ -275,154 +257,17 @@ def logout():
 def seller_home():
     if session.get('role') != 'seller':
         flash("You do not have permission to access this page.", "error")
-        return redirect(url_for('index'))
-    return render_template('seller_home.html')
-
-######### Buyer Page ##########
-
-@app.route("/restaurants")
-def restaurant_list():
+        return redirect(url_for('index'))    
+    
+    # Fetch the seller's restaurants
     conn = get_db_connection()
     cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM restaurants")
+    cursor.execute("SELECT * FROM restaurants WHERE owner_username = ?", (session['username'],))
     restaurants = cursor.fetchall()
     conn.close()
 
-    return render_template("restaurants.html", restaurants=restaurants)
-
-@app.route("/confirm_order", methods=["POST"])
-@login_required(role='buyer')
-def confirm_order():
-    cart_items = session.get("cart", [])
-
-    if not cart_items:
-        flash("Your cart is empty.", "error")
-        return redirect(url_for("view_cart"))
-
-    session.pop("cart", None)
-
-    flash("Your order has been confirmed!", "success")
-    return redirect(url_for("index"))
-
-@app.route("/restaurant/<int:restaurant_id>")
-@login_required(role='buyer')
-def restaurant_detail(restaurant_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        # Fetch the restaurant details
-        cursor.execute("SELECT * FROM restaurants WHERE id = ?", (restaurant_id,))
-        restaurant = cursor.fetchone()
-
-        if not restaurant:
-            return "Restaurant not found", 404
-
-        # Fetch the menu items for the restaurant
-        cursor.execute("SELECT * FROM menu_items WHERE restaurant_id = ?", (restaurant_id,))
-        menu_items = cursor.fetchall()
-
-    except sqlite3.Error as e:
-        print(f"SQLite error: {e}")
-        return "An error occurred", 500
-
-    finally:
-        conn.close()
-
-    return render_template("restaurant_detail.html", restaurant=restaurant, menu_items=menu_items)
-
-@app.route("/add_to_cart", methods=["POST"])
-@login_required(role='buyer')
-def add_to_cart():
-    restaurant_id = request.form.get("restaurant_id")
-    item_name = request.form.get("item_name")
-    quantity = request.form.get("quantity")
-
-    if not restaurant_id or not item_name or not quantity:
-        flash("Missing data. Please check your form.", "error")
-        return redirect(url_for("restaurant_list"))
-
-    restaurant_id = int(restaurant_id)
-    quantity = int(quantity)
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM menu_items WHERE restaurant_id = ? AND name = ?", (restaurant_id, item_name))
-    menu_item = cursor.fetchone()
-    conn.close()
-
-    if menu_item:
-        item_price = menu_item["price"]
-
-        if "cart" not in session:
-            session["cart"] = []
-
-        session["cart"].append(
-            {
-                "restaurant_id": restaurant_id,
-                "item_name": item_name,
-                "price": item_price,
-                "quantity": quantity,
-            }
-        )
-
-        session.modified = True
-        return redirect(url_for("view_cart"))
-    else:
-        flash("Item not found", "error")
-        return redirect(url_for("restaurant_detail", restaurant_id=restaurant_id))
-
-@app.route("/cart")
-@login_required(role='buyer')
-def view_cart():
-    cart_items = session.get("cart", [])
-    total_price = sum(item["price"] * item["quantity"] for item in cart_items)
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    # Fetch all restaurants to be used in the template
-    cursor.execute("SELECT id, name FROM restaurants")
-    restaurants = {row["id"]: row["name"] for row in cursor.fetchall()}
-
-    conn.close()
-
-    # Add restaurant names to cart items
-    for item in cart_items:
-        item["restaurant_name"] = restaurants.get(item["restaurant_id"], "Unknown")
-
-    return render_template("cart.html", cart_items=cart_items, total_price=total_price)
-
-@app.route("/update_cart", methods=["POST"])
-@login_required(role='buyer')
-def update_cart():
-    item_index = int(request.form.get("item_index"))
-    quantity = int(request.form.get("quantity"))
-
-    if "cart" in session:
-        if 0 <= item_index < len(session["cart"]):
-            session["cart"][item_index]["quantity"] = quantity
-            session.modified = True
-
-    return redirect(url_for("view_cart"))
-
-
-@app.route("/remove_from_cart", methods=["POST"])
-@login_required(role='buyer')
-def remove_from_cart():
-    item_index = int(request.form.get("item_index"))
-
-    if "cart" in session:
-        if 0 <= item_index < len(session["cart"]):
-            session["cart"].pop(item_index)
-            session.modified = True
-
-    return redirect(url_for("view_cart"))
-
-
-######### Seller Page ##########
+    # Pass the restaurants to the template
+    return render_template('seller_home.html', restaurants=restaurants)
 
 @app.route("/add_restaurant", methods=["GET", "POST"])
 @login_required(role='seller')
@@ -592,6 +437,156 @@ def restaurant_items(restaurant_id):
     conn.close()
 
     return render_template('restaurant_items.html', restaurant=restaurant, menu_items=menu_items)
+
+######### Buyer Page ##########
+@app.route('/buyer_home')
+@login_required(role='buyer')
+def buyer_home():
+    if session.get('role') != 'buyer':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    return render_template('buyer_home.html')
+
+@app.route("/restaurants")
+def restaurant_list():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM restaurants")
+    restaurants = cursor.fetchall()
+    conn.close()
+
+    return render_template("restaurants.html", restaurants=restaurants)
+
+@app.route("/confirm_order", methods=["POST"])
+@login_required(role='buyer')
+def confirm_order():
+    cart_items = session.get("cart", [])
+
+    if not cart_items:
+        flash("Your cart is empty.", "error")
+        return redirect(url_for("view_cart"))
+
+    session.pop("cart", None)
+
+    flash("Your order has been confirmed!", "success")
+    return redirect(url_for("index"))
+
+@app.route("/restaurant/<int:restaurant_id>")
+@login_required(role='buyer')
+def restaurant_detail(restaurant_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Fetch the restaurant details
+        cursor.execute("SELECT * FROM restaurants WHERE id = ?", (restaurant_id,))
+        restaurant = cursor.fetchone()
+
+        if not restaurant:
+            return "Restaurant not found", 404
+
+        # Fetch the menu items for the restaurant
+        cursor.execute("SELECT * FROM menu_items WHERE restaurant_id = ?", (restaurant_id,))
+        menu_items = cursor.fetchall()
+
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+        return "An error occurred", 500
+
+    finally:
+        conn.close()
+
+    return render_template("restaurant_detail.html", restaurant=restaurant, menu_items=menu_items)
+
+@app.route("/add_to_cart", methods=["POST"])
+@login_required(role='buyer')
+def add_to_cart():
+    restaurant_id = request.form.get("restaurant_id")
+    item_name = request.form.get("item_name")
+    quantity = request.form.get("quantity")
+
+    if not restaurant_id or not item_name or not quantity:
+        flash("Missing data. Please check your form.", "error")
+        return redirect(url_for("restaurant_list"))
+
+    restaurant_id = int(restaurant_id)
+    quantity = int(quantity)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM menu_items WHERE restaurant_id = ? AND name = ?", (restaurant_id, item_name))
+    menu_item = cursor.fetchone()
+    conn.close()
+
+    if menu_item:
+        item_price = menu_item["price"]
+
+        if "cart" not in session:
+            session["cart"] = []
+
+        session["cart"].append(
+            {
+                "restaurant_id": restaurant_id,
+                "item_name": item_name,
+                "price": item_price,
+                "quantity": quantity,
+            }
+        )
+
+        session.modified = True
+        return redirect(url_for("view_cart"))
+    else:
+        flash("Item not found", "error")
+        return redirect(url_for("restaurant_detail", restaurant_id=restaurant_id))
+
+@app.route("/cart")
+@login_required(role='buyer')
+def view_cart():
+    cart_items = session.get("cart", [])
+    total_price = sum(item["price"] * item["quantity"] for item in cart_items)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch all restaurants to be used in the template
+    cursor.execute("SELECT id, name FROM restaurants")
+    restaurants = {row["id"]: row["name"] for row in cursor.fetchall()}
+
+    conn.close()
+
+    # Add restaurant names to cart items
+    for item in cart_items:
+        item["restaurant_name"] = restaurants.get(item["restaurant_id"], "Unknown")
+
+    return render_template("cart.html", cart_items=cart_items, total_price=total_price)
+
+@app.route("/update_cart", methods=["POST"])
+@login_required(role='buyer')
+def update_cart():
+    item_index = int(request.form.get("item_index"))
+    quantity = int(request.form.get("quantity"))
+
+    if "cart" in session:
+        if 0 <= item_index < len(session["cart"]):
+            session["cart"][item_index]["quantity"] = quantity
+            session.modified = True
+
+    return redirect(url_for("view_cart"))
+
+
+@app.route("/remove_from_cart", methods=["POST"])
+@login_required(role='buyer')
+def remove_from_cart():
+    item_index = int(request.form.get("item_index"))
+
+    if "cart" in session:
+        if 0 <= item_index < len(session["cart"]):
+            session["cart"].pop(item_index)
+            session.modified = True
+
+    return redirect(url_for("view_cart"))
 
 if __name__ == "__main__":
     app.run(debug=True)

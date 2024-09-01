@@ -3,7 +3,7 @@ import sqlite3
 DATABASE = "database.db"
 
 def createtables():
-    try:
+    
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
 
@@ -50,32 +50,22 @@ def createtables():
         """
         )
 
-    # Create tasks table
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            task_type TEXT NOT NULL,
-            description TEXT NOT NULL,
-            status TEXT NOT NULL
+        # Create tasks table
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task_type TEXT NOT NULL,
+                description TEXT NOT NULL,
+                status TEXT NOT NULL
+            )
+            """
         )
-        """
-    )
 
     
-    # Commit the transaction and close the connection
-    conn.commit()
-    conn.close()
         # Commit the transaction and close the connection
         conn.commit()
-        print("Tables created successfully!")
-
-    except sqlite3.Error as e:
-        print(f"An error occurred: {e}")
-
-    finally:
         conn.close()
-
-
+       
 if __name__ == "__main__":
     createtables()
