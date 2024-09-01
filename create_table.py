@@ -37,7 +37,7 @@ def createtables():
         """
         )
 
-        # Create menu_items table with a description column
+        # Create menu_items table without a description column
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS menu_items (
@@ -50,22 +50,18 @@ def createtables():
         """
         )
 
-    # Create tasks table
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            task_type TEXT NOT NULL,
-            description TEXT NOT NULL,
-            status TEXT NOT NULL
+        # Create tasks table
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task_type TEXT NOT NULL,
+                description TEXT NOT NULL,
+                status TEXT NOT NULL
+            )
+            """
         )
-        """
-    )
 
-    
-    # Commit the transaction and close the connection
-    conn.commit()
-    conn.close()
         # Commit the transaction and close the connection
         conn.commit()
         print("Tables created successfully!")
@@ -75,7 +71,6 @@ def createtables():
 
     finally:
         conn.close()
-
 
 if __name__ == "__main__":
     createtables()
