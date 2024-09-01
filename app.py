@@ -47,6 +47,73 @@ def task_management(task_type):
 def progress_tracking():
     return render_template('progress_tracking.html')
 
+@app.route('/runner_profile')
+def runner_profile():
+    if session.get('role') != 'runner':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (session['username'],))
+    user = cursor.fetchone()
+    conn.close()
+
+    return render_template('runner_profile.html', user=user)
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    name = request.form.get('name')
+    email = request.form.get('email')
+    phone_no = request.form.get('phone_no')
+
+    if not all([name, email, phone_no]):
+        flash("All fields are required.", "error")
+        return redirect(url_for('runner_profile'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE users
+        SET name = ?, email = ?, phone_no = ?
+        WHERE username = ?
+        """,
+        (name, email, phone_no, session['username'])
+    )
+    conn.commit()
+    conn.close()
+
+    flash("Profile updated successfully.", "success")
+    return redirect(url_for('runner_profile'))
+
+@app.route('/delete_account', methods=['POST'])
+def delete_account():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM users WHERE username = ?",
+        (session['username'],)
+    )
+    conn.commit()
+    conn.close()
+
+    session.pop('username', None)
+    session.pop('role', None)
+
+    flash("Account deleted successfully.", "success")
+    return redirect(url_for('index'))
+
 def login_required(role=None):
     def decorator(f):
         @wraps(f)

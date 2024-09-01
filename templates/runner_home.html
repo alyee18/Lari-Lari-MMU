@@ -16,13 +16,9 @@
                 <li class="dropdown">
                   <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking</a>
                 </li>
-                  <li class="dropdown">
-                     <a href="#" class="dropbtn">Profile</a>
-                     <div class="dropdown-content">
-                        <a href="#" onclick="showProfileOption('info')">Profile info</a>
-                        <a href="#" onclick="showProfileOption('notification')">Notification</a>
-                     </div>
-                  </li>
+                <li class="dropdown">
+                  <a href="{{ url_for('runner_profile') }}" class="dropbtn">Profile</a>
+                </li>
                   <li><a href="{{ url_for('logout') }}">Logout</a></li>
                </ul>
             </nav>
