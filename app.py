@@ -186,18 +186,6 @@ def logout():
 
     return render_template("logout.html")
 
-
-######### Delete User ##########
-@app.route("/delete_user/<username>", methods=["POST"])
-def delete_user(username):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM users WHERE username = ?", (username,))
-    conn.commit()
-    conn.close()
-    flash(f"User {username} has been deleted.", "info")
-    return redirect(url_for("admin_page"))
-
 ######### SellerPage ##########
 @app.route('/seller_home')
 def seller_home():
@@ -433,4 +421,4 @@ def confirm_order():
 
 
 if __name__ == "__main__":
-    app.run(app, debug=True)
+    app.run(debug=True)
