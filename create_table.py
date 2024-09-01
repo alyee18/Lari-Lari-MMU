@@ -3,7 +3,7 @@ import sqlite3
 DATABASE = "database.db"
 
 def createtables():
-    try:
+    
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
 
@@ -37,7 +37,7 @@ def createtables():
         """
         )
 
-        # Create menu_items table without a description column
+        # Create menu_items table with a description column
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS menu_items (
@@ -62,15 +62,10 @@ def createtables():
             """
         )
 
+    
         # Commit the transaction and close the connection
         conn.commit()
-        print("Tables created successfully!")
-
-    except sqlite3.Error as e:
-        print(f"An error occurred: {e}")
-
-    finally:
         conn.close()
-
+       
 if __name__ == "__main__":
     createtables()
