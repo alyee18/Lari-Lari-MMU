@@ -29,15 +29,16 @@
         </a>
         <div class="right-content">
             {% if 'username' in session %}
-                <a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a>
+                <a href="{{ url_for('login') }}" class="nav-btn">Log In</a>
             {% else %}
                 <a href="{{ url_for('signup') }}" class="nav-btn">Sign Up</a>
+                <a href="{{ url_for('login') }}" class="nav-btn">Log In</a>
                 <a href="{{ url_for('login') }}" class="nav-btn">Log In</a>
             {% endif %}
             <div class="bx bx-menu" id="menu-icon"></div>
         </div>
     </header>
-
+<!--------------------------TOPIC---------------------------------------------------->    
     <!-- TOPIC -->    
     <section class="topic">
         <div class="topic-text">
@@ -52,13 +53,21 @@
                     <p><a href="{{ url_for('login') }}">Log in as a buyer to place an order</a></p>
                 {% endif %}
             </div>
+            </div>
         </div>
     </section>
 
+
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init({offset: 1,});
+    </script>
     <script>
         AOS.init({offset: 1,});
     </script>
     
 </body>
 </html>
+
+<!--------------------------Restaurant---------------------------------------------------->    
+   

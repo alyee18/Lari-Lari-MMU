@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, redirect, url_for, session, flash, request
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,18 +7,27 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
 
-
 def get_db_connection():
     con = sqlite3.connect("database.db")
     con.row_factory = sqlite3.Row
     return con
 
+def get_tasks(task_type):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM tasks WHERE task_type = ?", (task_type,))
+    tasks = cursor.fetchall()
+
+    conn.close()
+    return tasks
 
 ######### home ##########
 @app.route("/")
 def index():
     return render_template("index.html")
 
+######### Runner ##########
 @app.route('/runner_home')
 def runner_home():
     if session.get('role') != 'runner':
@@ -25,9 +35,21 @@ def runner_home():
         return redirect(url_for('index'))
     return render_template('runner_home.html')
 
-@app.route('/seller_home')
-def seller_home():
-    if session.get('role') != 'seller':
+@app.route('/task_management/<task_type>')
+def task_management(task_type):
+    task_list = get_tasks(task_type)
+
+    task_list = [{'id': task['id'], 'description': task['description']} for task in task_list]
+
+    return render_template('task_management.html', tasks=task_list, task_type=task_type)
+
+@app.route('/progress_tracking')
+def progress_tracking():
+    return render_template('progress_tracking.html')
+
+@app.route('/runner_profile')
+def runner_profile():
+    if session.get('role') != 'runner':
         flash("You do not have permission to access this page.", "error")
         return redirect(url_for('index'))
     
@@ -41,7 +63,67 @@ def seller_home():
     # Pass the restaurants to the template
     return render_template('seller_home.html', restaurants=restaurants)
 
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (session['username'],))
+    user = cursor.fetchone()
+    conn.close()
 
+    return render_template('runner_profile.html', user=user)
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    name = request.form.get('name')
+    email = request.form.get('email')
+    phone_no = request.form.get('phone_no')
+
+    if not all([name, email, phone_no]):
+        flash("All fields are required.", "error")
+        return redirect(url_for('runner_profile'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE users
+        SET name = ?, email = ?, phone_no = ?
+        WHERE username = ?
+        """,
+        (name, email, phone_no, session['username'])
+    )
+    conn.commit()
+    conn.close()
+
+    flash("Profile updated successfully.", "success")
+    return redirect(url_for('runner_profile'))
+
+@app.route('/delete_account', methods=['POST'])
+def delete_account():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM users WHERE username = ?",
+        (session['username'],)
+    )
+    conn.commit()
+    conn.close()
+
+    session.pop('username', None)
+    session.pop('role', None)
+
+    flash("Account deleted successfully.", "success")
+    return redirect(url_for('index'))
 @app.route('/buyer_home')
 def buyer_home():
     if session.get('role') != 'buyer':
@@ -147,6 +229,9 @@ def login():
             session["username"] = username
             session["role"] = user["role"]
             flash("Login successful!", "success")
+
+            print(f"Logged in as: {username}")
+            print(f"User role: {session['role']}")
             
             # Redirect based on the user's role
             if user["role"] == "seller":
@@ -159,9 +244,11 @@ def login():
                 return redirect(url_for("index"))
         else:
             flash("Invalid username or password.", "error")
+            print("Invalid credentials")
 
     if "username" in session:
         role = session.get("role")
+        print(f"Redirecting based on role: {role}")
         if role == "seller":
             return redirect(url_for("seller_home"))
         elif role == "runner":
@@ -183,18 +270,13 @@ def logout():
 
     return render_template("logout.html")
 
-
-######### Delete User ##########
-@app.route("/delete_user/<username>", methods=["POST"])
-def delete_user(username):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM users WHERE username = ?", (username,))
-    conn.commit()
-    conn.close()
-    flash(f"User {username} has been deleted.", "info")
-    return redirect(url_for("admin_page"))
-
+######### SellerPage ##########
+@app.route('/seller_home')
+def seller_home():
+    if session.get('role') != 'seller':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    return render_template('seller_home.html')
 
 ######### Buyer Page ##########
 
