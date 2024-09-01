@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Home</title>
+</head>
+<body>
+    <h1>Welcome, {{ session['username'] }}!</h1>
+    <a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a>
+
+    <h2>Your Restaurants</h2>
+    <ul>
+    {% for restaurant in restaurants %}
+        <li>
+            <a href="{{ url_for('restaurant_items', restaurant_id=restaurant['id']) }}">
+                <strong>{{ restaurant['name'] }}</strong>
+            </a> - {{ restaurant['cuisine'] }}
+        </li>
+    {% endfor %}
+    </ul>
+
+    <h2>Add a New Restaurant</h2>
+    <a href="{{ url_for('add_restaurant') }}">Add Restaurant</a>
+    
+</body>
+</html>

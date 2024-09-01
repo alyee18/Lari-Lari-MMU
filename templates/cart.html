@@ -12,7 +12,7 @@
         <ul>
             {% for item in cart_items %}
                 <li>
-                    {{ item['item_name'] }} - {{ item['quantity'] }} x ${{ item['price'] }} from {{ restaurants[item['restaurant_id'] - 1]['name'] }}
+                    {{ item['item_name'] }} - {{ item['quantity'] }} x ${{ item['price'] }} from {{ item['restaurant_name'] }}
                     <form action="{{ url_for('update_cart') }}" method="post" style="display:inline;">
                         <input type="hidden" name="item_index" value="{{ loop.index0 }}">
                         <input type="number" name="quantity" value="{{ item['quantity'] }}" min="1">
@@ -26,16 +26,19 @@
             {% endfor %}
         </ul>
 
+        <h2>Total: ${{ total_price }}</h2>
+
         <form action="{{ url_for('confirm_order') }}" method="POST">
             <button type="submit">Confirm Order</button>
         </form>
-
+        
     {% else %}
         <p>Your cart is empty.</p>
     {% endif %}
 
-    <h2>Total: ${{ total_price }}</h2>
-    <li><a href="{{ url_for('restaurant_list') }}">Back to Restaurants</a></li>
-    <li><a href="{{ url_for('index') }}">Back to Home</a></li>
+    <ul>
+        <li><a href="{{ url_for('restaurant_list') }}">Back to Restaurant List</a></li>
+        <li><a href="{{ url_for('index') }}">Back to Home</a></li>
+    </ul>
 </body>
 </html>
