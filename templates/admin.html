@@ -6,50 +6,91 @@
     <title>Admin Dashboard</title>
 </head>
 <body>
-    <h1>Admin Dashboard</h1>
+    <div class="navbar">
+        <a href="{{ url_for('admin_page') }}">Dashboard</a>
+        <a href="{{ url_for('manage_users') }}">Manage Users</a>
+        <a href="{{ url_for('receive_feedback') }}">Feedback</a>
+        <a href="{{ url_for('control_deliveries') }}">Deliveries</a>
+    </div>
 
-    <!-- Display flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="flash-{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    <div class="container">
+        <h1>Admin Dashboard</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Phone No</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.role }}</td>
-                <td>{{ user.phone_no }}</td>
-                <td>
-                    <!-- Form for deleting a user -->
-                    <form method="POST" action="{{ url_for('delete_user', username=user.username) }}">
-                        <button type="submit" class="button">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div class="section">
+            <h2>Manage Users</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Phone No</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>{{ user.phone_no }}</td>
+                        <td>
+                            <form action="{{ url_for('delete_user', username=user.username) }}" method="post" style="display:inline;">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <!-- Button to return to the homepage or login page -->
-    <p><a href="{{ url_for('index') }}" class="button">Return to Homepage</a></p>
+        <div class="section">
+            <h2>Receive Feedback</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feedback ID</th>
+                        <th>Username</th>
+                        <th>Message</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feedback in feedbacks %}
+                    <tr>
+                        <td>{{ feedback.id }}</td>
+                        <td>{{ feedback.username }}</td>
+                        <td>{{ feedback.message }}</td>
+                        <td>
+                            <!-- Add actions like delete or mark as read if needed -->
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Control Deliveries</h2>
+            <!-- You can add a form or table to manage deliveries -->
+            <form action="{{ url_for('update_delivery_status') }}" method="post">
+                <div class="form-group">
+                    <label for="order_id">Order ID:</label>
+                    <input type="text" id="order_id" name="order_id" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <input type="text" id="status" name="status" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
