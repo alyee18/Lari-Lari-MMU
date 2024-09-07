@@ -52,6 +52,7 @@ def runner_profile():
         flash("You do not have permission to access this page.", "error")
         return redirect(url_for('index'))
     
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE username = ?", (session['username'],))
