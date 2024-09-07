@@ -438,6 +438,73 @@ def restaurant_items(restaurant_id):
 
     return render_template('restaurant_items.html', restaurant=restaurant, menu_items=menu_items)
 
+@app.route('/seller_profile')
+def seller_profile():
+    if session.get('role') != 'seller':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (session['username'],))
+    user = cursor.fetchone()
+    conn.close()
+
+    return render_template('seller_profile.html', user=user)
+
+@app.route('/update_seller_profile', methods=['POST'])
+def update_seller_profile():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    name = request.form.get('name')
+    email = request.form.get('email')
+    phone_no = request.form.get('phone_no')
+
+    if not all([name, email, phone_no]):
+        flash("All fields are required.", "error")
+        return redirect(url_for('seller_profile'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE users
+        SET name = ?, email = ?, phone_no = ?
+        WHERE username = ?
+        """,
+        (name, email, phone_no, session['username'])
+    )
+    conn.commit()
+    conn.close()
+
+    flash("Profile updated successfully.", "success")
+    return redirect(url_for('seller_profile'))
+
+@app.route('/delete_seller_account', methods=['POST'])
+def delete_seller_account():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM users WHERE username = ?",
+        (session['username'],)
+    )
+    conn.commit()
+    conn.close()
+
+    session.pop('username', None)
+    session.pop('role', None)
+
+    flash("Account deleted successfully.", "success")
+    return redirect(url_for('index'))
+
 ######### Buyer Page ##########
 @app.route('/buyer_home')
 @login_required(role='buyer')
@@ -467,10 +534,50 @@ def confirm_order():
         flash("Your cart is empty.", "error")
         return redirect(url_for("view_cart"))
 
-    session.pop("cart", None)
+    # Calculate the total price of the cart
+    total_price = sum(item["price"] * item["quantity"] for item in cart_items)
 
-    flash("Your order has been confirmed!", "success")
-    return redirect(url_for("index"))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Insert the new order into the orders table
+        cursor.execute(
+            """
+            INSERT INTO orders (buyer_username, restaurant_id, total_price)
+            VALUES (?, ?, ?)
+            """,
+            (session["username"], cart_items[0]["restaurant_id"], total_price)
+        )
+        order_id = cursor.lastrowid
+
+        # Insert each cart item into the order_items table
+        for item in cart_items:
+            cursor.execute(
+                """
+                INSERT INTO order_items (order_id, item_name, price, quantity)
+                VALUES (?, ?, ?, ?)
+                """,
+                (order_id, item["item_name"], item["price"], item["quantity"])
+            )
+
+        conn.commit()
+
+        # Clear the cart after successful order submission
+        session.pop("cart", None)
+
+        flash("Your order has been confirmed!", "success")
+        return redirect(url_for("index"))
+
+    except sqlite3.Error as e:
+        conn.rollback()  # Rollback in case of any errors
+        flash(f"An error occurred: {e}", "error")
+        print(f"SQLite error: {e}")
+
+    finally:
+        conn.close()
+
+    return redirect(url_for("view_cart"))
 
 @app.route("/restaurant/<int:restaurant_id>")
 @login_required(role='buyer')

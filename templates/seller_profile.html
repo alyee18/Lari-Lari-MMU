@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Profile</title>
+    <link rel="stylesheet" type="text/css" href="../static/style4(RP).css">
+
+    <!--------------------------box-icon-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+</head>
+<body>
+
+    <div class="container">
+        <nav class="nav-bar">
+          <ul class="nav-links">
+            <li class="nav-link">
+              <a href="{{ url_for('seller_home') }}">Home</a>                
+              <i class='bx bx-home'></i>
+            </li>
+
+    <li class="nav-link profile">
+        <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking
+        <i class='bx bx-list-check'></i>
+        <span class="dropdown-icon">
+          <i class='bx bx-chevron-down'></i>
+        </span>
+        </a>
+        <ul class="dropdown-content">
+            <li><a href="{{ url_for('progress_tracking') }}">Real Time Tracking</a></li>
+        </ul>
+      </li>
+
+      <li class="nav-link">
+        <a href="{{ url_for('seller_profile') }}" class="dropbtn">Profile
+        <i class='bx bx-user'></i>
+        </a>
+      </li>
+      
+      <li class="nav-link">
+        <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
+        <i class='bx bx-log-out'></i>
+
+   <div class="container">
+        <h1>Manage Your Profile</h1>
+   
+         {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                  {% for category, message in messages %}
+                     <div class="alert {{ category }}">{{ message }}</div>
+                  {% endfor %}
+            {% endif %}
+         {% endwith %}   
+
+         <div id="profile-update">
+             <h2>Edit Profile</h2>
+             <form action="{{ url_for('update_profile') }}" method="post">
+                    <input type="text" id="name" name="name" value="{{ user.name }}" placeholder="Name" required><br><br>
+                    <i class="bx bx-user"></i>
+
+                    <input type="email" id="email" name="email" value="{{ user.email }}" placeholder="Email"required><br><br>
+                    <i class="bx bx-envelope"></i>
+
+                    <input type="text" id="phone_no" name="phone_no" value="{{ user.phone_no }}" placeholder="Phone"required><br><br>
+                    <i class='bx bx-phone'></i>
+                    <input type="submit" value="Update Profile">
+                    <i class='bx bx-user-check'></i>
+             </form>
+         </div>
+
+         <div id="delete-account">
+            <h2>Delete Account</h2><i class='bx bx-user-x'></i>
+            <form action="{{ url_for('delete_account') }}" method="post" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+                <input type="submit" value="Delete Account">
+            </form>
+         </div>
+    </div>
+</body>
+</html>
