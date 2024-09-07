@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Control</title>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <ul>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/usercontrol">User Control</a></li>
+            <li><a href="/restaurantcontrol">Restaurant Control</a></li>
+            <li><a href="/ordercontrol">Order Control</a></li>
+            <li><a href="/menucontrol">Menu Control</a></li>
+            <li><a href="/pageeditor">Page Editor</a></li>
+            <li><a href="/logout">Log Out</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+      <h2>Restaurants Control</h2>
+      <a href="/add_restaurant">Add New Restaurant</a>
+      <table>
+          <thead>
+              <tr>
+                  <th>No</th>
+                  <th>Restaurant Name</th>
+                  <th>Cuisine</th>
+                  <th>Price Range</th>
+                  <th>Action</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for restaurant in restaurants %}
+              <tr>
+                  <td>{{ loop.index }}</td> 
+                  <td>{{ restaurant.name }}</td>
+                  <td>{{ restaurant.cuisine }}</td>
+                  <td>{{ restaurant.pricerange }}</td>
+                  <td>
+                      <a href="/editrestaurant/{{ restaurant.id }}">Edit</a> |
+                      <a href="/deleterestaurant/{{ restaurant.id }}">Delete</a>
+                  </td>
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+  </div>
+</body>
+</html>

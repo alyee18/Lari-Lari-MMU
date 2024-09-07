@@ -43,34 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
            options: {
                scales: {
                    y: {
-                       beginAtZero: true
+                       beginAtZero: true,
+                     
                    }
                }
            }
+           
        });
 
-       // Pie Chart - Breakdown of Users
-       const ctxBreakdown = document.getElementById('breakdownChart').getContext('2d');
-       new Chart(ctxBreakdown, {
-           type: 'pie',
-           data: {
-               labels: ['Runners', 'Buyers', 'Sellers'],
-               datasets: [{
-                   data: [numRunners, numBuyers, numSellers],
-                   backgroundColor: [
-                       'rgba(255, 99, 132, 0.2)',
-                       'rgba(54, 162, 235, 0.2)',
-                       'rgba(255, 206, 86, 0.2)'
-                   ],
-                   borderColor: [
-                       'rgba(255, 99, 132, 1)',
-                       'rgba(54, 162, 235, 1)',
-                       'rgba(255, 206, 86, 1)'
-                   ],
-                   borderWidth: 1
-               }]
-           }
-       });
+       
    }
 
    fetchDashboardData();

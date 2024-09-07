@@ -63,19 +63,19 @@ def createtables():
         )
 
         # Create orders table
-        cursor.execute('''
-    CREATE TABLE IF NOT EXISTS orders (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        buyer_id INTEGER,
-        seller_id INTEGER,
-        item TEXT,
-        quantity INTEGER,
-        status TEXT,
-        date TEXT,
-        FOREIGN KEY (buyer_id) REFERENCES users (id),
-        FOREIGN KEY (seller_id) REFERENCES users (id)
-    );
-    ''')
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                buyer TEXT NOT NULL,
+                seller TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                quantity INTEGER NOT NULL,
+                total_price REAL NOT NULL,
+                status TEXT NOT NULL
+            )
+            """ 
+        )
 
         # Commit the transaction and close the connection
         conn.commit()

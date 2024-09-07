@@ -38,32 +38,100 @@ def admin_login():
 
     return render_template('admin_login.html')
 
-@app.route('/admin')
-def admin_dashboard():
-    if not session.get('logged_in'):
-        return redirect(url_for('admin_login'))
-    return render_template('admin.html')
-
 @app.route('/api/dashboard_data')
 def dashboard_data():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    num_orders = cursor.execute('SELECT COUNT(*) FROM orders').fetchone()[0]
-    num_runners = cursor.execute('SELECT COUNT(*) FROM users WHERE role = "runner"').fetchone()[0]
-    num_buyers = cursor.execute('SELECT COUNT(*) FROM users WHERE role = "buyer"').fetchone()[0]
-    num_sellers = cursor.execute('SELECT COUNT(*) FROM users WHERE role = "seller"').fetchone()[0]
+    cursor.execute('SELECT COUNT(*) FROM orders')
+    num_orders = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM users WHERE role = "runner"')
+    num_runners = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM users WHERE role = "buyer"')
+    num_buyers = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM users WHERE role = "seller"')
+    num_sellers = cursor.fetchone()[0]
 
     conn.close()
 
     data = {
-        "num_orders": num_orders,
-        "num_runners": num_runners,
-        "num_buyers": num_buyers,
-        "num_sellers": num_sellers
+        'num_orders': num_orders,
+        'num_runners': num_runners,
+        'num_buyers': num_buyers,
+        'num_sellers': num_sellers
     }
-    
+
     return jsonify(data)
+
+@app.route('/admin')
+def admin_dashboard():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'runner'")
+    num_runners = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'buyer'")
+    num_buyers = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'seller'")
+    num_sellers = cursor.fetchone()[0]
+
+    cursor.execute("SELECT id, buyer, seller, item_name, quantity, total_price, status FROM orders")
+    orders = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('admin.html', num_runners=num_runners, num_buyers=num_buyers, num_sellers=num_sellers, orders=orders)
+    
+@app.route('/usercontrol')
+def user_control():
+    conn = get_db_connection()
+    users = conn.execute('SELECT * FROM users').fetchall()
+    conn.close()
+    return render_template('usercontrol.html', users=users)
+
+@app.route('/menucontrol')
+def menu_control():
+    conn = get_db_connection()
+    menu_items = conn.execute('SELECT * FROM menu_items').fetchall()
+    conn.close()
+    return render_template('menucontrol.html', menu_items=menu_items)
+
+@app.route('/ordercontrol')
+def order_control():
+    conn = get_db_connection()
+    orders = conn.execute('SELECT * FROM orders').fetchall()
+    conn.close()
+    return render_template('ordercontrol.html', orders=orders)
+
+@app.route('/updateorderstatus/<int:order_id>', methods=('GET', 'POST'))
+def update_order_status(order_id):
+    conn = get_db_connection()
+    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    
+    if request.method == 'POST':
+        status = request.form['status']
+        conn.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id))
+        conn.commit()
+        conn.close()
+        return redirect('/ordercontrol')
+    
+    conn.close()
+    return render_template('update_order_status.html', order=order)
+
+@app.route('/restaurantcontrol')
+def restaurant_control():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, cuisine, price_range FROM restaurants")
+    restaurants = cursor.fetchall()
+    conn.close()
+
+    return render_template('restaurantcontrol.html', restaurants=restaurants)
 
 ######### home ##########
 @app.route("/")
