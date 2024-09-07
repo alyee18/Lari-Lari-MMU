@@ -23,6 +23,36 @@
 </head>
 <body>
 
+    <div class="container">
+        <nav class="nav-bar">
+          <ul class="nav-links">
+            <li class="nav-link">
+              <a href="{{ url_for('buyer_home') }}">Home</a>                
+              <i class='bx bx-home'></i>
+            </li>
+
+    <li class="nav-link profile">
+        <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking
+        <i class='bx bx-list-check'></i>
+        <span class="dropdown-icon">
+          <i class='bx bx-chevron-down'></i>
+        </span>
+        </a>
+        <ul class="dropdown-content">
+            <li><a href="{{ url_for('progress_tracking') }}">Real Time Tracking</a></li>
+        </ul>
+      </li>
+
+      <li class="nav-link">
+        <a href="{{ url_for('buyer_profile') }}" class="dropbtn">Profile
+        <i class='bx bx-user'></i>
+        </a>
+      </li>
+      
+      <li class="nav-link">
+        <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
+        <i class='bx bx-log-out'></i>
+
     <header>
         <a href="#" class="logo">
             <img src="../static/img-logo.jpg">

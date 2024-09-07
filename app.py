@@ -505,6 +505,10 @@ def delete_seller_account():
     flash("Account deleted successfully.", "success")
     return redirect(url_for('index'))
 
+@app.route('/progress_tracking')
+def seller_progress_tracking():
+    return render_template('progress_tracking.html')
+
 ######### Buyer Page ##########
 @app.route('/buyer_home')
 @login_required(role='buyer')
@@ -694,6 +698,77 @@ def remove_from_cart():
             session.modified = True
 
     return redirect(url_for("view_cart"))
+
+@app.route('/buyer_profile')
+def buyer_profile():
+    if session.get('role') != 'buyer':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (session['username'],))
+    user = cursor.fetchone()
+    conn.close()
+
+    return render_template('buyer_profile.html', user=user)
+
+@app.route('/update_buyer_profile', methods=['POST'])
+def update_buyer_profile():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    name = request.form.get('name')
+    email = request.form.get('email')
+    phone_no = request.form.get('phone_no')
+
+    if not all([name, email, phone_no]):
+        flash("All fields are required.", "error")
+        return redirect(url_for('seller_profile'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE users
+        SET name = ?, email = ?, phone_no = ?
+        WHERE username = ?
+        """,
+        (name, email, phone_no, session['username'])
+    )
+    conn.commit()
+    conn.close()
+
+    flash("Profile updated successfully.", "success")
+    return redirect(url_for('buyer_profile'))
+
+@app.route('/delete_buyer_account', methods=['POST'])
+def delete_buyer_account():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM users WHERE username = ?",
+        (session['username'],)
+    )
+    conn.commit()
+    conn.close()
+
+    session.pop('username', None)
+    session.pop('role', None)
+
+    flash("Account deleted successfully.", "success")
+    return redirect(url_for('index'))
+
+@app.route('/progress_tracking')
+def buyer_progress_tracking():
+    return render_template('progress_tracking.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
