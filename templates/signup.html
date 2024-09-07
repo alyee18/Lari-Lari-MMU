@@ -21,6 +21,20 @@
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    
+    <form action="{{ url_for('signup') }}" method="post">
+         <Your form fields here >
+    </form>
+
     <section>
         <div class="form-box">
             <div class="form-value">
@@ -49,10 +63,9 @@
                     </div>
                     <div class="inputbox">
                         <select id="role" name="role" required>
-                            <option value="restaurant">Restaurant</option>
+                            <option value="seller">Seller</option>
                             <option value="buyer">Buyer</option>
                             <option value="runner">Runner</option>
-                            <option value="admin">Admin</option>
                         </select>
                     </div>
                     <button type="submit">Sign Up</button>

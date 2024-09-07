@@ -4,93 +4,156 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="myscripts.js" defer></script>
+    
 </head>
 <body>
-    <div class="navbar">
-        <a href="{{ url_for('admin_page') }}">Dashboard</a>
-        <a href="{{ url_for('manage_users') }}">Manage Users</a>
-        <a href="{{ url_for('receive_feedback') }}">Feedback</a>
-        <a href="{{ url_for('control_deliveries') }}">Deliveries</a>
+    <header>
+        <h2>Admin Dashboard</h2>
+    </header>
+    <div class="sidebar">
+        <ul>
+            <li><i class='bx bx-home'></i><a href="/admin">Dashboard</a></li>
+            <li><i class='bx bx-user'></i><a href="/usercontrol">User Control</a></li>
+            <li><i class='bx bx-cart'></i><a href="/ordercontrol">Order Control</a></li>
+            <li><i class='bx bx-food-menu'></i><a href="/menucontrol">Menu Control</a></li>
+            <li><i class='bx bx-coin-stack'></i><a href="/finance">Financial Overview</a></li>
+            <li><i class='bx bx-edit'></i><a href="/pageeditor">Page Editor</a></li>
+            <li><i class='bx bx-log-out'></i><a href="/logout">Logout</a></li>
+        </ul>
     </div>
+    <div class="admincontainer">
+      <div class="subadmincontainer">
+          <div class="subdes">
+              <h2>{{ num_orders }}</h2>
+              <h4>Orders</h4>
+          </div>
+          <div class="icon">
+              <i class='bx bxs-cart'></i>
+          </div>
+      </div>
+      <div class="subadmincontainer">
+          <div class="subdes">
+              <h2>{{ num_runners }}</h2>
+              <h4>Runners</h4>
+          </div>
+          <div class="icon">
+              <i class='bx bxs-bike'></i>
+          </div>
+      </div>
+      <div class="subadmincontainer">
+          <div class="subdes">
+              <h2>{{ num_buyers }}</h2>
+              <h4>Buyers</h4>
+          </div>
+          <div class="icon">
+              <i class='bx bxs-user'></i>
+          </div>
+      </div>
+      <div class="subadmincontainer">
+          <div class="subdes">
+              <h2>{{ num_sellers }}</h2>
+              <h4>Sellers</h4>
+          </div>
+          <div class="icon">
+              <i class='bx bxs-store'></i>
+          </div>
+      </div>
+  </div>
+  <input type="hidden" id="num_orders" value="{{ num_orders }}">
+  <input type="hidden" id="num_runners" value="{{ num_runners }}">
+  <input type="hidden" id="num_buyers" value="{{ num_buyers }}">
+  <input type="hidden" id="num_sellers" value="{{ num_sellers }}">
+  <div class="graphcontainer">
+      <div class="graph">
+          <canvas id="ordersChart" width="500"></canvas>
+      </div>
+      <div class="graph">
+          <canvas id="usersChart"></canvas>
+      </div>
+  </div>
+  <div class="table" id="orders_table">
+      <div class="table__header">
+          <h1>Orders List</h1>
+          <div class="input-group">
+              <input type="search" id="search" placeholder="Search Orders...">
+              <i class='bx bx-search' onclick="searchOrders()"></i>
+          </div>
+      </div>
+      <div class="table__body">
+          <table>
+              <thead>
+                  <tr>
+                      <th>Order ID</th>
+                      <th>Buyer</th>
+                      <th>Seller</th>
+                      <th>Item</th>
+                      <th>Quantity</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for order in orders %}
+                  <tr>
+                      <td>{{ order.id }}</td>
+                      <td>{{ order.buyer }}</td>
+                      <td>{{ order.seller }}</td>
+                      <td>{{ order.item }}</td>
+                      <td>{{ order.quantity }}</td>
+                      <td>{{ order.status }}</td>
+                      <td>{{ order.date }}</td>
+                  </tr>
+                  {% endfor %}
+              </tbody>                               
+          </table>
+      </div>
+  </div>
+  <script>
+      // Define a function named searchOrders
+      function searchOrders() {
+          const searchQuery = document.getElementById('search').value;
+          window.location.href = `/admin?search=${searchQuery}`;
+      }
 
-    <div class="container">
-        <h1>Admin Dashboard</h1>
+      // Sample code to initialize charts
+      const ctxOrders = document.getElementById('ordersChart').getContext('2d');
+      const ordersChart = new Chart(ctxOrders, {
+          type: 'bar',
+          data: {
+              labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+              datasets: [{
+                  label: 'Orders',
+                  data: [10, 20, 15, 25, 30, 20],
+                  backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              }
+          }
+      });
 
-        <div class="section">
-            <h2>Manage Users</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Phone No</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.name }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.role }}</td>
-                        <td>{{ user.phone_no }}</td>
-                        <td>
-                            <form action="{{ url_for('delete_user', username=user.username) }}" method="post" style="display:inline;">
-                                <button type="submit">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h2>Receive Feedback</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Feedback ID</th>
-                        <th>Username</th>
-                        <th>Message</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for feedback in feedbacks %}
-                    <tr>
-                        <td>{{ feedback.id }}</td>
-                        <td>{{ feedback.username }}</td>
-                        <td>{{ feedback.message }}</td>
-                        <td>
-                            <!-- Add actions like delete or mark as read if needed -->
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h2>Control Deliveries</h2>
-            <!-- You can add a form or table to manage deliveries -->
-            <form action="{{ url_for('update_delivery_status') }}" method="post">
-                <div class="form-group">
-                    <label for="order_id">Order ID:</label>
-                    <input type="text" id="order_id" name="order_id" required>
-                </div>
-                <div class="form-group">
-                    <label for="status">Status:</label>
-                    <input type="text" id="status" name="status" required>
-                </div>
-                <div class="form-group">
-                    <button type="submit">Update Status</button>
-                </div>
-            </form>
-        </div>
-    </div>
+      const ctxUsers = document.getElementById('usersChart').getContext('2d');
+      const usersChart = new Chart(ctxUsers, {
+          type: 'pie',
+          data: {
+              labels: ['Runners', 'Buyers', 'Sellers'],
+              datasets: [{
+                  data: [{ num_runners }, { num_buyers }, { num_sellers }],
+                  backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'],
+                  borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
+                  borderWidth: 1
+              }]
+          }
+      });
+  </script>
 </body>
 </html>
