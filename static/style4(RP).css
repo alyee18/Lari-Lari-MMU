@@ -1,0 +1,16 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: "New Amsterdam", sans-serif; 
+} 
+body{
+    background-color: #e9ffe9 ;
+    background:linear-gradient(to right , #e2e2e2,#e9ffc9) ;
+}
+.container{
+    display: flex;
+    font-size: 20px;
+    background-color: #e9ffe9 ;
+    background:linear-gradient(to right , #e2e2e2,#e9ffc9) ;
+    justify-content: center;
+}

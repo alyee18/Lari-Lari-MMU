@@ -16,8 +16,8 @@
     /*    .5rem = 8px | 1rem = 16px     */
  }
  body{
-    background-color: var(--body-color);
-    color: var(--text-color);
+   background-color: #e9ffe9 ;
+   background:linear-gradient(to left , rgb(233, 235, 225),#f9f3ca) ;
  }
  img{
     display: block;
