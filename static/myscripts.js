@@ -43,7 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
            options: {
                scales: {
                    y: {
-                       beginAtZero: true,
+                     beginAtZero: true,
+                       ticks:{
+                        stepSize: 1,
+                        callback: function(value) {
+                           return Number.isInteger(value) ? value : '';
+                        }
+                       }
                      
                    }
                }

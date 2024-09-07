@@ -21,7 +21,11 @@
             <li><i class='bx bx-cart'></i><a href="/ordercontrol">Order Control</a></li>
             <li><i class='bx bx-food-menu'></i><a href="/menucontrol">Menu Control</a></li>
             <li><i class='bx bx-edit'></i><a href="/pageeditor">Page Editor</a></li>
-            <li><i class='bx bx-log-out'></i><a href="/logout">Logout</a></li>
+            <li>
+               <form action="{{ url_for('logout') }}" method="POST">
+                  <button type="submit" class="logout-button">Logout</button>
+              </form>
+            </li>
         </ul>
     </div>
     <div class="admincontainer">
