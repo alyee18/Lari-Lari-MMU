@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runner Home</title>
+    <link rel="stylesheet" type="text/css" href="../static/style3.css">
+
+    <!--------------------------box-icon-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    
+    <link rel="stylesheet" type="text/css" href="../static/style3.css">
+
+    <!--------------------------box-icon-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    
+</head>
+<body>
+  <h1>Welcome, Runner!</h1>
+    <div class="container">
+      <nav class="nav-bar">
+        <ul class="nav-links">
+          <li class="nav-link">
+            <a href="{{ url_for('index') }}">Home</a>                
+            <i class='bx bx-home'></i>
+          </li>
+
+          <li class="nav-link profile">
+            <a href="{{ url_for('task_management', task_type='available') }}" class="dropbtn">Task Management
+            <i class='bx bx-task'></i>
+            <span class="dropdown-icon">
+              <i class='bx bx-chevron-down'></i>
+            </span>
+            </a>
+            <ul class="dropdown-content">
+              <li><a href="{{ url_for('task_management', task_type='available') }}">Available Deliveries</a></li>
+              <li><a href="{{ url_for('task_management', task_type='current') }}">Current Deliveries</a></li>
+              <li><a href="{{ url_for('task_management', task_type='completed') }}">Completed Deliveries</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-link profile">
+            <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking
+            <i class='bx bx-list-check'></i>
+            <span class="dropdown-icon">
+              <i class='bx bx-chevron-down'></i>
+            </span>
+            </a>
+            <ul class="dropdown-content">
+                <li><a href="{{ url_for('progress_tracking') }}">Real Time Tracking</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-link">
+            <a href="{{ url_for('runner_profile') }}" class="dropbtn">Profile
+            <i class='bx bx-user'></i>
+            </a>
+          </li>
+
+          <li class="nav-link">
+            <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
+            <i class='bx bx-log-out'></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+<!--------------------------Task Management---------------------------------------------------->    
+         
+
+<!--------------------------Map navigation---------------------------------------------------->    
+
+</body>
+</html>
+                

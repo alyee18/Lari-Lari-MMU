@@ -7,7 +7,6 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
 
-
 def get_db_connection():
     con = sqlite3.connect("database.db")
     con.row_factory = sqlite3.Row

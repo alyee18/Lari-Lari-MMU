@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live GPS Tracking with OpenStreetMap</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body><div class="container">
+    <nav class="nav-bar">
+      <ul class="nav-links">
+        <li class="nav-link">
+          <a href="{{ url_for('index') }}">Home</a>                
+          <i class='bx bx-home'></i>
+        </li>
+
+        <li class="nav-link profile">
+          <a href="{{ url_for('task_management', task_type='available') }}" class="dropbtn">Task Management
+          <i class='bx bx-task'></i>
+          <span class="dropdown-icon">
+            <i class='bx bx-chevron-down'></i>
+          </span>
+          </a>
+          <ul class="dropdown-content">
+            <li><a href="{{ url_for('task_management', task_type='available') }}">Available Deliveries</a></li>
+            <li><a href="{{ url_for('task_management', task_type='current') }}">Current Deliveries</a></li>
+            <li><a href="{{ url_for('task_management', task_type='completed') }}">Completed Deliveries</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-link profile">
+          <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking
+          <i class='bx bx-list-check'></i>
+          <span class="dropdown-icon">
+            <i class='bx bx-chevron-down'></i>
+          </span>
+          </a>
+          <ul class="dropdown-content">
+              <li><a href="{{ url_for('progress_tracking') }}">Real Time Tracking</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-link">
+          <a href="{{ url_for('runner_profile') }}" class="dropbtn">Profile
+          <i class='bx bx-user'></i>
+          </a>
+        </li>
+
+        <li class="nav-link">
+          <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
+          <i class='bx bx-log-out'></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+    <h1>Live Delivery Tracking</h1>
+    <div id="map"></div>
+
+    <script>
+        // Initialize the map and set its view to an initial location and zoom level
+        var map = L.map('map').setView([51.505, -0.09], 13); // Initial coordinates (London)
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: 'Â© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Create a marker for tracking
+        var marker = L.marker([51.505, -0.09]).addTo(map);
+
+        // Function to update the marker's position
+        function updateMarkerPosition(lat, lng) {
+            var newLatLng = new L.LatLng(lat, lng);
+            marker.setLatLng(newLatLng);
+            map.setView(newLatLng, map.getZoom());
+        }
+
+        // Track the user's location in real-time
+        function startTracking() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    function(position) {
+                        var lat = position.coords.latitude;
+                        var lng = position.coords.longitude;
+                        updateMarkerPosition(lat, lng);
+                    },
+                    function(error) {
+                        console.error("Geolocation error: " + error.message);
+                    },
+                    {
+                        enableHighAccuracy: true, // Use GPS if available
+                        maximumAge: 10000, // Maximum age of cached position
+                        timeout: 10000 // Timeout for geolocation request
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        window.onload = startTracking;
+    </script>
+</body>
+</html>
