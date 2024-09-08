@@ -53,6 +53,7 @@ def runner_profile():
         flash("You do not have permission to access this page.", "error")
         return redirect(url_for('index'))
     
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE username = ?", (session['username'],))
@@ -159,8 +160,17 @@ def signup():
             cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
             if cursor.fetchone():
                 flash("Username already exists!", "error")
-                conn.close()
                 return render_template("signup.html")
+            
+            cursor.execute("SELECT 1 FROM users WHERE email = ?", (email,))
+            if cursor.fetchone():
+                flash('Email already registered.')
+                return redirect(url_for('signup'))
+        
+            cursor.execute("SELECT 1 FROM users WHERE phone_no = ?", (phone_no,))
+            if cursor.fetchone():
+                flash('Phone number already registered.')
+                return redirect(url_for('signup'))
 
             # Hash the password before storing it
             hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
@@ -247,9 +257,28 @@ def login():
 ######### logout ##########
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-    session.pop("username", None)
-    session.pop("password", None)
-    flash("You have been logged out successully.", "info")
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if username and password:
+            conn = get_db_connection()  
+            cursor = conn.cursor()
+            cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+            user = cursor.fetchone()
+            conn.close()
+
+            if user and check_password_hash(user[0], password):
+                # Clear session data
+                session.pop("username", None)
+                session.pop("role", None)
+
+                flash("You have been logged out successfully.", "info")
+                return redirect(url_for("index"))
+            else:
+                flash("Invalid username or password.", "error")
+        else:
+            flash("Both username and password are required.", "error")
 
     return render_template("logout.html")
 

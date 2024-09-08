@@ -34,6 +34,7 @@
                 </ul>
             {% endif %}
         {% endwith %}
+
         <form method="POST" action="{{ url_for('logout') }}">
             <div class="form-group">
                 <label for="username">Username:</label>
@@ -44,12 +45,15 @@
                 <input type="password" id="password" name="password" required>
             </div>
             <div class="form-group">
-                <button type="submit">Log Out </button>
+                <button type="submit" class="button">Log Out</button>
             </div>
         </form>
-        
-        <p><a class="button" href="{{ url_for('login') }}">Return to Login Page</a></p>
-        <p><a class="button" href="{{ url_for('index') }}">Return to Home Page</a></p>
+
+        {% if not session.get('username') %}
+                <p><a class="button" href="{{ url_for('login') }}">Return to Login Page</a></p>
+                <p><a class="button" href="{{ url_for('index') }}">Return to Home Page</a></p>
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>
