@@ -70,7 +70,7 @@ def createtables():
                 buyer_username TEXT NOT NULL,
                 restaurant_name TEXT NOT NULL,
                 total_price REAL NOT NULL,
-                order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,                
                 FOREIGN KEY (restaurant_name) REFERENCES restaurants (name)
             )
             """

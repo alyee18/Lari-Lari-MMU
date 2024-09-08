@@ -488,28 +488,26 @@ def seller_progress_tracking():
 @app.route('/seller_orders')
 @login_required(role='seller')
 def seller_orders():
-    restaurant_id = session.get('restaurant_id')
-
-    if not restaurant_id:
-        flash("Restaurant ID is missing. Please select a restaurant.", "error")
-        return redirect(url_for('seller_home'))
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        # Fetch orders for the seller
         cursor.execute("""
-            SELECT orders.id, orders.buyer_username, orders.restaurant_name, orders.total_price, orders.order_status, orders.order_date
-            FROM orders
-            WHERE orders.restaurant_id = ?
-            ORDER BY orders.order_date DESC
-        """, (restaurant_id,))
+            SELECT * FROM seller_orders
+            WHERE owner_username = ?
+            ORDER BY order_date DESC
+        """, (session['username'],))
+
         orders = cursor.fetchall()
+
     except sqlite3.Error as e:
-        flash(f"An error occurred while fetching orders: {e}", "error")
+        print(f"SQLite error: {e}")
+        flash(f"An error occurred: {e}", "error")
         orders = []
 
-    conn.close()
+    finally:
+        conn.close()
 
     return render_template('seller_orders.html', orders=orders)
 
@@ -600,10 +598,10 @@ def confirm_order():
         # Insert the order into the orders table
         cursor.execute(
             """
-            INSERT INTO orders (buyer_username, restaurant_name, total_price)
-            VALUES (?, ?, ?)
+            INSERT INTO orders (buyer_username, restaurant_name, total_price, order_status)
+            VALUES (?, ?, ?, ?)
             """,
-            (session["username"], restaurant_name, total_price)
+            (session["username"], restaurant_name, total_price, 'pending')
         )
         order_id = cursor.lastrowid
 
@@ -628,7 +626,7 @@ def confirm_order():
         if conn:
             conn.rollback()
         flash(f"An error occurred: {e}", "error")
-        print(f"SQLite error: {e}")
+        print(f"SQLite error: {e}")  # Optional: This line can help in local debugging
 
     finally:
         if conn:
