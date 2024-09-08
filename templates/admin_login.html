@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" type="text/css" href="../static/style(admin).css">
+
+    <!--------------------------box-icon-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+</head>
+<body>
+    <div class="login-container">
+        <div class="myform">
+            <form id="loginForm" method="post" action="/admin-login">
+                <h2>Admin Login</h2>
+                <span>HELLO Admin! Welcome Back!</span>
+                <div class="form-group">
+                    <input type="text" id="username" name="username" placeholder="Username" required>
+                    <i class="bx bx-user"></i>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <i class="bx bx-lock-alt"></i>
+                </div>
+                <button type="submit">Login</button>
+                <p id="error-message" style="color: red; display: none;">Invalid username or password.</p>
+            </form>
+        </div>
+        <div class="image">
+            <img src="../static/logo.jpg" >
+        </div>
+    </div>
+</body>
+</html>

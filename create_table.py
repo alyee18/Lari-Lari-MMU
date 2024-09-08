@@ -7,6 +7,7 @@ def createtables():
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
     
+    
         # Create user table
         cursor.execute(
             """

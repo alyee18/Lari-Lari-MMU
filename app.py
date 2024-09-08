@@ -1,6 +1,10 @@
-from flask import Flask, render_template, redirect, url_for, session, flash, request
+from flask import Flask, render_template, redirect, url_for, session, flash, request, jsonify
+import os
+import json
 import sqlite3
+from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from functools import wraps
 from datetime import datetime
 
@@ -21,6 +25,86 @@ def get_tasks(task_type):
 
     conn.close()
     return tasks
+
+
+########## ADMIN PageEditor ##########   
+def load_content():
+    """Load content from content.json."""
+    try:
+        with open("content.json", "r") as content_file:
+            return json.load(content_file)
+    except FileNotFoundError:
+        # Return default values if the file does not exist
+        return {
+            "home_content": "",
+            "shop_name": "",
+            "logo": ""
+        }
+    except json.JSONDecodeError:
+        # Handle JSON decoding errors
+        return {
+            "home_content": "",
+            "shop_name": "",
+            "logo": ""
+        }
+
+def save_content(content):
+    """Save content to content.json."""
+    try:
+        with open("content.json", "w") as content_file:
+            json.dump(content, content_file, indent=4)
+    except IOError as e:
+        print(f"Error saving content: {e}")
+
+@app.route("/pageEditor", methods=["GET", "POST"])
+def page_editor():
+    if request.method == "POST":
+        home_content = request.form.get("home_content")
+        shop_name = request.form.get("shop_name")
+        
+        filename = ""
+        if "logo" in request.files:
+            file = request.files["logo"]
+            if file and file.filename != "":
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+        content = {
+            "home_content": home_content,
+            "shop_name": shop_name,
+            "logo": filename
+        }
+        
+        save_content(content)
+        
+        flash("Content updated successfully!")
+        return redirect(url_for("index"))
+    
+    return render_template("pageEditor.html")
+
+@app.route('/change_admin_credentials', methods=['POST'])
+def change_admin_credentials():
+    admin_current_email = request.form.get('admin_current_email')
+    admin_new_email = request.form.get('admin_email')
+    admin_current_password = request.form.get('admin_current_password')
+    admin_new_password = request.form.get('admin_password')
+
+    if admin_current_email == admin_email and admin_current_password == admin_password:
+        if admin_new_email:
+            admin_email = admin_new_email
+        if admin_new_password:
+            admin_password = admin_new_password
+        
+        flash("Email and/or password updated successfully!")
+    else:
+        flash("Invalid email or password!")
+
+    admin_data = {"email": admin_email, "password": admin_password}
+    with open("admin.json", "w") as admin_file:
+        json.dump(admin_data, admin_file)
+    
+    return redirect(url_for("pageEditor"))
+
 
 ######### home ##########
 @app.route("/")
@@ -284,6 +368,7 @@ def logout():
 
 ######### SellerPage ##########
 @app.route('/seller_home')
+@login_required(role='seller')
 @login_required(role='seller')
 def seller_home():
     conn = get_db_connection()
