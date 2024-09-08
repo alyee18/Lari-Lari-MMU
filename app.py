@@ -489,10 +489,10 @@ def seller_progress_tracking():
 @app.route('/seller_orders')
 @login_required(role='seller')
 def seller_orders():
-    restaurant_name = session.get('restaurant_name')
+    restaurant_id = session.get('restaurant_id')  # Get the restaurant_id from the session
 
-    if not restaurant_name:
-        flash("Restaurant name is missing. Please select a restaurant.", "error")
+    if not restaurant_id:
+        flash("Please select a restaurant.", "error")
         return redirect(url_for('seller_home'))
 
     conn = get_db_connection()
@@ -500,11 +500,12 @@ def seller_orders():
 
     try:
         cursor.execute("""
-            SELECT id, buyer_username, item_name, total_price, quantity, order_date, order_status
-            FROM orders
-            WHERE restaurant_name = ?
-            ORDER BY order_date DESC
-        """, (restaurant_name,))
+            SELECT o.id, o.buyer_username, r.name AS restaurant_name, o.item_name, o.total_price, o.quantity, o.order_date, o.order_status
+            FROM orders o
+            JOIN restaurants r ON o.restaurant_id = r.id
+            WHERE o.restaurant_id = ?
+            ORDER BY o.order_date DESC
+        """, (restaurant_id,))
         orders = cursor.fetchall()
     except sqlite3.Error as e:
         flash(f"An error occurred while fetching orders: {e}", "error")
@@ -513,7 +514,6 @@ def seller_orders():
     conn.close()
 
     return render_template('seller_orders.html', orders=orders)
-
 
 @app.route('/update_order_status/<int:order_id>', methods=['POST'])
 @login_required(role='seller')
@@ -524,9 +524,10 @@ def update_order_status_handler(order_id):
         flash("Invalid status.", "error")
         return redirect(url_for('seller_orders'))
 
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
         cursor.execute(
             """
             UPDATE orders
@@ -536,12 +537,12 @@ def update_order_status_handler(order_id):
             (new_status, order_id)
         )
         conn.commit()
+        flash("Order status updated successfully!", "success")
     except sqlite3.Error as e:
         flash(f"An error occurred: {e}", "error")
     finally:
         conn.close()
 
-    flash("Order status updated successfully!", "success")
     return redirect(url_for('seller_orders'))
 
 @app.route('/select_restaurant', methods=['POST'])
@@ -549,7 +550,7 @@ def update_order_status_handler(order_id):
 def select_restaurant():
     restaurant_id = request.form.get('restaurant_id')
     if restaurant_id:
-        session['restaurant_id'] = restaurant_id
+        session['restaurant_id'] = restaurant_id  # Store restaurant_id in the session
     return redirect(url_for('seller_orders'))
 
 ######### Buyer Page ##########
@@ -818,7 +819,7 @@ def buyer_orders():
     try:
         # Fetch orders with correct schema
         cursor.execute("""
-            SELECT orders.id, orders.restaurant_name, orders.total_price, orders.order_date
+            SELECT orders.id, orders.restaurant_name, orders.total_price, orders.order_status, orders.order_date
             FROM orders
             WHERE orders.buyer_username = ?
             ORDER BY orders.order_date DESC
