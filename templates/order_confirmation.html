@@ -26,10 +26,9 @@
             <h1>{{ message }}</h1>
             <h2>Thank You for your supporting!!</h2>
             <p>Your order detials has been successfully submmited.Thanks!</p>
-            <p>Enjoy your food yaa~~</p>
-            <button type="button">OK</button>
+            <p>Enjoy your food!</p>
+            <a href="{{ url_for('restaurant_list') }}" class="button">Go back to Restaurant List</a>
         </div>
     </div>
-    <a href="{{ url_for('restaurant_list') }}">Go back to Restaurant List</a>
 </body>
 </html>

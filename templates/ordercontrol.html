@@ -14,25 +14,22 @@
             <li><a href="/restaurantcontrol">Restaurant Control</a></li>
             <li><a href="/ordercontrol">Order Control</a></li>
             <li><a href="/menucontrol">Menu Control</a></li>
-            <li><a href="/pageeditor">Page Editor</a></li>
+            <li><a href="/pageEditor">Page Editor</a></li>
             <li><a href="/logout">Log Out</a></li>
         </ul>
     </div>
 
     <div class="content">
       <h2>Order Control</h2>
-      <a href="/add_menu_item">Add New Menu Item</a>
       <table>
           <thead>
               <tr>
                   <th>No</th>
-                  <th>ID</th>
+                  <th>Order ID</th>
                   <th>Buyer</th>
-                  <th>Seller</th>
-                  <th>Item</th>
-                  <th>Quantity</th>
+                  <th>Restaurant</th>
                   <th>Total Price</th>
-                  <th>Status</th>
+                  <th>Order Date</th>
                   <th>Action</th>
               </tr>
           </thead>
@@ -40,18 +37,47 @@
               {% for order in orders %}
               <tr>
                   <td>{{ loop.index }}</td>
-                  <td>{{ item.id }}</td>
-                  <td>{{ order.buyer }}</td>
-                  <td>{{ order.seller }}</td>
-                  <td>{{ order.item_name }}</td>
-                  <td>{{ order.quantity }}</td>
+                  <td>{{ order.id }}</td>
+                  <td>{{ order.buyer_username }}</td>
+                  <td>{{ order.restaurant_name }}</td>
                   <td>{{ order.total_price }}</td>
-                  <td>{{ order.status }}</td>
+                  <td>{{ order.order_date }}</td>
                   <td><a href="/updateorderstatus/{{ order.id }}">Update Status</a></td>
                </tr>
                {% endfor %}
            </tbody>
        </table>
    </div>
+
+   <div class="content">
+    <h2>Order Item Control</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Order ID</th>
+                <th>Buyer</th>
+                <th>Restaurant</th>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order_items %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.order_id }}</td>
+                <td>{{ item. buyer_username }}</td>
+                <td>{{ item.restaurant_name }}</td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.quantity }}</td>
+             </tr>
+             {% endfor %}
+         </tbody>
+     </table>
+ </div>
+
 </body>
 </html>
