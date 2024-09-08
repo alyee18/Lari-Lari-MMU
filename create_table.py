@@ -6,7 +6,7 @@ def createtables():
     
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
-
+    
         # Create user table
         cursor.execute(
             """
@@ -62,7 +62,22 @@ def createtables():
             """
         )
 
-    
+         # Create the orders table
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                buyer_username TEXT NOT NULL,
+                restaurant_name TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                total_price REAL NOT NULL,
+                quantity INTEGER NOT NULL,
+                order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+                order_status TEXT DEFAULT 'pending'
+            )
+            """
+        )
+
         # Commit the transaction and close the connection
         conn.commit()
         conn.close()

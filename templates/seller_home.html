@@ -7,21 +7,41 @@
 </head>
 <body>
     <h1>Welcome, {{ session['username'] }}!</h1>
-    <a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a>
-
-    <h2>Your Restaurants</h2>
-    <ul>
-    {% for restaurant in restaurants %}
-        <li>
-            <a href="{{ url_for('restaurant_items', restaurant_id=restaurant['id']) }}">
-                <strong>{{ restaurant['name'] }}</strong>
-            </a> - {{ restaurant['cuisine'] }}
-        </li>
-    {% endfor %}
-    </ul>
-
-    <h2>Add a New Restaurant</h2>
-    <a href="{{ url_for('add_restaurant') }}">Add Restaurant</a>
     
+    <div class="container">
+        <nav class="nav-bar">
+            <ul class="nav-links">
+                <li class="nav-link">
+                    <a href="{{ url_for('seller_home') }}">Home</a>                
+                </li>
+                <li class="nav-link profile">
+                    <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking</a>
+                </li>
+                <li class="nav-link">
+                    <a href="{{ url_for('seller_profile') }}" class="dropbtn">Profile</a>
+                </li>
+                <li class="nav-link">
+                    <a href="{{ url_for('seller_orders') }}" class="dropbtn">View Order</a>
+                </li>
+                <li class="nav-link">
+                    <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT</a>
+                </li>
+            </ul>
+        </nav>
+
+        <h2>Your Restaurants</h2>
+        <ul>
+            {% for restaurant in restaurants %}
+                <li>
+                    <a href="{{ url_for('restaurant_items', restaurant_id=restaurant['id']) }}">
+                        <strong>{{ restaurant['name'] }}</strong>
+                    </a> - {{ restaurant['cuisine'] }}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Add a New Restaurant</h2>
+        <a href="{{ url_for('add_restaurant') }}">Add Restaurant</a>
+    </div>
 </body>
 </html>

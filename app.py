@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, session, flash, req
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
@@ -283,19 +284,22 @@ def logout():
 
 ######### SellerPage ##########
 @app.route('/seller_home')
+@login_required(role='seller')
 def seller_home():
-    if session.get('role') != 'seller':
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for('index'))    
-    
-    # Fetch the seller's restaurants
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM restaurants WHERE owner_username = ?", (session['username'],))
     restaurants = cursor.fetchall()
     conn.close()
 
-    # Pass the restaurants to the template
+    if not restaurants:
+        flash("No restaurants found. Please add a restaurant.", "info")
+        return redirect(url_for('add_restaurant'))
+
+    # Set the default restaurant_id if needed
+    if not session.get('restaurant_id') and restaurants:
+        session['restaurant_id'] = restaurants[0]['id']
+
     return render_template('seller_home.html', restaurants=restaurants)
 
 @app.route("/add_restaurant", methods=["GET", "POST"])
@@ -314,7 +318,6 @@ def add_restaurant():
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
-
             cursor.execute(
                 """
                 INSERT INTO restaurants (name, cuisine, price_range, delivery_time, owner_username)
@@ -324,11 +327,9 @@ def add_restaurant():
             )
             conn.commit()
             restaurant_id = cursor.lastrowid
-
         except sqlite3.Error as e:
             flash(f"An error occurred: {e}", "error")
             print(f"SQLite error: {e}")
-
         finally:
             conn.close()
 
@@ -344,9 +345,6 @@ def add_menu_item(restaurant_id):
         name = request.form.get("name")
         price = float(request.form.get("price", 0))
 
-        # Debug: Print received data
-        print(f"Received menu item data: {name}, {price}, {restaurant_id}")
-
         # Check if all required fields are present
         if not name or price <= 0:
             flash("All fields are required and price must be positive!", "error")
@@ -355,8 +353,6 @@ def add_menu_item(restaurant_id):
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
-
-            # Save the menu item details to the database
             cursor.execute(
                 """
                 INSERT INTO menu_items (restaurant_id, name, price)
@@ -365,16 +361,14 @@ def add_menu_item(restaurant_id):
                 (restaurant_id, name, price),
             )
             conn.commit()
-
         except sqlite3.Error as e:
             flash(f"An error occurred: {e}", "error")
-            print(f"SQLite error: {e}")  # Debug: Print SQLite error message
-
+            print(f"SQLite error: {e}")
         finally:
             conn.close()
 
         flash("Menu item added successfully!", "success")
-        return redirect(url_for("seller_home"))  # Redirect to seller's home page
+        return redirect(url_for("seller_home"))
 
     return render_template("add_menu_item.html", restaurant_id=restaurant_id)
 
@@ -399,7 +393,6 @@ def update_menu_item(restaurant_id, item_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-
         cursor.execute(
             """
             UPDATE menu_items
@@ -409,12 +402,9 @@ def update_menu_item(restaurant_id, item_id):
             (name, price, item_id, restaurant_id),
         )
         conn.commit()
-
     except sqlite3.Error as e:
         flash(f"An error occurred: {e}", "error")
         print(f"SQLite error: {e}")
-        return redirect(url_for('restaurant_items', restaurant_id=restaurant_id))
-
     finally:
         conn.close()
 
@@ -427,18 +417,14 @@ def delete_menu_item(restaurant_id, item_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-
         cursor.execute(
             "DELETE FROM menu_items WHERE id = ? AND restaurant_id = ?",
             (item_id, restaurant_id)
         )
         conn.commit()
-
     except sqlite3.Error as e:
         flash(f"An error occurred: {e}", "error")
         print(f"SQLite error: {e}")
-        return redirect(url_for('restaurant_items', restaurant_id=restaurant_id))
-
     finally:
         conn.close()
 
@@ -450,8 +436,6 @@ def delete_menu_item(restaurant_id, item_id):
 def restaurant_items(restaurant_id):
     conn = get_db_connection()
     cursor = conn.cursor()
-
-    # Fetch the restaurant details
     cursor.execute("SELECT * FROM restaurants WHERE id = ? AND owner_username = ?", (restaurant_id, session['username']))
     restaurant = cursor.fetchone()
 
@@ -459,13 +443,144 @@ def restaurant_items(restaurant_id):
         flash("Restaurant not found or you do not have permission to view it.", "error")
         return redirect(url_for('seller_home'))
 
-    # Fetch the menu items for the restaurant
     cursor.execute("SELECT * FROM menu_items WHERE restaurant_id = ?", (restaurant_id,))
     menu_items = cursor.fetchall()
-
     conn.close()
 
     return render_template('restaurant_items.html', restaurant=restaurant, menu_items=menu_items)
+
+@app.route('/seller_profile')
+def seller_profile():
+    if session.get('role') != 'seller':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (session['username'],))
+    user = cursor.fetchone()
+    conn.close()
+
+    return render_template('seller_profile.html', user=user)
+
+@app.route('/update_seller_profile', methods=['POST'])
+def update_seller_profile():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+
+    name = request.form.get('name')
+    email = request.form.get('email')
+    phone_no = request.form.get('phone_no')
+
+    if not all([name, email, phone_no]):
+        flash("All fields are required.", "error")
+        return redirect(url_for('seller_profile'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE users
+        SET name = ?, email = ?, phone_no = ?
+        WHERE username = ?
+        """,
+        (name, email, phone_no, session['username'])
+    )
+    conn.commit()
+    conn.close()
+
+    flash("Profile updated successfully.", "success")
+    return redirect(url_for('seller_profile'))
+
+@app.route('/delete_seller_account', methods=['POST'])
+def delete_seller_account():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE username = ?", (session['username'],))
+    conn.commit()
+    conn.close()
+
+    session.pop('username', None)
+    session.pop('role', None)
+
+    flash("Account deleted successfully.", "success")
+    return redirect(url_for('index'))
+
+@app.route('/progress_tracking')
+def seller_progress_tracking():
+    return render_template('progress_tracking.html')
+
+@app.route('/seller_orders')
+@login_required(role='seller')
+def seller_orders():
+    restaurant_id = session.get('restaurant_id')  # Get the restaurant_id from the session
+
+    if not restaurant_id:
+        flash("Please select a restaurant.", "error")
+        return redirect(url_for('seller_home'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT o.id, o.buyer_username, r.name AS restaurant_name, o.item_name, o.total_price, o.quantity, o.order_date, o.order_status
+            FROM orders o
+            JOIN restaurants r ON o.restaurant_id = r.id
+            WHERE o.restaurant_id = ?
+            ORDER BY o.order_date DESC
+        """, (restaurant_id,))
+        orders = cursor.fetchall()
+    except sqlite3.Error as e:
+        flash(f"An error occurred while fetching orders: {e}", "error")
+        orders = []
+
+    conn.close()
+
+    return render_template('seller_orders.html', orders=orders)
+
+@app.route('/update_order_status/<int:order_id>', methods=['POST'])
+@login_required(role='seller')
+def update_order_status_handler(order_id):
+    new_status = request.form.get('order_status')
+
+    if new_status not in ['pending', 'completed', 'canceled']:
+        flash("Invalid status.", "error")
+        return redirect(url_for('seller_orders'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            UPDATE orders
+            SET order_status = ?
+            WHERE id = ?
+            """,
+            (new_status, order_id)
+        )
+        conn.commit()
+        flash("Order status updated successfully!", "success")
+    except sqlite3.Error as e:
+        flash(f"An error occurred: {e}", "error")
+    finally:
+        conn.close()
+
+    return redirect(url_for('seller_orders'))
+
+@app.route('/select_restaurant', methods=['POST'])
+@login_required(role='seller')
+def select_restaurant():
+    restaurant_id = request.form.get('restaurant_id')
+    if restaurant_id:
+        session['restaurant_id'] = restaurant_id  # Store restaurant_id in the session
+    return redirect(url_for('seller_orders'))
 
 ######### Buyer Page ##########
 @app.route('/buyer_home')
@@ -487,19 +602,56 @@ def restaurant_list():
 
     return render_template("restaurants.html", restaurants=restaurants)
 
-@app.route("/confirm_order", methods=["POST"])
+@app.route('/order_confirmation')
+def order_confirmation():
+    return render_template('order_confirmation.html', message="Your order has been confirmed!")
+    
+@app.route('/confirm_order', methods=['POST'])
 @login_required(role='buyer')
 def confirm_order():
-    cart_items = session.get("cart", [])
+    conn = None
+    try:
+        print("Confirm Order route accessed")
+        cart_items = session.get('cart', [])
+        print(f"Cart items: {cart_items}")
 
-    if not cart_items:
-        flash("Your cart is empty.", "error")
-        return redirect(url_for("view_cart"))
+        if not cart_items:
+            flash("Cart is empty. Please add items before confirming the order.", "error")
+            return redirect(url_for('view_cart'))
 
-    session.pop("cart", None)
+        restaurant_name = cart_items[0].get("restaurant_name", "Unknown")
+        total_price = sum(float(item.get('price', 0)) * int(item.get('quantity', 1)) for item in cart_items)
+        print(f"Total price: {total_price}")
 
-    flash("Your order has been confirmed!", "success")
-    return redirect(url_for("index"))
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Insert the order into the orders table
+        for item in cart_items:
+            cursor.execute(
+                """
+                INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (session["username"], restaurant_name, item["item_name"], item["price"], item["quantity"])
+            )
+
+        conn.commit()
+        flash("Order confirmed successfully!", "success")
+        session.pop('cart', None)
+
+    except sqlite3.Error as e:
+        if conn:
+            conn.rollback()
+        flash(f"An error occurred: {e}", "error")
+        print(f"SQLite error: {e}")
+
+    finally:
+        if conn:
+            conn.close()
+
+    # Ensure 'order_confirmation' is a valid endpoint
+    return redirect(url_for('order_confirmation'))
 
 @app.route("/restaurant/<int:restaurant_id>")
 @login_required(role='buyer')
@@ -537,7 +689,7 @@ def add_to_cart():
 
     if not restaurant_id or not item_name or not quantity:
         flash("Missing data. Please check your form.", "error")
-        return redirect(url_for("restaurant_list"))
+        return redirect(url_for("restaurant_detail", restaurant_id=restaurant_id))
 
     restaurant_id = int(restaurant_id)
     quantity = int(quantity)
@@ -604,7 +756,6 @@ def update_cart():
 
     return redirect(url_for("view_cart"))
 
-
 @app.route("/remove_from_cart", methods=["POST"])
 @login_required(role='buyer')
 def remove_from_cart():
@@ -616,6 +767,104 @@ def remove_from_cart():
             session.modified = True
 
     return redirect(url_for("view_cart"))
+
+@app.route('/buyer_profile')
+def buyer_profile():
+    if session.get('role') != 'buyer':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (session['username'],))
+    user = cursor.fetchone()
+    conn.close()
+
+    return render_template('buyer_profile.html', user=user)
+
+@app.route('/update_buyer_profile', methods=['POST'])
+def update_buyer_profile():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    name = request.form.get('name')
+    email = request.form.get('email')
+    phone_no = request.form.get('phone_no')
+
+    if not all([name, email, phone_no]):
+        flash("All fields are required.", "error")
+        return redirect(url_for('buyer_profile'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE users
+        SET name = ?, email = ?, phone_no = ?
+        WHERE username = ?
+        """,
+        (name, email, phone_no, session['username'])
+    )
+    conn.commit()
+    conn.close()
+
+    flash("Profile updated successfully.", "success")
+    return redirect(url_for('buyer_profile'))
+
+@app.route('/delete_buyer_account', methods=['POST'])
+def delete_buyer_account():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM users WHERE username = ?",
+        (session['username'],)
+    )
+    conn.commit()
+    conn.close()
+
+    session.pop('username', None)
+    session.pop('role', None)
+
+    flash("Account deleted successfully.", "success")
+    return redirect(url_for('index'))
+
+@app.route('/progress_tracking')
+def buyer_progress_tracking():
+    return render_template('progress_tracking.html')
+
+@app.route('/buyer_orders')
+@login_required(role='buyer')
+def buyer_orders():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Fetch orders with correct schema
+        cursor.execute("""
+            SELECT orders.id, orders.restaurant_name, orders.total_price, orders.order_status, orders.order_date
+            FROM orders
+            WHERE orders.buyer_username = ?
+            ORDER BY orders.order_date DESC
+        """, (session['username'],))
+
+        orders = cursor.fetchall()
+
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+        flash(f"An error occurred: {e}", "error")
+        orders = []
+
+    finally:
+        conn.close()
+
+    return render_template('buyer_orders.html', orders=orders)
 
 if __name__ == "__main__":
     app.run(debug=True)
