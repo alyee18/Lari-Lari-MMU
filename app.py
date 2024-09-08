@@ -6,6 +6,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
@@ -368,6 +369,7 @@ def logout():
 ######### SellerPage ##########
 @app.route('/seller_home')
 @login_required(role='seller')
+@login_required(role='seller')
 def seller_home():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -601,10 +603,10 @@ def seller_progress_tracking():
 @app.route('/seller_orders')
 @login_required(role='seller')
 def seller_orders():
-    restaurant_id = session.get('restaurant_id')
+    restaurant_id = session.get('restaurant_id')  # Get the restaurant_id from the session
 
     if not restaurant_id:
-        flash("Restaurant ID is missing. Please select a restaurant.", "error")
+        flash("Please select a restaurant.", "error")
         return redirect(url_for('seller_home'))
 
     conn = get_db_connection()
@@ -612,10 +614,11 @@ def seller_orders():
 
     try:
         cursor.execute("""
-            SELECT orders.id, orders.buyer_username, orders.restaurant_name, orders.total_price, orders.order_status, orders.order_date
-            FROM orders
-            WHERE orders.restaurant_id = ?
-            ORDER BY orders.order_date DESC
+            SELECT o.id, o.buyer_username, r.name AS restaurant_name, o.item_name, o.total_price, o.quantity, o.order_date, o.order_status
+            FROM orders o
+            JOIN restaurants r ON o.restaurant_id = r.id
+            WHERE o.restaurant_id = ?
+            ORDER BY o.order_date DESC
         """, (restaurant_id,))
         orders = cursor.fetchall()
     except sqlite3.Error as e:
@@ -635,9 +638,10 @@ def update_order_status_handler(order_id):
         flash("Invalid status.", "error")
         return redirect(url_for('seller_orders'))
 
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
         cursor.execute(
             """
             UPDATE orders
@@ -647,21 +651,20 @@ def update_order_status_handler(order_id):
             (new_status, order_id)
         )
         conn.commit()
+        flash("Order status updated successfully!", "success")
     except sqlite3.Error as e:
         flash(f"An error occurred: {e}", "error")
     finally:
         conn.close()
 
-    flash("Order status updated successfully!", "success")
     return redirect(url_for('seller_orders'))
-
 
 @app.route('/select_restaurant', methods=['POST'])
 @login_required(role='seller')
 def select_restaurant():
     restaurant_id = request.form.get('restaurant_id')
     if restaurant_id:
-        session['restaurant_id'] = restaurant_id
+        session['restaurant_id'] = restaurant_id  # Store restaurant_id in the session
     return redirect(url_for('seller_orders'))
 
 ######### Buyer Page ##########
@@ -684,13 +687,16 @@ def restaurant_list():
 
     return render_template("restaurants.html", restaurants=restaurants)
 
+@app.route('/order_confirmation')
+def order_confirmation():
+    return render_template('order_confirmation.html', message="Your order has been confirmed!")
+    
 @app.route('/confirm_order', methods=['POST'])
 @login_required(role='buyer')
 def confirm_order():
-
     conn = None
     try:
-        # Retrieve cart items from the session
+        print("Confirm Order route accessed")
         cart_items = session.get('cart', [])
         print(f"Cart items: {cart_items}")
 
@@ -698,34 +704,25 @@ def confirm_order():
             flash("Cart is empty. Please add items before confirming the order.", "error")
             return redirect(url_for('view_cart'))
 
-        try:
-            restaurant_name = cart_items[0]["restaurant_name"]
-        except (IndexError, KeyError):
-            flash("No items found in the cart or missing restaurant name.", "error")
-            return redirect(url_for('view_cart'))
-
+        restaurant_name = cart_items[0].get("restaurant_name", "Unknown")
         total_price = sum(float(item.get('price', 0)) * int(item.get('quantity', 1)) for item in cart_items)
         print(f"Total price: {total_price}")
 
         conn = get_db_connection()
         cursor = conn.cursor()
 
+        # Insert the order into the orders table
         for item in cart_items:
-            item_name = item.get('item_name')
-            quantity = int(item.get('quantity', 1))
-            print(f"Inserting item: {item_name}, Quantity: {quantity}")
             cursor.execute(
                 """
-                INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity, order_date)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity)
+                VALUES (?, ?, ?, ?, ?)
                 """,
-                (session['username'], restaurant_name, item_name, total_price, quantity, datetime.now())
+                (session["username"], restaurant_name, item["item_name"], item["price"], item["quantity"])
             )
 
         conn.commit()
         flash("Order confirmed successfully!", "success")
-        print("Order confirmed successfully")
-
         session.pop('cart', None)
 
     except sqlite3.Error as e:
@@ -738,6 +735,7 @@ def confirm_order():
         if conn:
             conn.close()
 
+    # Ensure 'order_confirmation' is a valid endpoint
     return redirect(url_for('order_confirmation'))
 
 @app.route("/restaurant/<int:restaurant_id>")
@@ -935,7 +933,7 @@ def buyer_orders():
     try:
         # Fetch orders with correct schema
         cursor.execute("""
-            SELECT orders.id, orders.restaurant_name, orders.total_price, orders.order_date
+            SELECT orders.id, orders.restaurant_name, orders.total_price, orders.order_status, orders.order_date
             FROM orders
             WHERE orders.buyer_username = ?
             ORDER BY orders.order_date DESC
