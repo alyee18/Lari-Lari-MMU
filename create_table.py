@@ -7,6 +7,7 @@ def createtables():
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
     
+    
         # Create user table
         cursor.execute(
             """
@@ -78,7 +79,6 @@ def createtables():
             """
         )
 
-    
         # Commit the transaction and close the connection
         conn.commit()
         conn.close()

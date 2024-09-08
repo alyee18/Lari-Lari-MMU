@@ -1,10 +1,12 @@
 from flask import Flask, render_template, redirect, url_for, session, flash, request, jsonify
+import os
 import json
 import sqlite3
-import os
+from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
@@ -586,6 +588,7 @@ def logout():
 ######### SellerPage ##########
 @app.route('/seller_home')
 @login_required(role='seller')
+@login_required(role='seller')
 def seller_home():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -854,9 +857,10 @@ def update_order_status_handler(order_id):
         flash("Invalid status.", "error")
         return redirect(url_for('seller_orders'))
 
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
         cursor.execute(
             """
             UPDATE orders
@@ -879,7 +883,7 @@ def update_order_status_handler(order_id):
 def select_restaurant():
     restaurant_id = request.form.get('restaurant_id')
     if restaurant_id:
-        session['restaurant_id'] = restaurant_id
+        session['restaurant_id'] = restaurant_id  # Store restaurant_id in the session
     return redirect(url_for('seller_orders'))
 
 ######### Buyer Page ##########
@@ -1149,7 +1153,7 @@ def buyer_orders():
     try:
         # Fetch orders with correct schema
         cursor.execute("""
-            SELECT orders.id, orders.restaurant_name, orders.total_price, orders.order_date
+            SELECT orders.id, orders.restaurant_name, orders.total_price, orders.order_status, orders.order_date
             FROM orders
             WHERE orders.buyer_username = ?
             ORDER BY orders.order_date DESC
