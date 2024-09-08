@@ -68,10 +68,10 @@ def createtables():
             CREATE TABLE IF NOT EXISTS orders (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 buyer_username TEXT NOT NULL,
-                restaurant_id INTEGER NOT NULL,
+                restaurant_name TEXT NOT NULL,
                 total_price REAL NOT NULL,
                 order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (restaurant_id) REFERENCES restaurants (id)
+                FOREIGN KEY (restaurant_name) REFERENCES restaurants (name)
             )
             """
         )
@@ -82,15 +82,17 @@ def createtables():
             CREATE TABLE IF NOT EXISTS order_items (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 order_id INTEGER NOT NULL,
+                buyer_name TEXT NOT NULL,
+                restaurant_name TEXT NOT NULL,
                 item_name TEXT NOT NULL,
                 price REAL NOT NULL,
                 quantity INTEGER NOT NULL,
-                FOREIGN KEY (order_id) REFERENCES orders (id)
+                FOREIGN KEY (order_id) REFERENCES orders (rowid),
+                FOREIGN KEY (restaurant_name) REFERENCES restaurants (name)
             )
             """
         )
 
-    
         # Commit the transaction and close the connection
         conn.commit()
         conn.close()

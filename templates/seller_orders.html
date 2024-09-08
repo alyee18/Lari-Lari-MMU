@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Orders for Your Restaurants</title>
+</head>
+<body>
+    <h2>Orders for Your Restaurants</h2>
+    <div class="container">
+        <nav class="nav-bar">
+            <ul class="nav-links">
+                <li class="nav-link">
+                    <a href="{{ url_for('seller_home') }}">Home</a>                
+                </li>
+                <li class="nav-link profile">
+                    <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking</a>
+                </li>
+                <li class="nav-link">
+                    <a href="{{ url_for('seller_profile') }}" class="dropbtn">Profile</a>
+                </li>
+                <li class="nav-link">
+                    <a href="{{ url_for('seller_orders') }}" class="dropbtn">View Order</a>
+                </li>
+                <li class="nav-link">
+                    <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT</a>
+                </li>
+            </ul>
+        </nav>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Buyer Username</th>
+                    <th>Restaurant</th>
+                    <th>Total Price</th>
+                    <th>Order Status</th>
+                    <th>Date</th>
+                    <th>Actions</th> <!-- Added Actions column for updating status -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.buyer_username }}</td>
+                    <td>{{ order.restaurant_name }}</td>
+                    <td>{{ order.total_price }}</td>
+                    <td>{{ order.order_status }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td>
+                        <!-- Form to update order status -->
+                        <form method="POST" action="{{ url_for('update_order_status', order_id=order.id) }}">
+                            <select name="order_status">
+                                <option value="pending" {% if order.order_status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="completed" {% if order.order_status == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="canceled" {% if order.order_status == 'canceled' %}selected{% endif %}>Canceled</option>
+                            </select>
+                            <button type="submit">Update Status</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

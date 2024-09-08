@@ -19,66 +19,65 @@
 
     <!-- aos-animation-link -->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-
 </head>
 <body>
-
     <div class="container">
         <nav class="nav-bar">
-          <ul class="nav-links">
-            <li class="nav-link">
-              <a href="{{ url_for('buyer_home') }}">Home</a>                
-              <i class='bx bx-home'></i>
-            </li>
+            <ul class="nav-links">
+                <li class="nav-link">
+                    <a href="{{ url_for('buyer_home') }}">Home</a>                
+                    <i class='bx bx-home'></i>
+                </li>
 
-    <li class="nav-link profile">
-        <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking
-        <i class='bx bx-list-check'></i>
-        <span class="dropdown-icon">
-          <i class='bx bx-chevron-down'></i>
-        </span>
-        </a>
-        <ul class="dropdown-content">
-            <li><a href="{{ url_for('progress_tracking') }}">Real Time Tracking</a></li>
-        </ul>
-      </li>
+                <li class="nav-link profile">
+                    <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking
+                    <i class='bx bx-list-check'></i>
+                    <span class="dropdown-icon">
+                        <i class='bx bx-chevron-down'></i>
+                    </span>
+                    </a>
+                    <ul class="dropdown-content">
+                        <li><a href="{{ url_for('progress_tracking') }}">Real Time Tracking</a></li>
+                    </ul>
+                </li>
 
-      <li class="nav-link">
-        <a href="{{ url_for('buyer_profile') }}" class="dropbtn">Profile
-        <i class='bx bx-user'></i>
-        </a>
-      </li>
-      
-      <li class="nav-link">
-        <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
-        <i class='bx bx-log-out'></i>
+                <li class="nav-link">
+                    <a href="{{ url_for('buyer_profile') }}" class="dropbtn">Profile
+                    <i class='bx bx-user'></i>
+                    </a>
+                </li>
+                
+                <li class="nav-link">
+                    <a href="{{ url_for('buyer_orders') }}" class="dropbtn">Orders History
+                    <i class='bx bx-user'></i>
+                    </a>
+                </li>
 
-    <header>
-        <a href="#" class="logo">
-            <img src="../static/img-logo.jpg">
-        </a>
-        <div class="right-content">
-                <a href="{{ url_for('logout') }}" class="nav-btn">Log Out</a>
-            <div class="bx bx-menu" id="menu-icon"></div>
-        </div>
-    </header>
+                <li class="nav-link">
+                    <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
+                    <i class='bx bx-log-out'></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-    <!-- TOPIC -->    
-    <section class="topic">
-        <div class="topic-text">
-            <h5 data-aos="fade-right" data-aos-duration="1500"> #Welcome to the Restaurant Finder </h5>
-            <h1 data-aos="zoom-in-left" data-aos-duration="1800" data-aos-delay="200">LARI LARI MMU</h1>
-            <p data-aos="fade-right" data-aos-duration="1700" data-aos-delay="300"> YOO YOO YOO wanna find something tasty??<br> Here LARI LARI MMU is the best choice for you !!</p>
-            
-            <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
-                    <li><a href="{{ url_for('restaurant_list') }}">Order Now</a></li>
+        <!-- TOPIC -->    
+        <section class="topic">
+            <div class="topic-text">
+                <h5 data-aos="fade-right" data-aos-duration="1500"> #Welcome to the Restaurant Finder </h5>
+                <h1 data-aos="zoom-in-left" data-aos-duration="1800" data-aos-delay="200">LARI LARI MMU</h1>
+                <p data-aos="fade-right" data-aos-duration="1700" data-aos-delay="300"> YOO YOO YOO wanna find something tasty??<br> Here LARI LARI MMU is the best choice for you !!</p>
+                
+                <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
+                    <a href="{{ url_for('restaurant_list') }}" class="order-now-link">Order Now</a>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
-        AOS.init({offset: 1,});
+        AOS.init({offset: 1});
     </script>
     
 </body>
