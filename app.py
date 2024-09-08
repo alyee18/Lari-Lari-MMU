@@ -1,4 +1,6 @@
-from flask import Flask, render_template, redirect, url_for, session, flash, request
+from flask import Flask, render_template, redirect, url_for, session, flash, request, jsonify
+import os
+import json
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -20,6 +22,116 @@ def get_tasks(task_type):
 
     conn.close()
     return tasks
+
+######### Admin ##########
+@app.route('/admin-login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if username == 'admin' and password == 'admin':
+            session['logged_in'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return render_template('admin_login.html', error='Invalid username or password.')
+
+    return render_template('admin_login.html')
+
+@app.route('/api/dashboard_data')
+def dashboard_data():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT COUNT(*) FROM orders')
+    num_orders = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM users WHERE role = "runner"')
+    num_runners = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM users WHERE role = "buyer"')
+    num_buyers = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM users WHERE role = "seller"')
+    num_sellers = cursor.fetchone()[0]
+
+    conn.close()
+
+    data = {
+        'num_orders': num_orders,
+        'num_runners': num_runners,
+        'num_buyers': num_buyers,
+        'num_sellers': num_sellers
+    }
+
+    return jsonify(data)
+
+@app.route('/admin')
+def admin_dashboard():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'runner'")
+    num_runners = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'buyer'")
+    num_buyers = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'seller'")
+    num_sellers = cursor.fetchone()[0]
+
+    cursor.execute("SELECT id, buyer, seller, item_name, quantity, total_price, status FROM orders")
+    orders = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('admin.html', num_runners=num_runners, num_buyers=num_buyers, num_sellers=num_sellers, orders=orders)
+    
+@app.route('/usercontrol')
+def user_control():
+    conn = get_db_connection()
+    users = conn.execute('SELECT * FROM users').fetchall()
+    conn.close()
+    return render_template('usercontrol.html', users=users)
+
+@app.route('/menucontrol')
+def menu_control():
+    conn = get_db_connection()
+    menu_items = conn.execute('SELECT * FROM menu_items').fetchall()
+    conn.close()
+    return render_template('menucontrol.html', menu_items=menu_items)
+
+@app.route('/ordercontrol')
+def order_control():
+    conn = get_db_connection()
+    orders = conn.execute('SELECT * FROM orders').fetchall()
+    conn.close()
+    return render_template('ordercontrol.html', orders=orders)
+
+@app.route('/updateorderstatus/<int:order_id>', methods=('GET', 'POST'))
+def update_order_status(order_id):
+    conn = get_db_connection()
+    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    
+    if request.method == 'POST':
+        status = request.form['status']
+        conn.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id))
+        conn.commit()
+        conn.close()
+        return redirect('/ordercontrol')
+    
+    conn.close()
+    return render_template('update_order_status.html', order=order)
+
+@app.route('/restaurantcontrol')
+def restaurant_control():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, cuisine, price_range FROM restaurants")
+    restaurants = cursor.fetchall()
+    conn.close()
+
+    return render_template('restaurantcontrol.html', restaurants=restaurants)
 
 ######### home ##########
 @app.route("/")
@@ -51,6 +163,7 @@ def runner_profile():
     if session.get('role') != 'runner':
         flash("You do not have permission to access this page.", "error")
         return redirect(url_for('index'))
+    
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -158,8 +271,17 @@ def signup():
             cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
             if cursor.fetchone():
                 flash("Username already exists!", "error")
-                conn.close()
                 return render_template("signup.html")
+            
+            cursor.execute("SELECT 1 FROM users WHERE email = ?", (email,))
+            if cursor.fetchone():
+                flash('Email already registered.')
+                return redirect(url_for('signup'))
+        
+            cursor.execute("SELECT 1 FROM users WHERE phone_no = ?", (phone_no,))
+            if cursor.fetchone():
+                flash('Phone number already registered.')
+                return redirect(url_for('signup'))
 
             # Hash the password before storing it
             hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
@@ -246,9 +368,28 @@ def login():
 ######### logout ##########
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-    session.pop("username", None)
-    session.pop("password", None)
-    flash("You have been logged out successully.", "info")
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if username and password:
+            conn = get_db_connection()  
+            cursor = conn.cursor()
+            cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+            user = cursor.fetchone()
+            conn.close()
+
+            if user and check_password_hash(user[0], password):
+                # Clear session data
+                session.pop("username", None)
+                session.pop("role", None)
+
+                flash("You have been logged out successfully.", "info")
+                return redirect(url_for("index"))
+            else:
+                flash("Invalid username or password.", "error")
+        else:
+            flash("Both username and password are required.", "error")
 
     return render_template("logout.html")
 
@@ -438,6 +579,73 @@ def restaurant_items(restaurant_id):
 
     return render_template('restaurant_items.html', restaurant=restaurant, menu_items=menu_items)
 
+@app.route('/seller_profile')
+def seller_profile():
+    if session.get('role') != 'seller':
+        flash("You do not have permission to access this page.", "error")
+        return redirect(url_for('index'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (session['username'],))
+    user = cursor.fetchone()
+    conn.close()
+
+    return render_template('seller_profile.html', user=user)
+
+@app.route('/update_seller_profile', methods=['POST'])
+def update_seller_profile():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    name = request.form.get('name')
+    email = request.form.get('email')
+    phone_no = request.form.get('phone_no')
+
+    if not all([name, email, phone_no]):
+        flash("All fields are required.", "error")
+        return redirect(url_for('seller_profile'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE users
+        SET name = ?, email = ?, phone_no = ?
+        WHERE username = ?
+        """,
+        (name, email, phone_no, session['username'])
+    )
+    conn.commit()
+    conn.close()
+
+    flash("Profile updated successfully.", "success")
+    return redirect(url_for('seller_profile'))
+
+@app.route('/delete_seller_account', methods=['POST'])
+def delete_seller_account():
+    if 'username' not in session:
+        flash("You need to log in to access this page.", "error")
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM users WHERE username = ?",
+        (session['username'],)
+    )
+    conn.commit()
+    conn.close()
+
+    session.pop('username', None)
+    session.pop('role', None)
+
+    flash("Account deleted successfully.", "success")
+    return redirect(url_for('index'))
+
 ######### Buyer Page ##########
 @app.route('/buyer_home')
 @login_required(role='buyer')
@@ -467,10 +675,50 @@ def confirm_order():
         flash("Your cart is empty.", "error")
         return redirect(url_for("view_cart"))
 
-    session.pop("cart", None)
+    # Calculate the total price of the cart
+    total_price = sum(item["price"] * item["quantity"] for item in cart_items)
 
-    flash("Your order has been confirmed!", "success")
-    return redirect(url_for("index"))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Insert the new order into the orders table
+        cursor.execute(
+            """
+            INSERT INTO orders (buyer_username, restaurant_id, total_price)
+            VALUES (?, ?, ?)
+            """,
+            (session["username"], cart_items[0]["restaurant_id"], total_price)
+        )
+        order_id = cursor.lastrowid
+
+        # Insert each cart item into the order_items table
+        for item in cart_items:
+            cursor.execute(
+                """
+                INSERT INTO order_items (order_id, item_name, price, quantity)
+                VALUES (?, ?, ?, ?)
+                """,
+                (order_id, item["item_name"], item["price"], item["quantity"])
+            )
+
+        conn.commit()
+
+        # Clear the cart after successful order submission
+        session.pop("cart", None)
+
+        flash("Your order has been confirmed!", "success")
+        return redirect(url_for("index"))
+
+    except sqlite3.Error as e:
+        conn.rollback()  # Rollback in case of any errors
+        flash(f"An error occurred: {e}", "error")
+        print(f"SQLite error: {e}")
+
+    finally:
+        conn.close()
+
+    return redirect(url_for("view_cart"))
 
 @app.route("/restaurant/<int:restaurant_id>")
 @login_required(role='buyer')
@@ -587,6 +835,84 @@ def remove_from_cart():
             session.modified = True
 
     return redirect(url_for("view_cart"))
+
+########## ADMIN Page ##########   
+def load_content():
+    """Load content from content.json."""
+    try:
+        with open("content.json", "r") as content_file:
+            return json.load(content_file)
+    except FileNotFoundError:
+        # Return default values if the file does not exist
+        return {
+            "home_content": "",
+            "shop_name": "",
+            "logo": ""
+        }
+    except json.JSONDecodeError:
+        # Handle JSON decoding errors
+        return {
+            "home_content": "",
+            "shop_name": "",
+            "logo": ""
+        }
+
+def save_content(content):
+    """Save content to content.json."""
+    try:
+        with open("content.json", "w") as content_file:
+            json.dump(content, content_file, indent=4)
+    except IOError as e:
+        print(f"Error saving content: {e}")
+
+@app.route("/pageEditor", methods=["GET", "POST"])
+def page_editor():
+    if request.method == "POST":
+        home_content = request.form.get("home_content")
+        shop_name = request.form.get("shop_name")
+        
+        filename = ""
+        if "logo" in request.files:
+            file = request.files["logo"]
+            if file and file.filename != "":
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+        content = {
+            "home_content": home_content,
+            "shop_name": shop_name,
+            "logo": filename
+        }
+        
+        save_content(content)
+        
+        flash("Content updated successfully!")
+        return redirect(url_for("page_editor"))
+    
+    return render_template("pageEditor.html")
+
+@app.route('/change_admin_credentials', methods=['POST'])
+def change_admin_credentials():
+    admin_current_email = request.form.get('admin_current_email')
+    admin_new_email = request.form.get('admin_email')
+    admin_current_password = request.form.get('admin_current_password')
+    admin_new_password = request.form.get('admin_password')
+
+    if admin_current_email == admin_email and admin_current_password == admin_password:
+        if admin_new_email:
+            admin_email = admin_new_email
+        if admin_new_password:
+            admin_password = admin_new_password
+
+        flash("Email and/or password updated successfully!")
+    else:
+        flash("Invalid email or password!")
+
+    admin_data = {"email": admin_email, "password": admin_password}
+    with open("admin.json", "w") as admin_file:
+        json.dump(admin_data, admin_file)
+    
+    return redirect(url_for("page_editor"))
 
 if __name__ == "__main__":
     app.run(debug=True)
