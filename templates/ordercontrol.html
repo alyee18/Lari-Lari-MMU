@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Control</title>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <ul>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/usercontrol">User Control</a></li>
+            <li><a href="/restaurantcontrol">Restaurant Control</a></li>
+            <li><a href="/ordercontrol">Order Control</a></li>
+            <li><a href="/menucontrol">Menu Control</a></li>
+            <li><a href="/pageEditor">Page Editor</a></li>
+            <li><a href="/logout">Log Out</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+      <h2>Order Control</h2>
+      <table>
+          <thead>
+              <tr>
+                  <th>No</th>
+                  <th>Order ID</th>
+                  <th>Buyer</th>
+                  <th>Restaurant</th>
+                  <th>Total Price</th>
+                  <th>Order Date</th>
+                  <th>Action</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for order in orders %}
+              <tr>
+                  <td>{{ loop.index }}</td>
+                  <td>{{ order.id }}</td>
+                  <td>{{ order.buyer_username }}</td>
+                  <td>{{ order.restaurant_name }}</td>
+                  <td>{{ order.total_price }}</td>
+                  <td>{{ order.order_date }}</td>
+                  <td><a href="/updateorderstatus/{{ order.id }}">Update Status</a></td>
+               </tr>
+               {% endfor %}
+           </tbody>
+       </table>
+   </div>
+
+</body>
+</html>

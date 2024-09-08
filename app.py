@@ -26,8 +26,7 @@ def get_tasks(task_type):
     conn.close()
     return tasks
 
-
-########## ADMIN PageEditor ##########   
+######### Admin ##########
 def load_content():
     """Load content from content.json."""
     try:
@@ -62,6 +61,7 @@ def page_editor():
         home_content = request.form.get("home_content")
         shop_name = request.form.get("shop_name")
         
+        # Handle file upload
         filename = ""
         if "logo" in request.files:
             file = request.files["logo"]
@@ -69,16 +69,18 @@ def page_editor():
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
+        # Update content (ensure 'content' is defined or retrieved appropriately)
         content = {
             "home_content": home_content,
             "shop_name": shop_name,
             "logo": filename
         }
         
+        # Save content (define `save_content` function or method)
         save_content(content)
         
         flash("Content updated successfully!")
-        return redirect(url_for("index"))
+        return redirect(url_for("page_editor"))
     
     return render_template("pageEditor.html")
 
@@ -89,11 +91,15 @@ def change_admin_credentials():
     admin_current_password = request.form.get('admin_current_password')
     admin_new_password = request.form.get('admin_password')
 
+    # Example admin credentials validation and update logic
+    # Ensure that the admin credentials are stored securely and hashed properly
     if admin_current_email == admin_email and admin_current_password == admin_password:
         if admin_new_email:
             admin_email = admin_new_email
         if admin_new_password:
             admin_password = admin_new_password
+        # Commit changes to the database here
+        # Example: db.session.commit()
         
         flash("Email and/or password updated successfully!")
     else:
@@ -103,7 +109,220 @@ def change_admin_credentials():
     with open("admin.json", "w") as admin_file:
         json.dump(admin_data, admin_file)
     
-    return redirect(url_for("pageEditor"))
+    return redirect(url_for("page_editor"))
+
+@app.route('/admin-login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if username == 'admin' and password == 'admin':
+            session['logged_in'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return render_template('admin_login.html', error='Invalid username or password.')
+
+    return render_template('admin_login.html')
+
+@app.route('/api/dashboard_data')
+def dashboard_data():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT COUNT(*) FROM orders')
+    num_orders = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM users WHERE role = "runner"')
+    num_runners = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM users WHERE role = "buyer"')
+    num_buyers = cursor.fetchone()[0]
+
+    cursor.execute('SELECT COUNT(*) FROM users WHERE role = "seller"')
+    num_sellers = cursor.fetchone()[0]
+
+    conn.close()
+
+    data = {
+        'num_orders': num_orders,
+        'num_runners': num_runners,
+        'num_buyers': num_buyers,
+        'num_sellers': num_sellers
+    }
+
+    return jsonify(data)
+
+@app.route('/admin')
+def admin_dashboard():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'runner'")
+    num_runners = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'buyer'")
+    num_buyers = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'seller'")
+    num_sellers = cursor.fetchone()[0]
+
+    cursor.execute('SELECT * FROM orders')
+    orders = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('admin.html', num_runners=num_runners, num_buyers=num_buyers, num_sellers=num_sellers, orders=orders)
+    
+@app.route('/usercontrol')
+def user_control():
+    conn = get_db_connection()
+    users = conn.execute('SELECT * FROM users').fetchall()
+    conn.close()
+    return render_template('usercontrol.html', users=users)
+
+@app.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
+def edit_user(user_id):
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+
+    if user is None:
+        flash('User not found.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    if request.method == 'POST':
+        if '_method' in request.form and request.form['_method'] == 'DELETE':
+            # Handle DELETE request
+            conn.execute('DELETE FROM users WHERE id = ?', (user_id,))
+            conn.commit()
+
+            users = conn.execute('SELECT id FROM users ORDER BY id').fetchall()
+            for new_id, user in enumerate(users, start=1):
+                conn.execute('UPDATE users SET id = ? WHERE id = ?', (new_id, user[0]))
+            
+            conn.commit()
+            conn.close()
+            flash('User deleted and IDs renumbered successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            # Handle POST request (update user)
+            username = request.form['username']
+            email = request.form['email']
+            phone_no = request.form['phone_no']
+
+            print(f"Updating user {user_id} with username: {username}, email: {email}, and phone_no: {phone_no}")
+            
+            conn.execute('UPDATE users SET username = ?, email = ?, phone_no = ? WHERE id = ?',
+                         (username, email, phone_no, user_id))
+            conn.commit()
+            conn.close()
+            flash('User updated successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
+    
+    conn.close()
+    return render_template('edit_user.html', user=user)
+
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
+    conn.commit()
+    
+    # Renumber IDs
+    users = conn.execute('SELECT id FROM users ORDER BY id').fetchall()
+    for new_id, user in enumerate(users, start=1):
+        conn.execute('UPDATE users SET id = ? WHERE id = ?', (new_id, user['id']))
+    
+    conn.commit()
+    conn.close()
+
+    flash('User deleted and IDs renumbered successfully!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/menucontrol')
+def menu_control():
+    conn = get_db_connection()
+    menu_items = conn.execute('SELECT * FROM menu_items').fetchall()
+    conn.close()
+    return render_template('menucontrol.html', menu_items=menu_items)
+
+@app.route('/admin/edit_menu_item/<int:item_id>', methods=['GET', 'POST'])
+def edit_menu_item(item_id):
+    conn = get_db_connection()
+    item = conn.execute('SELECT * FROM menu_items WHERE id = ?', (item_id,)).fetchone()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        price = request.form['price']
+        conn.execute('UPDATE menu_items SET name = ?, price = ? WHERE id = ?', (name, price, item_id))
+        conn.commit()
+        conn.close()
+        flash('Menu item updated successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+
+    conn.close()
+    return render_template('edit_menu_item.html', item=item)
+
+@app.route('/ordercontrol')
+def order_control():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT * FROM orders')
+    orders = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('ordercontrol.html', orders=orders)
+
+@app.route('/updateorderstatus/<int:order_id>', methods=('GET', 'POST'))
+def update_order_status(order_id):
+    conn = get_db_connection()
+    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    
+    if request.method == 'POST':
+        status = request.form['status']
+        conn.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id))
+        conn.commit()
+        conn.close()
+        return redirect('/ordercontrol')
+    
+    conn.close()
+    return render_template('update_order_status.html', order=order)
+
+@app.route('/restaurantcontrol')
+def restaurant_control():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, cuisine, price_range FROM restaurants")
+    restaurants = cursor.fetchall()
+    conn.close()
+    print(restaurants)
+
+    return render_template('restaurantcontrol.html', restaurants=restaurants)
+
+@app.route('/admin/edit_restaurant/<int:restaurant_id>', methods=['GET', 'POST'])
+def edit_restaurant(restaurant_id):
+    conn = get_db_connection()
+    restaurant = conn.execute('SELECT * FROM restaurants WHERE id = ?', (restaurant_id,)).fetchone()
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        cuisine = request.form['cuisine']
+        price_range = request.form['price_range']
+        
+        conn.execute('UPDATE restaurants SET name = ?, cuisine = ?, price_range = ? WHERE id = ?',
+                     (name, cuisine, price_range, restaurant_id))
+        conn.commit()
+        conn.close()
+        flash('Restaurant updated successfully!', 'success')
+        return redirect(url_for('restaurant_control'))
+    
+    conn.close()
+    return render_template('edit_restaurant.html', restaurant=restaurant)
 
 
 ######### home ##########
@@ -603,10 +822,10 @@ def seller_progress_tracking():
 @app.route('/seller_orders')
 @login_required(role='seller')
 def seller_orders():
-    restaurant_id = session.get('restaurant_id')  # Get the restaurant_id from the session
+    restaurant_name = session.get('restaurant_name')
 
-    if not restaurant_id:
-        flash("Please select a restaurant.", "error")
+    if not restaurant_name:
+        flash("Restaurant name is missing. Please select a restaurant.", "error")
         return redirect(url_for('seller_home'))
 
     conn = get_db_connection()
@@ -614,12 +833,11 @@ def seller_orders():
 
     try:
         cursor.execute("""
-            SELECT o.id, o.buyer_username, r.name AS restaurant_name, o.item_name, o.total_price, o.quantity, o.order_date, o.order_status
-            FROM orders o
-            JOIN restaurants r ON o.restaurant_id = r.id
-            WHERE o.restaurant_id = ?
-            ORDER BY o.order_date DESC
-        """, (restaurant_id,))
+            SELECT id, buyer_username, item_name, total_price, quantity, order_date, order_status
+            FROM orders
+            WHERE restaurant_name = ?
+            ORDER BY order_date DESC
+        """, (restaurant_name,))
         orders = cursor.fetchall()
     except sqlite3.Error as e:
         flash(f"An error occurred while fetching orders: {e}", "error")
@@ -628,6 +846,7 @@ def seller_orders():
     conn.close()
 
     return render_template('seller_orders.html', orders=orders)
+
 
 @app.route('/update_order_status/<int:order_id>', methods=['POST'])
 @login_required(role='seller')
@@ -737,6 +956,7 @@ def confirm_order():
 
     # Ensure 'order_confirmation' is a valid endpoint
     return redirect(url_for('order_confirmation'))
+
 
 @app.route("/restaurant/<int:restaurant_id>")
 @login_required(role='buyer')

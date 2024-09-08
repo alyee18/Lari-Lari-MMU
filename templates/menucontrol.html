@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Control</title>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <ul>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/usercontrol">User Control</a></li>
+            <li><a href="/restaurantcontrol">Restaurant Control</a></li>
+            <li><a href="/ordercontrol">Order Control</a></li>
+            <li><a href="/menucontrol">Menu Control</a></li>
+            <li><a href="/pageEditor">Page Editor</a></li>
+            <li><a href="/logout">Log Out</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h2>Menu Control</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Restaurant</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in menu_items %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.restaurant_id }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_menu_item', item_id=item.id) }}">Edit</a>
+                        
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
