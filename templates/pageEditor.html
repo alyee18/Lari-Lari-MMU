@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page Editor</title>
+</head>
+<body>
+    <h1>Admin Page Editor</h1>
+    <form id="editor-form" action="/save" method="post" enctype="multipart/form-data">
+        <label for="shop_name">Shop Name:</label><br>
+        <input type="text" id="shop_name" name="shop_name" value="{{ shop_name }}" placeholder="Enter shop name"><br><br>
+
+        <label for="content">Home Page Content:</label><br>
+        <textarea id="content" name="content" rows="10" cols="50" placeholder="Edit your content here...">{{ content }}</textarea><br><br>
+
+        <label for="logo">Upload Logo:</label><br>
+        <input type="file" id="logo" name="logo"><br><br>
+
+        <label for="current_email">Current Email:</label><br>
+        <input type="email" id="current_email" name="current_email" value="{{ current_email }}" placeholder="Current email"><br><br>
+
+        <label for="new_email">New Email:</label><br>
+        <input type="email" id="new_email" name="new_email" placeholder="New email"><br><br>
+
+        <label for="password">Current Password:</label><br>
+        <input type="password" id="password" name="password" placeholder="Enter password"><br><br>
+
+        <label for="password">New Password:</label><br>
+        <input type="password" id="password" name="password" placeholder="Enter password"><br><br>
+
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>
