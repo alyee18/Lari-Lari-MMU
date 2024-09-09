@@ -39,27 +39,33 @@
                 </tr>
             </thead>
             <tbody>
+                {% if orders %}
                 {% for order in orders %}
-                <tr>
-                    <td>{{ order.id }}</td>
-                    <td>{{ order.buyer_username }}</td>
-                    <td>{{ order.restaurant_name }}</td>
-                    <td>{{ order.total_price }}</td>
-                    <td>{{ order.order_status }}</td>
-                    <td>{{ order.order_date }}</td>
-                    <td>
-                        <!-- Form to update order status -->
-                        <form method="POST" action="{{ url_for('update_order_status', order_id=order.id) }}">
-                            <select name="order_status">
-                                <option value="pending" {% if order.order_status == 'pending' %}selected{% endif %}>Pending</option>
-                                <option value="completed" {% if order.order_status == 'completed' %}selected{% endif %}>Completed</option>
-                                <option value="canceled" {% if order.order_status == 'canceled' %}selected{% endif %}>Canceled</option>
-                            </select>
-                            <button type="submit">Update Status</button>
-                        </form>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.buyer_username }}</td>
+                        <td>{{ order.restaurant_name }}</td>
+                        <td>{{ order.item_name }}</td>
+                        <td>{{ order.total_price }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>{{ order.order_date }}</td>
+                        <td>{{ order.order_status }}</td>
+                        <td>
+                            <!-- Form to update order status -->
+                            <form method="POST" action="{{ url_for('update_order_status', order_id=order.id) }}">
+                                <select name="order_status">
+                                    <option value="pending" {% if order.order_status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="completed" {% if order.order_status == 'completed' %}selected{% endif %}>Completed</option>
+                                    <option value="canceled" {% if order.order_status == 'canceled' %}selected{% endif %}>Canceled</option>
+                                </select>
+                                <button type="submit">Update Status</button>
+                            </form>
+                        </td>
+                    </tr>
                 {% endfor %}
+            {% else %}
+                <tr><td colspan="8">No orders found for this restaurant.</td></tr>
+            {% endif %}
             </tbody>
         </table>
     </div>
