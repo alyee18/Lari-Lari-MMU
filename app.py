@@ -328,7 +328,15 @@ def edit_restaurant(restaurant_id):
 ######### home ##########
 @app.route("/")
 def index():
-    return render_template("index.html")
+    content = load_content()
+    print("Loaded Content:", content)  # Debugging output
+    logo_url = url_for('static', filename='uploads/' + content["logo"]) if content["logo"] else None
+    return render_template("index.html", 
+                           home_content=content["home_content"], 
+                           shop_name=content["shop_name"], 
+                           logo_url=logo_url)
+
+    
 
 ######### Runner ##########
 @app.route('/runner_home')
