@@ -1153,7 +1153,7 @@ def buyer_orders():
     try:
         # Fetch orders with correct schema
         cursor.execute("""
-            SELECT orders.id, orders.restaurant_name, orders.total_price, orders.order_status, orders.order_date
+            SELECT orders.id, orders.restaurant_name, orders.item_name, orders.total_price,orders.order_status, orders.order_date
             FROM orders
             WHERE orders.buyer_username = ?
             ORDER BY orders.order_date DESC
