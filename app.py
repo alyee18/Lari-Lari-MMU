@@ -1,7 +1,9 @@
 from flask import Flask, render_template, redirect, url_for, session, flash, request, jsonify
 import json
 import sqlite3
+import os
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from functools import wraps
 
 app = Flask(__name__)
@@ -241,6 +243,76 @@ def edit_restaurant(restaurant_id):
     
     conn.close()
     return render_template('edit_restaurant.html', restaurant=restaurant)
+
+@app.route("/pageEditor", methods=["GET","POST"])
+def page_Editor():
+    home_content = request.form.get('home_content')
+    shop_name = request.form.get('shop_name')
+    
+    if request.method == "POST":
+        home_content = request.form.get("home_content")
+        shop_name = request.form.get("shop_name")
+        logo = request.form.get("logo")
+
+        filename = ""
+        if "logo" in request.files:
+            file = request.files["logo"] 
+            if file.filename != "":
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"],filename))
+
+        content.update(
+            {
+                "home_content": home_content,
+                "shop_name": shop_name,
+                "logo": logo
+            }
+        )
+
+        save_content(content)
+
+    return render_template("pageEditor.html", content=content)
+# Load content from content.json if it exists
+if os.path.exists('content.json'):
+    with open('content.json', 'r') as file:
+        content = json.load(file)
+else:
+    # Default content if the file doesn't exist
+    content = {
+        "home_content": "Welcome to our shop!",
+        "shop_name": "My Awesome Shop",
+        "logo": "default_logo.png"
+    }
+
+# Function to save the content back to content.json
+def save_content(content):
+    with open('content.json', 'w') as file:
+        json.dump(content, file)
+
+@app.route('/change_admin_credentials', methods=['POST'])
+def change_admin_credentials():
+    admin_current_email = request.form.get('admin_current_email')
+    admin_new_email = request.form.get('admin_email')
+    admin_current_password = request.form.get('admin_current_password')
+    admin_new_password = request.form.get('admin_password')
+    admin_email = request.form.get("admin_email")
+    admin_password = request.form.get("admin_password")
+
+    if admin_email == admin_current_email and admin_password == admin_current_password:
+        if admin_new_email:
+            admin_email = admin_new_email
+        if admin_new_password:
+            admin_password = admin_new_password
+        db.session.commit()
+        flash("Email and/or password updated successfully!")
+    else:
+        flash("Invalid email or password!")
+
+    admin_data = {"email": admin_email, "password": admin_password}
+    with open("admin.json", "w") as admin_file:
+        json.dump(admin_data, admin_file)
+    
+    return redirect("pageEditor")
 
 
 ######### home ##########
