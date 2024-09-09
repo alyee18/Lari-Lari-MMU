@@ -937,7 +937,7 @@ def confirm_order():
                 INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity)
                 VALUES (?, ?, ?, ?, ?)
                 """,
-                (session["username"], restaurant_name, item["item_name"], item["price"], item["quantity"])
+                (session["username"], restaurant_name, item["item_name"], total_price, item["quantity"])
             )
 
         conn.commit()
