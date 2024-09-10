@@ -2,6 +2,8 @@ from flask import Flask, render_template, redirect, url_for, session, flash, req
 import os
 import json
 import sqlite3
+import logging
+logging.basicConfig(level=logging.DEBUG)
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -26,7 +28,7 @@ def get_tasks(task_type):
     conn.close()
     return tasks
 
-######### Admin ##########
+######### Admin Page Editor##########
 def load_content():
     """Load content from content.json."""
     try:
@@ -111,6 +113,7 @@ def change_admin_credentials():
     
     return redirect(url_for("page_editor"))
 
+######### Admin ##########
 @app.route('/admin-login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
@@ -338,13 +341,139 @@ def runner_home():
         return redirect(url_for('index'))
     return render_template('runner_home.html')
 
+@app.route('/runner_tasks/<runner_name>/<task_type>')
+def runner_tasks(runner_name, task_type):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if task_type in ['available', 'current', 'completed']:
+        cursor.execute(
+            """
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, runner_name
+            FROM orders
+            WHERE order_status = ? AND (runner_name = ? OR runner_name IS NULL)
+            """,
+            (task_type, runner_name)
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, runner_name
+            FROM orders
+            WHERE runner_name = ?
+            """,
+            (runner_name,)
+        )
+
+    tasks = cursor.fetchall()
+    
+    cursor.execute("SELECT username FROM users WHERE role = 'runner'")
+    runners = cursor.fetchall()
+
+    conn.close()
+    return render_template('runner_tasks.html', task_type=task_type, tasks=tasks)
+
+@app.route('/place_order', methods=['POST'])
+def place_order():
+    buyer_username = request.form['buyer_username']
+    restaurant_name = request.form['restaurant_name']
+    item_name = request.form['item_name']
+    total_price = float(request.form['total_price'])
+    quantity = int(request.form['quantity'])
+    order_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity, order_status, order_date)
+        VALUES (?, ?, ?, ?, ?, 'available', ?)
+        """,
+        (buyer_username, restaurant_name, item_name, total_price, quantity, order_date)
+    )
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('order_confirmation'))
+
+
+@app.route('/accept_order/<int:order_id>', methods=['POST'])
+def accept_order(order_id):
+    runner_name = request.form.get('runner_name')
+    logging.debug(f"Attempting to accept order ID {order_id} for runner {runner_name}")
+
+    if not runner_name:
+        return "Runner name is required", 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+    """
+    UPDATE orders
+    SET order_status = 'current', runner_name = ?
+    WHERE id = ?
+    """,
+    (runner_name, order_id)
+)
+
+    conn.commit()
+    conn.close()
+    return redirect(url_for('task_management', task_type='current'))
+
+@app.route('/complete_order/<int:order_id>', methods=['POST'])
+def complete_order(order_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(
+    """
+    UPDATE orders
+    SET order_status = 'completed'
+    WHERE id = ?
+    """,
+    (order_id,)
+)
+
+    conn.commit()
+    conn.close()
+    return redirect(url_for('task_management', task_type='completed'))
+
 @app.route('/task_management/<task_type>')
 def task_management(task_type):
-    task_list = get_tasks(task_type)
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    task_list = [{'id': task['id'], 'description': task['description']} for task in task_list]
+    runner_name = session.get('username')
 
-    return render_template('task_management.html', tasks=task_list, task_type=task_type)
+    if task_type in ['available', 'current', 'completed']:
+        cursor.execute(
+            """
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, runner_name, order_status
+            FROM orders
+            WHERE order_status = ? AND (runner_name = ? OR runner_name IS NULL)
+            """,
+            (task_type, runner_name)
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, runner_name, order_status
+            FROM orders
+            WHERE runner_name = ?
+            """,
+            (runner_name,)
+        )
+
+    tasks = cursor.fetchall()
+
+    cursor.execute("SELECT username FROM users WHERE role = 'runner'")
+    runners = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('task_management.html', task_type=task_type, tasks=tasks, runners=runners)
 
 @app.route('/progress_tracking')
 def progress_tracking():

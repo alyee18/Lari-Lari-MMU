@@ -55,19 +55,46 @@
           </ul>
         </nav>
       </div>
-    <div class="container">
+      <div class="container">
         <div class="task-section">
-            <h2>{{ task_type.replace('_', ' ').title() }}</h2>
-            {% if tasks %}
-                <ul>
-                    {% for task in tasks %}
-                        <li class="task-item">{{ task.description }}</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No tasks available.</p>
-            {% endif %}
-        </div>
+          <h2>{{ task_type.replace('_', ' ').title() }}</h2>
+          {% if tasks %}
+              <ul>
+                  {% for task in tasks %}
+                      <li class="task-item">
+                          Order ID: {{ task.id }}
+                          <br>Item: {{ task.item_name }} from {{ task.restaurant_name }}
+                          <br>Total Price: {{ task.total_price }}
+                          <br>Quantity: {{ task.quantity }}
+                          <br>Buyer: {{ task.buyer_username }}
+                          <br>Order Date: {{ task.order_date }}
+                          <br>Assigned to: {{ task.runner_name if task.runner_name else 'Not yet assigned' }}
+      
+                          {% if task.order_status == 'available' %}
+                              
+                              <form action="{{ url_for('accept_order', order_id=task.id) }}" method="post">
+                                <label for="runner_name">Assign to Runner:</label>
+                                <select name="runner_name" id="runner_name">
+                                    {% for runner in runners %}
+                                        <option value="{{ runner.username }}">{{ runner.username }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit">Accept Order</button>
+                              </form>                            
+                        {% elif task.order_status == 'current' %}
+                              
+                              <form action="{{ url_for('complete_order', order_id=task.id) }}" method="post">
+                                <button type="submit">Complete</button>
+                            </form>
+                        {% endif %}
+                      </li>
+                  {% endfor %}
+              </ul>
+          {% else %}
+              <p>No tasks available.</p>
+          {% endif %}
+      </div>      
     </div>
+</div>
 </body>
 </html>

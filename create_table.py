@@ -51,18 +51,6 @@ def createtables():
         """
         )
 
-        # Create tasks table
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS tasks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                task_type TEXT NOT NULL,
-                description TEXT NOT NULL,
-                status TEXT NOT NULL
-            )
-            """
-        )
-
          # Create the orders table
         cursor.execute(
             """
@@ -74,7 +62,8 @@ def createtables():
                 total_price REAL NOT NULL,
                 quantity INTEGER NOT NULL,
                 order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-                order_status TEXT DEFAULT 'pending'
+                order_status TEXT DEFAULT 'available',
+                runner_name TEXT
             )
             """
         )
