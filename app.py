@@ -475,6 +475,55 @@ def task_management(task_type):
 
     return render_template('task_management.html', task_type=task_type, tasks=tasks, runners=runners)
 
+# Runner Location Endpoint #
+@app.route('/update_runner_location', methods=['POST'])
+def update_runner_location():
+    runner_username = request.form['runner_username']
+    latitude = request.form['latitude']
+    longitude = request.form['longitude']
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(
+        """
+        UPDATE runners
+        SET latitude = ?, longitude = ?
+        WHERE username = ?
+        """,
+        (latitude, longitude, runner_username)
+    )
+    
+    conn.commit()
+    conn.close()
+    
+    return "Location updated", 200
+
+# Buyer tracking runner endpoint #
+@app.route('/get_runner_location/<int:order_id>')
+def get_runner_location(order_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(
+        """
+        SELECT r.latitude, r.longitude
+        FROM orders o
+        JOIN runners r ON o.runner_name = r.username
+        WHERE o.id = ?
+        """,
+        (order_id,)
+    )
+    
+    runner_location = cursor.fetchone()
+    conn.close()
+    
+    if runner_location:
+        return jsonify({'latitude': runner_location[0], 'longitude': runner_location[1]})
+    else:
+        return jsonify({'latitude': None, 'longitude': None}), 404
+
+
 @app.route('/progress_tracking')
 def progress_tracking():
     return render_template('progress_tracking.html')
