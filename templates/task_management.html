@@ -68,7 +68,6 @@
                           <br>Quantity: {{ task.quantity }}
                           <br>Buyer: {{ task.buyer_username }}
                           <br>Order Date: {{ task.order_date }}
-                          <br>Assigned to: {{ task.runner_name if task.runner_name else 'Not yet assigned' }}
       
                           {% if task.order_status == 'available' %}
                               

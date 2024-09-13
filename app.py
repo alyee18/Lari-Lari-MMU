@@ -1000,57 +1000,45 @@ def seller_progress_tracking():
 @app.route('/seller_orders')
 @login_required(role='seller')
 def seller_orders():
-    restaurant_name = session.get('restaurant_name')
-
-    if not restaurant_name:
-        flash("Restaurant name is missing. Please select a restaurant.", "error")
-        return redirect(url_for('seller_home'))
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        # Fetch all orders for the seller's restaurant
         cursor.execute("""
-            SELECT id, buyer_username, item_name, total_price, quantity, order_date, order_status
+            SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, order_status, status
             FROM orders
-            WHERE restaurant_name = ?
             ORDER BY order_date DESC
-        """, (restaurant_name,))
+        """)
         orders = cursor.fetchall()
+        print(f"Orders fetched: {orders}")
+        
     except sqlite3.Error as e:
-        flash(f"An error occurred while fetching orders: {e}", "error")
         orders = []
-
-    conn.close()
+        print(f"Database error: {e}")
+    finally:
+        conn.close()
 
     return render_template('seller_orders.html', orders=orders)
 
-
-@app.route('/update_order_status/<int:order_id>', methods=['POST'])
+@app.route('/update_seller_order_status/<int:order_id>', methods=['POST'])
 @login_required(role='seller')
-def update_order_status_handler(order_id):
-    new_status = request.form.get('order_status')
-
-    if new_status not in ['pending', 'completed', 'canceled']:
-        flash("Invalid status.", "error")
-        return redirect(url_for('seller_orders'))
+def update_seller_order_status(order_id):
+    new_status = request.form['status']
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        cursor.execute(
-            """
+        # Update the status of the order
+        cursor.execute("""
             UPDATE orders
-            SET order_status = ?
+            SET status = ?
             WHERE id = ?
-            """,
-            (new_status, order_id)
-        )
+        """, (new_status, order_id))
         conn.commit()
-        flash("Order status updated successfully!", "success")
     except sqlite3.Error as e:
-        flash(f"An error occurred: {e}", "error")
+        print(f"Error updating order status: {e}")
     finally:
         conn.close()
 
@@ -1093,45 +1081,44 @@ def order_confirmation():
 def confirm_order():
     conn = None
     try:
-        print("Confirm Order route accessed")
         cart_items = session.get('cart', [])
-        print(f"Cart items: {cart_items}")
 
         if not cart_items:
             flash("Cart is empty. Please add items before confirming the order.", "error")
             return redirect(url_for('view_cart'))
 
-        restaurant_id = cart_items[0].get("restaurant_id")
-        total_price = sum(float(item.get('price', 0)) * int(item.get('quantity', 1)) for item in cart_items)
-        print(f"Total price: {total_price}")
-
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Fetch the restaurant name from the database using restaurant_id
-        cursor.execute("SELECT name FROM restaurants WHERE id = ?", (restaurant_id,))
-        restaurant_row = cursor.fetchone()
-
-        if not restaurant_row:
-            flash("Restaurant not found.", "error")
-            return redirect(url_for('view_cart'))
-
-        restaurant_name = restaurant_row[0]
-        print(f"Restaurant name from DB: {restaurant_name}")
-
-        # Insert the order into the orders table
+        # Insert each item as a separate order with its correct restaurant name
         for item in cart_items:
+            restaurant_id = item.get("restaurant_id")
+            item_name = item.get("item_name")
+            quantity = int(item.get("quantity", 1))
+            price = float(item.get("price", 0))
+            item_total_price = price * quantity
+
+            # Fetch the restaurant name based on restaurant_id
+            cursor.execute("SELECT name FROM restaurants WHERE id = ?", (restaurant_id,))
+            restaurant_row = cursor.fetchone()
+
+            if not restaurant_row:
+                flash(f"Restaurant not found for item {item_name}.", "error")
+                return redirect(url_for('view_cart'))
+
+            restaurant_name = restaurant_row[0]  # Get the restaurant name
+
+            # Insert the order with the correct restaurant name
             cursor.execute(
                 """
                 INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity)
                 VALUES (?, ?, ?, ?, ?)
                 """,
-                (session["username"], restaurant_name, item["item_name"], total_price, item["quantity"])
+                (session["username"], restaurant_name, item_name, item_total_price, quantity)
             )
 
         conn.commit()
-        flash("Order confirmed successfully!", "success")
-        session.pop('cart', None)
+        session.pop('cart', None)  # Clear the cart after order confirmation
 
     except sqlite3.Error as e:
         if conn:
@@ -1143,9 +1130,7 @@ def confirm_order():
         if conn:
             conn.close()
 
-    # Ensure 'order_confirmation' is a valid endpoint
     return redirect(url_for('order_confirmation'))
-
 
 @app.route("/restaurant/<int:restaurant_id>")
 @login_required(role='buyer')
@@ -1340,9 +1325,9 @@ def buyer_orders():
     cursor = conn.cursor()
 
     try:
-        # Fetch orders with correct schema
+        # Fetch orders for the current buyer, including the restaurant name
         cursor.execute("""
-            SELECT orders.id, orders.restaurant_name, orders.item_name,orders.total_price,orders.order_status, orders.order_date
+            SELECT orders.id, orders.restaurant_name, orders.item_name, orders.total_price, orders.order_status, orders.order_date
             FROM orders
             WHERE orders.buyer_username = ?
             ORDER BY orders.order_date DESC
