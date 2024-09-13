@@ -822,16 +822,28 @@ def seller_progress_tracking():
 @app.route('/seller_orders')
 @login_required(role='seller')
 def seller_orders():
-    restaurant_name = session.get('restaurant_name')
+    # Assuming the session stores 'restaurant_id', change if you store 'restaurant_name'
+    restaurant_id = session.get('restaurant_id')
 
-    if not restaurant_name:
-        flash("Restaurant name is missing. Please select a restaurant.", "error")
+    if not restaurant_id:
+        flash("Restaurant ID is missing. Please select a restaurant.", "error")
         return redirect(url_for('seller_home'))
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        # Fetch the restaurant name using restaurant_id
+        cursor.execute("SELECT name FROM restaurants WHERE id = ?", (restaurant_id,))
+        restaurant_row = cursor.fetchone()
+
+        if not restaurant_row:
+            flash("Restaurant not found.", "error")
+            return redirect(url_for('seller_home'))
+
+        restaurant_name = restaurant_row[0]
+
+        # Fetch orders for the seller's restaurant
         cursor.execute("""
             SELECT id, buyer_username, item_name, total_price, quantity, order_date, order_status
             FROM orders
@@ -842,11 +854,10 @@ def seller_orders():
     except sqlite3.Error as e:
         flash(f"An error occurred while fetching orders: {e}", "error")
         orders = []
-
-    conn.close()
+    finally:
+        conn.close()
 
     return render_template('seller_orders.html', orders=orders)
-
 
 @app.route('/update_order_status/<int:order_id>', methods=['POST'])
 @login_required(role='seller')
@@ -967,7 +978,6 @@ def confirm_order():
 
     # Ensure 'order_confirmation' is a valid endpoint
     return redirect(url_for('order_confirmation'))
-
 
 @app.route("/restaurant/<int:restaurant_id>")
 @login_required(role='buyer')
