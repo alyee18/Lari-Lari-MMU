@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Order Details</title>
+</head>
+<body>
+    <h2>Order Details</h2>
+
+    <div class="order-summary">
+        <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <p><strong>Buyer Username:</strong> {{ order.buyer_username}}</p>
+        <p><strong>Restaurant Name:</strong> {{ order.restaurant_name }}</p>
+        <p><strong>Item Name:</strong> {{ order.item_name }}</p>
+        <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+        <p><strong>Total Price:</strong> {{ order.total_price }}</p>
+        <p><strong>Order Date:</strong> {{ order.order_date }}</p>
+
+        {% if order.runner_name %}
+        <p><strong>Runner Name:</strong> {{ order.runner_name }}</p>
+        {% endif %}
+
+        {% if order.order_status == 'picked up' %}
+        <p class="status-message">Runner is delivering your order</p>
+        {% elif order.order_status == 'completed' %}
+        <p class="status-message">Your order is successfully completed</p>
+        {% elif order.status == 'preparing' %}
+        <p class="status-message">Seller is preparing your food</p>
+        {% elif order.status == 'delivered' %}
+        <p class="status-message">Your food is ready for runner to pick up</p>
+        {% else %}
+            <p class="status-message">Order status: {{ order.status }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>

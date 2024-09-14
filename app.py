@@ -444,26 +444,25 @@ def complete_order(order_id):
 def task_management(task_type):
     conn = get_db_connection()
     cursor = conn.cursor()
-
     runner_name = session.get('username')
 
-    if task_type in ['available', 'current', 'completed']:
+    if task_type == 'current':
         cursor.execute(
             """
-            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, runner_name, order_status
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, status, order_status
             FROM orders
-            WHERE order_status = ? AND (runner_name = ? OR runner_name IS NULL)
+            WHERE order_status = 'current' AND (runner_name IS NULL OR runner_name = ?)
             """,
-            (task_type, runner_name)
+            (runner_name,)
         )
     else:
         cursor.execute(
             """
-            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, runner_name, order_status
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, status, order_status
             FROM orders
-            WHERE runner_name = ?
+            WHERE order_status = ? AND (runner_name IS NULL OR runner_name = ?)
             """,
-            (runner_name,)
+            (task_type, runner_name)
         )
 
     tasks = cursor.fetchall()
@@ -475,54 +474,36 @@ def task_management(task_type):
 
     return render_template('task_management.html', task_type=task_type, tasks=tasks, runners=runners)
 
-# Runner Location Endpoint #
-@app.route('/update_runner_location', methods=['POST'])
-def update_runner_location():
-    runner_username = request.form['runner_username']
-    latitude = request.form['latitude']
-    longitude = request.form['longitude']
-    
+@app.route('/pickuped_order/<int:order_id>', methods=['POST'])
+def pickuped_order(order_id):
     conn = get_db_connection()
     cursor = conn.cursor()
-    
-    cursor.execute(
-        """
-        UPDATE runners
-        SET latitude = ?, longitude = ?
-        WHERE username = ?
-        """,
-        (latitude, longitude, runner_username)
-    )
-    
-    conn.commit()
-    conn.close()
-    
-    return "Location updated", 200
 
-# Buyer tracking runner endpoint #
-@app.route('/get_runner_location/<int:order_id>')
-def get_runner_location(order_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute(
-        """
-        SELECT r.latitude, r.longitude
-        FROM orders o
-        JOIN runners r ON o.runner_name = r.username
-        WHERE o.id = ?
-        """,
-        (order_id,)
-    )
-    
-    runner_location = cursor.fetchone()
-    conn.close()
-    
-    if runner_location:
-        return jsonify({'latitude': runner_location[0], 'longitude': runner_location[1]})
-    else:
-        return jsonify({'latitude': None, 'longitude': None}), 404
+    try:
+        cursor.execute("SELECT status, order_status FROM orders WHERE id = ?", (order_id,))
+        result = cursor.fetchone()
 
+        if result:
+            current_status, order_status = result
+
+            if order_status == 'current' and current_status == 'delivered':
+                cursor.execute("UPDATE orders SET status = 'picked up', runner_name = ? WHERE id = ?", (session['username'], order_id))
+                conn.commit()
+                flash('Order successfully picked up.', 'success')
+            else:
+                flash('Order cannot be picked up (incorrect status).', 'error')
+        else:
+            flash('Order not found.', 'error')
+
+    except sqlite3.Error as e:
+        print(f"Error picking up order: {e}")
+        conn.rollback()
+        flash('An unexpected error occurred while picking up the order.', 'error')
+
+    finally:
+        conn.close()
+
+    return redirect(url_for('task_management', task_type='current'))
 
 @app.route('/progress_tracking')
 def progress_tracking():
@@ -1030,7 +1011,6 @@ def update_seller_order_status(order_id):
     cursor = conn.cursor()
 
     try:
-        # Update the status of the order
         cursor.execute("""
             UPDATE orders
             SET status = ?
@@ -1344,6 +1324,26 @@ def buyer_orders():
         conn.close()
 
     return render_template('buyer_orders.html', orders=orders)
+
+@app.route('/buyer_order_details/<int:order_id>', methods=['GET'])
+def buyer_order_details(order_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, status, order_status, runner_name
+        FROM orders 
+        WHERE id = ?
+    """
+    cursor.execute(query, (order_id,))
+    order = cursor.fetchone()
+    conn.close()
+
+    if order is None:
+        return redirect(url_for('buyer_orders'))
+    
+    return render_template('buyer_order_details.html', order=order)
 
 if __name__ == "__main__":
     app.run(debug=True)

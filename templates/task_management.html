@@ -4,10 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Management</title>
-    
 </head>
 <body>
     <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
         <nav class="nav-bar">
           <ul class="nav-links">
             <li class="nav-link">
@@ -54,46 +62,52 @@
             </li>
           </ul>
         </nav>
-      </div>
-      <div class="container">
-        <div class="task-section">
-          <h2>{{ task_type.replace('_', ' ').title() }}</h2>
-          {% if tasks %}
-              <ul>
-                  {% for task in tasks %}
-                      <li class="task-item">
-                          Order ID: {{ task.id }}
-                          <br>Item: {{ task.item_name }} from {{ task.restaurant_name }}
-                          <br>Total Price: {{ task.total_price }}
-                          <br>Quantity: {{ task.quantity }}
-                          <br>Buyer: {{ task.buyer_username }}
-                          <br>Order Date: {{ task.order_date }}
-      
-                          {% if task.order_status == 'available' %}
-                              
-                              <form action="{{ url_for('accept_order', order_id=task.id) }}" method="post">
-                                <label for="runner_name">Assign to Runner:</label>
-                                <select name="runner_name" id="runner_name">
-                                    {% for runner in runners %}
-                                        <option value="{{ runner.username }}">{{ runner.username }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit">Accept Order</button>
-                              </form>                            
-                        {% elif task.order_status == 'current' %}
-                              
-                              <form action="{{ url_for('complete_order', order_id=task.id) }}" method="post">
-                                <button type="submit">Complete</button>
-                            </form>
-                        {% endif %}
-                      </li>
-                  {% endfor %}
-              </ul>
-          {% else %}
-              <p>No tasks available.</p>
-          {% endif %}
-      </div>      
     </div>
-</div>
+    <div class="container">
+        <div class="task-section">
+            <h2>{{ task_type.replace('_', ' ').title() }}</h2>
+            {% if tasks %}
+                <ul>
+                    {% for task in tasks %}
+                        <li class="task-item">
+                            Order ID: {{ task.id }}
+                            <br>Item: {{ task.item_name }} from {{ task.restaurant_name }}
+                            <br>Total Price: {{ task.total_price }}
+                            <br>Quantity: {{ task.quantity }}
+                            <br>Buyer: {{ task.buyer_username }}
+                            <br>Order Date: {{ task.order_date }}
+
+                            {% if task.order_status == 'available' %}
+                                <form action="{{ url_for('accept_order', order_id=task.id) }}" method="post">
+                                    <label for="runner_name">Assign to Runner:</label>
+                                    <select name="runner_name" id="runner_name">
+                                        {% for runner in runners %}
+                                            <option value="{{ runner.username }}">{{ runner.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit">Accept Order</button>
+                                </form>
+                            {% elif task.order_status == 'current' %}
+                                {% if task.status == 'delivered' %}
+                                    <form action="{{ url_for('pickuped_order', order_id=task.id) }}" method="post">
+                                        <button type="submit">Pickup</button>
+                                    </form>
+                                {% endif %}
+                                {% if task.status == 'picked up' %}
+                                    <form action="{{ url_for('complete_order', order_id=task.id) }}" method="post">
+                                        <button type="submit">Complete</button>
+                                    </form>
+                                {% endif %}
+                            {% elif task.order_status == 'completed' %}
+                                <p class="status-message">Your order is successfully completed</p>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tasks available.</p>
+            {% endif %}
+        </div>
+    </div>
 </body>
 </html>
