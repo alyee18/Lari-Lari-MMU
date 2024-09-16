@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LariLariMMU Website</title>
-    <link rel="stylesheet" type="text/css" href="../static/style.css">
+    <link rel="stylesheet" type="text/css" href="../static/style(Buyer).css">
 
     <!-- box-icon-link -->
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
@@ -15,7 +15,7 @@
     <!-- google-font-link -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
 
     <!-- aos-animation-link -->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
@@ -61,23 +61,23 @@
             </ul>
         </nav>
 
-        <!-- TOPIC -->    
-        <section class="topic">
-            <div class="topic-text">
-                <h5 data-aos="fade-right" data-aos-duration="1500"> #Welcome to the Restaurant Finder </h5>
-                <h1 data-aos="zoom-in-left" data-aos-duration="1800" data-aos-delay="200">LARI LARI MMU</h1>
-                <p data-aos="fade-right" data-aos-duration="1700" data-aos-delay="300"> YOO YOO YOO wanna find something tasty??<br> Here LARI LARI MMU is the best choice for you !!</p>
-                
-                <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
-                    <a href="{{ url_for('restaurant_list') }}" class="order-now-link">Order Now</a>
-                </div>
+<!--------------------------TOPIC---------------------------------------------------->     
+    <section class="topic">
+        <div class="topic-text">
+            <h5 data-aos="fade-right" data-aos-duration="1500"> #Welcome to the Restaurant Finder </h5>
+            <h1 data-aos="zoom-in-left" data-aos-duration="1800" data-aos-delay="200">LARI LARI MMU</h1>
+            <p data-aos="fade-right" data-aos-duration="1700" data-aos-delay="300"> YOO YOO YOO wanna find something tasty??<br> Here LARI LARI MMU is the best choice for you !!</p>
+            
+            <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
+                    <a href="{{ url_for('restaurant_list') }}" class="button">Order Now</a>
             </div>
-        </section>
-    </div>
+            </div>
+        </div>
+    </section>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
-        AOS.init({offset: 1});
+        AOS.init({offset: 1,});
     </script>
     
 </body>
