@@ -89,17 +89,21 @@
     height:100vh;
     align-items: center;
     display: grid;
+    
  }
- .topic-text h1{
-    font-size: var(--big-font);
-    font-weight: 700;
-    margin: 15px 0;
- }
- .topic-text h5{
-    font-size: 18px;
-    font-weight: 300;
-    letter-spacing: 1px;
- }
+.topic-text h1{
+   font-size: 6.6rem;
+   font-weight: 700;
+   margin: 15px 0;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+.topic-text h5{
+   font-size: 18px;
+   font-weight: 300;
+   letter-spacing: 1px;
+}
  .topic-text p{
     font-size: var(--p-font);
     font-weight: 350;
@@ -108,7 +112,7 @@
     line-height: 32px;
     color: var(--text-color);
     margin-bottom: 70px;
- }
+}
  .main-topic{
     display: flex;
     align-items: center;

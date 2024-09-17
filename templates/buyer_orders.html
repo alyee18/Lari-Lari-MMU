@@ -2,11 +2,23 @@
 <html lang="en">
 <head>
     <title>Order History</title>
+    <link rel="stylesheet" type="text/css" href="../static/style(BP).css">
+    
+    <!--------------------------box-icon-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
-
-    <h2>Your Order History</h2>
-
     <div class="container">
         <nav class="nav-bar">
             <ul class="nav-links">
@@ -35,7 +47,7 @@
                 
                 <li class="nav-link">
                     <a href="{{ url_for('buyer_orders') }}" class="dropbtn">Orders History
-                    <i class='bx bx-user'></i>
+                    <i class="ri-file-list-3-line"></i>
                     </a>
                 </li>
 
@@ -46,32 +58,37 @@
                 </li>
             </ul>
         </nav>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Restaurant</th>
-                    <th>Order Items</th>
-                    <th>Total Price</th>
-                    <th>Order Status</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>{{ order.id }}</td>
-                    <td>{{ order.restaurant_name }}</td>
-                    <td>{{ order.item_name }}</td> 
-                    <td>{{ order.total_price }}</td>
-                    <td>{{ order.order_status }}</td>
-                    <td>{{ order.order_date }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
-
+        <div class="table">
+            <div class="table-header">
+                <h2>Your Order History</h2>
+            </div>
+            <div class="table-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Restaurant</th>
+                            <th>Order Items</th>
+                            <th>Total Price</th>
+                            <th>Order Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.restaurant_name }}</td>
+                            <td>{{ order.item_name }}</td> 
+                            <td>{{ order.total_price }}</td>
+                            <td>{{ order.order_status }}</td>
+                            <td>{{ order.order_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 </body>
 </html>

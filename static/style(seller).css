@@ -41,7 +41,7 @@ h1{
     margin: 20px auto;
     margin-top: 40px;
     margin-bottom: 20px;
-
+    overflow: hidden;
 }
 .nav-links{
     display:flex;

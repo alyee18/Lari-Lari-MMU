@@ -29,34 +29,24 @@
                     <i class='bx bx-home'></i>
                 </li>
 
-                <li class="nav-link profile">
-                    <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking
+                <li class="nav-link">
+                    <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking</a>
                     <i class='bx bx-list-check'></i>
-                    <span class="dropdown-icon">
-                        <i class='bx bx-chevron-down'></i>
-                    </span>
-                    </a>
-                    <ul class="dropdown-content">
-                        <li><a href="{{ url_for('progress_tracking') }}">Real Time Tracking</a></li>
-                    </ul>
                 </li>
 
                 <li class="nav-link">
-                    <a href="{{ url_for('buyer_profile') }}" class="dropbtn">Profile
+                    <a href="{{ url_for('buyer_profile') }}" class="dropbtn">Profile</a>
                     <i class='bx bx-user'></i>
-                    </a>
                 </li>
                 
                 <li class="nav-link">
-                    <a href="{{ url_for('buyer_orders') }}" class="dropbtn">Orders History
-                    <i class='bx bx-user'></i>
-                    </a>
+                    <a href="{{ url_for('buyer_orders') }}" class="dropbtn">Orders History</a>
+                    <i class="ri-file-list-3-line"></i>
                 </li>
 
                 <li class="nav-link">
-                    <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
-                    <i class='bx bx-log-out'></i>
-                    </a>
+                    <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT</a>
+                    <i class='bx bx-log-out'></i>  
                 </li>
             </ul>
         </nav>
