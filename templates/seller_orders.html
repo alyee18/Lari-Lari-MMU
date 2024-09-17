@@ -54,6 +54,7 @@
                         <td>{{ order.order_status }}</td>
                         <td>{{ order.status }}</td>
                         <td>
+                            {% if order.order_status == 'current' %}
                             <form method="POST" action="{{ url_for('update_seller_order_status', order_id=order.id) }}">
                                 <select name="status">
                                     <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
@@ -61,6 +62,9 @@
                                 </select>
                                 <button type="submit">Update Status</button>
                             </form>
+                            {% else %}
+                                    <span>N/A</span>
+                                {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

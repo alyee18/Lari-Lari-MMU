@@ -57,6 +57,7 @@
                     <th>Quantity</th>
                     <th>Order Status</th>
                     <th>Date</th>
+                    <th>Delivery Address</th>
                     <th>Details</th>
                 </tr>
             </thead>
@@ -71,6 +72,7 @@
                     <td>{{ order.quantity }}</td>
                     <td>{{ order.order_status }}</td>
                     <td>{{ order.order_date }}</td>
+                    <td>{{ order.delivery_address }}</td>
                     <td>
                         <a href="{{ url_for('buyer_order_details', order_id=order.id) }}">View Details</a>
                     </td>

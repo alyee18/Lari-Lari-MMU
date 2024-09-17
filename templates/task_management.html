@@ -7,7 +7,7 @@
 </head>
 <body>
     <div class="container">
-      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <ul class="flash-messages">
                     {% for category, message in messages %}
@@ -16,53 +16,55 @@
                 </ul>
             {% endif %}
         {% endwith %}
+        
         <nav class="nav-bar">
-          <ul class="nav-links">
-            <li class="nav-link">
-              <a href="{{ url_for('index') }}">Home</a>                
-              <i class='bx bx-home'></i>
-            </li>
-  
-            <li class="nav-link profile">
-              <a href="{{ url_for('task_management', task_type='available') }}" class="dropbtn">Task Management
-              <i class='bx bx-task'></i>
-              <span class="dropdown-icon">
-                <i class='bx bx-chevron-down'></i>
-              </span>
-              </a>
-              <ul class="dropdown-content">
-                <li><a href="{{ url_for('task_management', task_type='available') }}">Available Deliveries</a></li>
-                <li><a href="{{ url_for('task_management', task_type='current') }}">Current Deliveries</a></li>
-                <li><a href="{{ url_for('task_management', task_type='completed') }}">Completed Deliveries</a></li>
-              </ul>
-            </li>
-  
-            <li class="nav-link profile">
-              <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking
-              <i class='bx bx-list-check'></i>
-              <span class="dropdown-icon">
-                <i class='bx bx-chevron-down'></i>
-              </span>
-              </a>
-              <ul class="dropdown-content">
-                  <li><a href="{{ url_for('progress_tracking') }}">Real Time Tracking</a></li>
-              </ul>
-            </li>
-  
-            <li class="nav-link">
-              <a href="{{ url_for('runner_profile') }}" class="dropbtn">Profile
-              <i class='bx bx-user'></i>
-              </a>
-            </li>
-  
-            <li class="nav-link">
-              <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
-              <i class='bx bx-log-out'></i>
-              </a>
-            </li>
-          </ul>
+            <ul class="nav-links">
+                <li class="nav-link">
+                    <a href="{{ url_for('index') }}">Home</a>                
+                    <i class='bx bx-home'></i>
+                </li>
+
+                <li class="nav-link profile">
+                    <a href="{{ url_for('task_management', task_type='available') }}" class="dropbtn">Task Management
+                        <i class='bx bx-task'></i>
+                        <span class="dropdown-icon">
+                            <i class='bx bx-chevron-down'></i>
+                        </span>
+                    </a>
+                    <ul class="dropdown-content">
+                        <li><a href="{{ url_for('task_management', task_type='available') }}">Available Deliveries</a></li>
+                        <li><a href="{{ url_for('task_management', task_type='current') }}">Current Deliveries</a></li>
+                        <li><a href="{{ url_for('task_management', task_type='completed') }}">Completed Deliveries</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-link profile">
+                    <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking
+                        <i class='bx bx-list-check'></i>
+                        <span class="dropdown-icon">
+                            <i class='bx bx-chevron-down'></i>
+                        </span>
+                    </a>
+                    <ul class="dropdown-content">
+                        <li><a href="{{ url_for('progress_tracking') }}">Real Time Tracking</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-link">
+                    <a href="{{ url_for('runner_profile') }}" class="dropbtn">Profile
+                        <i class='bx bx-user'></i>
+                    </a>
+                </li>
+
+                <li class="nav-link">
+                    <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT
+                        <i class='bx bx-log-out'></i>
+                    </a>
+                </li>
+            </ul>
         </nav>
     </div>
+    
     <div class="container">
         <div class="task-section">
             <h2>{{ task_type.replace('_', ' ').title() }}</h2>
@@ -76,6 +78,7 @@
                             <br>Quantity: {{ task.quantity }}
                             <br>Buyer: {{ task.buyer_username }}
                             <br>Order Date: {{ task.order_date }}
+                            <br>Delivery Address: {{ task.delivery_address }}
 
                             {% if task.order_status == 'available' %}
                                 <form action="{{ url_for('accept_order', order_id=task.id) }}" method="post">
@@ -89,14 +92,13 @@
                                 </form>
                             {% elif task.order_status == 'current' %}
                                 {% if task.status == 'delivered' %}
-                                    <form action="{{ url_for('pickuped_order', order_id=task.id) }}" method="post">
-                                        <button type="submit">Pickup</button>
-                                    </form>
-                                {% endif %}
-                                {% if task.status == 'picked up' %}
+                                <form action="{{ url_for('update_status', order_id=task.id) }}" method="POST">
+                                    <button type="submit">Pick Up</button>
+                                </form>
+                                {% elif task.status == 'picked up' %}
                                     <form action="{{ url_for('complete_order', order_id=task.id) }}" method="post">
                                         <button type="submit">Complete</button>
-                                    </form>
+                                </form>
                                 {% endif %}
                             {% elif task.order_status == 'completed' %}
                                 <p class="status-message">Your order is successfully completed</p>
