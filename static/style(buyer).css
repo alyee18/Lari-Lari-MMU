@@ -16,9 +16,7 @@ body {
     flex-direction: column;
     margin: 0;
 }
-h1{
-    justify-content: center;
-}
+
 .container{
     display: flex;
     flex-direction: column;

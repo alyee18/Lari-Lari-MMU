@@ -91,8 +91,6 @@ def change_admin_credentials():
     admin_current_password = request.form.get('admin_current_password')
     admin_new_password = request.form.get('admin_password')
 
-    # Example admin credentials validation and update logic
-    # Ensure that the admin credentials are stored securely and hashed properly
     if admin_current_email == admin_email and admin_current_password == admin_password:
         if admin_new_email:
             admin_email = admin_new_email
@@ -328,15 +326,7 @@ def edit_restaurant(restaurant_id):
 ######### home ##########
 @app.route("/")
 def index():
-    content = load_content()
-    print("Loaded Content:", content)  # Debugging output
-    logo_url = url_for('static', filename='uploads/' + content["logo"]) if content["logo"] else None
-    return render_template("index.html", 
-                           home_content=content["home_content"], 
-                           shop_name=content["shop_name"], 
-                           logo_url=logo_url)
-
-    
+    return render_template("index.html")
 
 ######### Runner ##########
 @app.route('/runner_home')

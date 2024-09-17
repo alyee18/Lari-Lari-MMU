@@ -70,7 +70,7 @@
         </nav>
       </div>
 
-   <div class="container">
+   <div class="profile-container">
         <h1>Manage Your Profile</h1>
    
          {% with messages = get_flashed_messages(with_categories=True) %}
@@ -81,26 +81,35 @@
             {% endif %}
          {% endwith %}   
 
-         <div id="profile-update">
+         <div class="edit-profile">
              <h2>Edit Profile</h2>
              <form action="{{ url_for('update_profile') }}" method="post">
-                    <input type="text" id="name" name="name" value="{{ user.name }}" placeholder="Name" required><br><br>
+                    <div class="input-container">
+                    <input type="text" id="name" name="name" value="{{ user.name }}" placeholder="Name" required>
                     <i class="bx bx-user"></i>
-
+                    </div>
+                    <div class="input-container">
                     <input type="email" id="email" name="email" value="{{ user.email }}" placeholder="Email"required><br><br>
                     <i class="bx bx-envelope"></i>
-
+                    </div>
+                    <div class="input-container">
                     <input type="text" id="phone_no" name="phone_no" value="{{ user.phone_no }}" placeholder="Phone"required><br><br>
                     <i class='bx bx-phone'></i>
-                    <input type="submit" value="Update Profile">
+                    </div>
+                    <div class="input-container">
+                    <input type="submit" value="Update Profile" class="button">
                     <i class='bx bx-user-check'></i>
+                    </div>
              </form>
          </div>
 
-         <div id="delete-account">
-            <h2>Delete Account</h2><i class='bx bx-user-x'></i>
+         <div class="delete-account">
+            <h2>Delete Account</h2>
             <form action="{{ url_for('delete_account') }}" method="post" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
-                <input type="submit" value="Delete Account">
+              <div class="input-container">
+                <input type="submit" value="Delete Account" class="btn">
+                <i class='bx bx-user-x'></i>
+              </div>
             </form>
          </div>
     </div>

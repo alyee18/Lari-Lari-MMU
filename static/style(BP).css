@@ -1,30 +1,43 @@
 *{
     margin: 0;
     padding: 0;
-    font-family: "Protest Guerrilla", sans-serif; 
+    font-family: "Protest Guerrilla", sans-serif;
 } 
-body{
-    background-color: #e9ffe9 ;
-    background:linear-gradient(to right , #e2e2e2,#e9ffc9) ;
+
+body {
+    background-color: #e8e8e8 ;
+    background:linear-gradient(to bottom , #e5daff,#783bbe) ;
+    min-height: 100vh; 
+    display: flex;
+    flex-direction: column;
+
 }
-h1{
-    justify-content: center;
-}
+
 .container{
     display: flex;
+    flex-direction: column;
     font-size: 20px;
-    background-color: #e9ffe9 ;
-    background:linear-gradient(to right , #e2e2e2,#e9ffc9) ;
     justify-content: center;
+    align-items: center;
 }
 
 .nav-bar{
-    background: #edffed;
+    background: #f5e9ff;
     border-radius: 1rem;
     box-shadow: 0 10px 25px rgba(0,0,0,0.35);
     justify-content: center;
-    margin-top: 30px;
-    margin-bottom: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    max-width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 1000; 
+    margin: 20px auto;
+    margin-top: 40px;
+    margin-bottom: 20px;
+
 }
 .nav-links{
     display:flex;
@@ -46,7 +59,7 @@ a{
     position: absolute;
     padding: 1rem 0.5rem;
     margin: 0.5rem -0.5rem;
-    background: #c1f277;
+    background: #9a77f2;
     color: black;
     box-shadow: 0 10px 25px rgba(0,0,0,0.35);
     border-radius: 0.5rem;
@@ -56,7 +69,7 @@ a{
     letter-spacing: 0.5px;
 }
 .nav-link:hover{
-    color:#8abe3b;
+    color:#783bbe;
     border-radius: 0.5rem;
 }
 .profile:hover .dropdown-content{
@@ -76,14 +89,15 @@ a{
     transform: rotate(180deg);
 }
 .dropdown-content li:hover{
-    background: #edffed;
+    background: #f5e9ff;
     color: black;
     border-radius: 0.5rem;
 }
+
 .button{
     display: inline-block;
     padding: 13px 32px;
-    background: #8abe3b;
+    background: #9a77f2;
     border: 2px solid transparent;
     border-radius: 7px;
     color: white;
@@ -96,7 +110,7 @@ a{
 }
 .button:hover{
     transform: scale(1.1);
-    background-color: #cbf58b;
+    background-color: #783bbe;
 }
 .btn{
     display: inline-block;
@@ -128,7 +142,6 @@ a{
     box-sizing: border-box;
     border: 1px  ;
     border-radius: 3px;
-    outline-color: #8abe3b;
 }
 
 .input-container .icon {
@@ -136,63 +149,3 @@ a{
     left: 0.75rem; 
     font-size: 20px;
 }
-.profile-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #e9ffc9;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin: 20px;
-    max-width: 900px;
-    width: 100%;
-}
-
-.profile-container h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-}
-
-.profile-options {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.card {
-    flex: 1;
-    margin-top: 50px;
-    background: #f9f9f9;
-    border-radius: 30px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-.card h2 {
-    font-size: 1.5rem;
-    margin-bottom: 15px;
-}
-
-.card form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.card form input[type="text"],
-.card form input[type="email"] {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-}
-
-.card p {
-    font-size: 1rem;
-    margin-bottom: 15px;
-}
-

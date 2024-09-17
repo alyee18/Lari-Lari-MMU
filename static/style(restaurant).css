@@ -1,0 +1,166 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Protest Guerrilla', sans-serif;
+}
+
+:root {
+    --first-color: hsl(82, 60%, 28%);
+    --title-color: hsl(0, 0%, 15%);
+    --text-color: hsl(0, 0%, 35%);
+    --body-color: hsl(0, 0%, 95%);
+    --container-color: hsl(0, 0%, 100%);
+    --h2-font-size: 1.25rem;
+    --small-font-size: .813rem;
+}
+
+body {
+    background-color: #e8e8e8;
+    background: linear-gradient(to right, #f1f3c7, #f8e58d);
+}
+
+h1 {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #9a77f2;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #7a5bc6;
+}
+
+.container {
+    display: flex;
+    flex: wrap;
+    place-items: center;
+    margin-inline: 1.5rem;
+    padding-block: 5rem;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.restaurant-container {
+    display: flex;
+    flex:wrap;
+    grid-template-columns: repeat(auto-fit, minmax(100px,1fr));
+    gap: 3.5rem;
+    width: 80%;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.restaurant-card {
+    background: #333;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 100%; 
+    transition: transform 0.3s;
+    justify-content: baseline;
+}
+
+.restaurant-card:hover {
+    transform: scale(1.02);
+}
+
+.restaurant-name {
+    text-decoration: none;
+    color:white;
+    font-size: 1.2em;
+}
+
+.restaurant-name:hover {
+    color: #f6be65;
+}
+
+.card-data{
+    background-color: var(--container-color);
+    padding: 1.5rem 2rem;
+    box-shadow: 0 8px 24px hsla(0, 0%, 0%, .15);
+    border-radius: 1rem;
+    position: relative;
+    bottom: -9rem;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    opacity: 0;
+    transition: opacity 1s 1s;
+}
+
+.card-discription {
+    display: block;
+    font-size: var(--small-font-size);
+    margin-bottom: .25rem;
+}
+.restaurant-card:hover .card-data{
+    animation: show-data 1s forwards;
+    opacity: 1;
+    transition: opacity .3s;
+}
+.restaurant-card:hover{
+    animation: remove-overflow 2s forwards;
+}
+.restaurant-card:not(:hover){
+    animation: show-overflow 2s forwards;
+}
+.restaurant-card:not(:hover) .card-data{
+    animation: remove-data 1s forwards;
+}
+ /*  card animation */
+@keyframes show-data{
+    50%{
+        transform: translateY(-10rem);
+    }
+    100%{
+        transform: translateY(-7rem);
+    }
+ }
+@keyframes remove-overflow{
+    to{
+        overflow: initial;
+    }
+ }
+@keyframes remove-data{
+    0%{
+        transform: translateY(-7rem);
+    }
+    50%{
+        transform: translateY(-10rem);
+    }
+    100%{
+        transform: translateY(.5rem);
+    }    
+ }
+@keyframes show-overflow{
+    0%{
+        overflow:initial;
+        pointer-events: none;    
+    }
+    50%{
+        overflow: hidden;
+    }
+ }
+ 
+@media screen and (min-width: 1120px) {
+    .container {
+        height: 100vh;
+    }
+    .restaurant-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

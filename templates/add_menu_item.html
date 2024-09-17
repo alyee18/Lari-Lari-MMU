@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Menu Item</title>
+    <link rel="stylesheet" type="text/css" href="../static/style(seller).css">
+
+    <!--------------------------box-icon-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Bubbles&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
     <h1>Add Menu Item for {{ restaurant_name }}</h1>
@@ -18,10 +37,10 @@
         <label for="price">Price:</label>
         <input type="number" id="price" name="price" step="0.01" required><br><br>
         
-        <button type="submit">Add Item</button>
+        <button type="submit" class="button">Add Item</button>
     </form>
 
-    <a href="{{ url_for('seller_home') }}">Back to Homepage</a>
+    <a href="{{ url_for('seller_home') }}" >Back to Homepage</a>
 
 </body>
 </html>
