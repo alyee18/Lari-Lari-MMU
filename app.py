@@ -830,6 +830,7 @@ def logout():
 ######### SellerPage ##########
 @app.route('/seller_home')
 @login_required(role='seller')
+@login_required(role='seller')
 def seller_home():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -841,6 +842,7 @@ def seller_home():
         flash("No restaurants found. Please add a restaurant.", "info")
         return redirect(url_for('add_restaurant'))
 
+    # Set the default restaurant_id if needed
     if not session.get('restaurant_id') and restaurants:
         session['restaurant_id'] = restaurants[0]['id']
 
@@ -854,33 +856,12 @@ def add_restaurant():
         cuisine = request.form.get("cuisine")
         price_range = request.form.get("price_range")
 
-        # Log form data for debugging
-        print(f"Received form data - Name: {name}, Cuisine: {cuisine}, Price Range: {price_range}")
-
-        # Validate that all fields are present
         if not all([name, cuisine, price_range]):
-            flash("All fields are required!", "error")
             return render_template("add_restaurant.html")
 
-        # Validate that price_range is a positive number
-        try:
-            price_range = int(price_range)  # or float(price_range) if it's a float value
-            if price_range <= 0:
-                flash("Price range must be a positive number!", "error")
-                return render_template("add_restaurant.html")
-        except ValueError:
-            flash("Price range must be a valid number!", "error")
-            return render_template("add_restaurant.html")
-
-        # Insert the restaurant into the database
         try:
             conn = get_db_connection()
-            conn.execute("PRAGMA foreign_keys = ON")
             cursor = conn.cursor()
-
-            # Log the username for debugging
-            print(f"Session username: {session['username']}")
-
             cursor.execute(
                 """
                 INSERT INTO restaurants (name, cuisine, price_range, owner_username)
@@ -889,14 +870,10 @@ def add_restaurant():
                 (name, cuisine, price_range, session["username"]),
             )
             conn.commit()
-
-            # Log success and retrieve restaurant ID
             restaurant_id = cursor.lastrowid
-            print(f"Restaurant inserted with ID: {restaurant_id}")
         except sqlite3.Error as e:
             flash(f"An error occurred: {e}", "error")
             print(f"SQLite error: {e}")
-            return render_template("add_restaurant.html")
         finally:
             conn.close()
 
@@ -906,41 +883,55 @@ def add_restaurant():
     return render_template("add_restaurant.html")
 
 def get_categories():
-    return ["Main Course", "Desserts", "Beverages" , "Snack", "Daily Necessities"]
+    return [
+        {"name": "Main Course", "estimated_time": 30},
+        {"name": "Desserts", "estimated_time": 10},
+        {"name": "Beverages", "estimated_time": 5},
+        {"name": "Snack", "estimated_time": 5},
+        {"name": "Daily Necessities", "estimated_time": 5}
+    ]
 
 @app.route("/add_menu_item/<int:restaurant_id>", methods=["GET", "POST"])
 @login_required(role='seller')
 def add_menu_item(restaurant_id):
     if request.method == "POST":
         name = request.form.get("name")
-        price = float(request.form.get("price", 0))
-        category = request.form.get("category")
+        try:
+            price = float(request.form.get("price", 0))
+        except ValueError:
+            flash("Invalid price entered. Please enter a valid number.", "error")
+            return render_template("add_menu_item.html", restaurant_id=restaurant_id, categories=get_categories())
 
-        if not name or price <= 0 or not category:
-            flash("All fields are required, and price must be positive!", "error")
-            return render_template("add_menu_item.html", restaurant_id=restaurant_id, categories= get_categories())
+        category_name = request.form.get("category")
+
+        if not name or price <= 0 or not category_name:
+            flash("All fields are required, and price must be a positive number.", "error")
+            return render_template("add_menu_item.html", restaurant_id=restaurant_id, categories=get_categories())
+
+        categories = get_categories()
+        estimated_time = next((category['estimated_time'] for category in categories if category['name'] == category_name), 5)
 
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO menu_items (restaurant_id, name, price, category)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO menu_items (restaurant_id, name, price, category, estimated_time)
+                VALUES (?, ?, ?, ?, ?)
                 """,
-                (restaurant_id, name, price, category),
+                (restaurant_id, name, price, category_name, estimated_time),
             )
             conn.commit()
+            flash("Menu item added successfully!", "success")
         except sqlite3.Error as e:
             flash(f"An error occurred: {e}", "error")
             print(f"SQLite error: {e}")
         finally:
             conn.close()
 
-        flash("Menu item added successfully!", "success")
         return redirect(url_for("restaurant_items", restaurant_id=restaurant_id))
 
-    return render_template("add_menu_item.html", restaurant_id=restaurant_id, categories= get_categories())
+    return render_template("add_menu_item.html", restaurant_id=restaurant_id, categories=get_categories())
 
 @app.route('/restaurant/<int:restaurant_id>/menu/update/<int:item_id>', methods=['POST'])
 @login_required(role='seller')
