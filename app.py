@@ -4,6 +4,8 @@ import json
 import sqlite3
 import logging
 logging.basicConfig(level=logging.DEBUG)
+import logging
+logging.basicConfig(level=logging.DEBUG)
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -12,9 +14,13 @@ from datetime import datetime
 from flask_socketio import SocketIO, emit
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+from flask_socketio import SocketIO, emit
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
+socketio = SocketIO(app)
 socketio = SocketIO(app)
 
 def get_db_connection():
@@ -32,6 +38,7 @@ def get_tasks(task_type):
     conn.close()
     return tasks
 
+######### Admin Page Editor##########
 ######### Admin Page Editor##########
 def load_content():
     """Load content from content.json."""
@@ -153,9 +160,36 @@ def admin_dashboard():
         GROUP BY restaurant_name
     """)
     financial_overview = cursor.fetchall()
+    cursor.execute("SELECT COUNT(*) FROM orders")
+    num_orders = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT restaurant_name, 
+               SUM(total_price) AS total_earnings, 
+               COUNT(id) AS total_orders 
+        FROM orders 
+        GROUP BY restaurant_name
+    """)
+    financial_overview = cursor.fetchall()
 
     conn.close()
 
+    financial_data = {
+        restaurant['restaurant_name']: {
+            'total_earnings': restaurant['total_earnings'],
+            'total_orders': restaurant['total_orders']
+        }
+        for restaurant in financial_overview
+    }
+
+    return render_template(
+        'admin.html',
+        num_runners=num_runners,
+        num_buyers=num_buyers,
+        num_sellers=num_sellers,
+        num_orders=num_orders,
+        financial_data=financial_data
+    )
     financial_data = {
         restaurant['restaurant_name']: {
             'total_earnings': restaurant['total_earnings'],
