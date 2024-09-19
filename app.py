@@ -273,32 +273,76 @@ def edit_menu_item(item_id):
     conn.close()
     return render_template('edit_menu_item.html', item=item)
 
-@app.route('/ordercontrol')
-def order_control():
+@app.route('/ordercontrol', methods=['GET'])
+def ordercontrol():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT * FROM orders')
+    query = """
+        SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, status
+        FROM orders
+    """
+    cursor.execute(query)
     orders = cursor.fetchall()
-
     conn.close()
 
     return render_template('ordercontrol.html', orders=orders)
 
-@app.route('/updateorderstatus/<int:order_id>', methods=('GET', 'POST'))
-def update_order_status(order_id):
+@app.route('/edit_order/<int:order_id>', methods=['GET'])
+def edit_order(order_id):
     conn = get_db_connection()
-    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
-    
-    if request.method == 'POST':
-        status = request.form['status']
-        conn.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id))
-        conn.commit()
-        conn.close()
-        return redirect('/ordercontrol')
-    
+    cursor = conn.cursor()
+
+    query = """
+        SELECT id, item_name, total_price, quantity, status
+        FROM orders
+        WHERE id = ?
+    """
+    cursor.execute(query, (order_id,))
+    order = cursor.fetchone()
     conn.close()
-    return render_template('update_order_status.html', order=order)
+
+    if order is None:
+        return redirect(url_for('order_control'))
+
+    return render_template('edit_order.html', order=order)
+
+
+@app.route('/update_order_status/<int:order_id>', methods=['POST'])
+def update_order_status(order_id):
+    item_name = request.form['item_name']
+    total_price = float(request.form['total_price'])
+    quantity = int(request.form['quantity'])
+    status = request.form['status']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        UPDATE orders
+        SET item_name = ?, total_price = ?, quantity = ?, status = ?
+        WHERE id = ?
+    """
+    cursor.execute(query, (item_name, total_price, quantity, status, order_id))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('ordercontrol'))
+
+@app.route('/delete_order/<int:order_id>', methods=['GET'])
+def delete_order(order_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        DELETE FROM orders
+        WHERE id = ?
+    """
+    cursor.execute(query, (order_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('ordercontrol'))
 
 @app.route('/restaurantcontrol')
 def restaurant_control():
