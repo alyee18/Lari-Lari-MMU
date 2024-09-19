@@ -13,21 +13,21 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
         
     <!--------------------------google-font-link---------------------------------------------------->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
     
     <!--------------------------aos-animation-link---------------------------------------------------->
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    </head>
-    <body>
-        <div class="cart">
-            <div class="cart-header">
-                <div class="cart-icon">
-                    <i class='bx bx-cart'></i>
-                </div>
-                <h1>Your Cart</h1>
+</head>
+<body>
+    <div class="cart">
+        <div class="cart-header">
+            <div class="cart-icon">
+                <i class='bx bx-cart'></i>
             </div>
+            <h1>Your Cart</h1>
+        </div>
         {% if cart_items %}
         <ul class="cart-item">
             {% for item in cart_items %}
@@ -52,6 +52,8 @@
         <form action="{{ url_for('confirm_order') }}" method="POST">
             <label for="delivery_address">Enter Delivery Address:</label>
             <input type="text" id="delivery_address" name="delivery_address" required>
+            <label for="delivery_address">Enter Delivery Address:</label>
+            <input type="text" id="delivery_address" name="delivery_address" required>
             <button type="submit">Confirm Order</button>
         </form>
         {% else %}
@@ -61,6 +63,6 @@
             <li><a href="{{ url_for('restaurant_list') }}">Back to Restaurant List</a></li>
             <li><a href="{{ url_for('buyer_home') }}">Back to Home</a></li>
         </ul>
-    </div>
+    </div> 
 </body>
 </html>

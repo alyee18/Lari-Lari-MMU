@@ -1,0 +1,89 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Protest Guerrilla', sans-serif;
+}
+body {
+    background-color: #e8e8e8;
+    background: linear-gradient(to right, #f1f3c7, #f8e58d);
+}
+.main-container {
+    display: grid;
+    grid-template-areas: 
+        "restaurant menu"
+        "restaurant menu";
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: auto 1fr;
+    gap: 20px;
+    padding: 20px;
+    height: 100vh;
+}
+.restaurant-container {
+    grid-area: restaurant;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 100px;
+    margin-top: 50px;
+    border-radius: 3rem;
+}
+.menu-container {
+    grid-area: menu;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 50px;
+    margin-bottom: 20px;
+    border-radius: 3rem;
+}
+.menu-header {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #563209;
+    font-size: 30px;
+}
+.menu-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-body ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0 0 20px;
+}
+
+.menu-body li {
+    margin-bottom: 10px;
+}
+
+.menu-items form {
+    display: flex;
+    flex-direction: column;
+}
+.menu-items label,.menu-items select,.menu-items input,.menu-items button {
+    margin-bottom: 10px;
+}
+.menu-items input,.menu-items select{
+    background-color: #e6e8ec;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    padding-left: 5px;    
+}
+.button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}

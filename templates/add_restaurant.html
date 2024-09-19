@@ -4,25 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Restaurant</title>
+    <link rel="stylesheet" type="text/css" href="../static/style(seller).css">
+
+    <!--------------------------box-icon-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Bubbles&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
-    <h1>Add New Restaurant</h1>
-    <form action="{{ url_for('add_restaurant') }}" method="post">
-        <label for="name">Restaurant Name:</label>
-        <input type="text" id="name" name="name" required><br>
-
-        <label for="cuisine">Cuisine:</label>
-        <input type="text" id="cuisine" name="cuisine" required><br>
-
-        <label for="price_range">Price Range:</label>
-        <input type="text" id="price_range" name="price_range" required><br>
-
-        <label for="delivery_time">Delivery Time (in minutes):</label>
-        <input type="number" id="delivery_time" name="delivery_time" required><br>
-
-        <input type="submit" value="Add Restaurant">
-    </form>
-
-    <a href="{{ url_for('seller_home') }}">Back to Home</a>
+    <div class="container">
+        <h1>Add New Restaurant</h1>
+        
+        <form action="{{ url_for('add_restaurant') }}" method="post">
+            <label for="name">Restaurant Name:</label>
+            <i class="ri-store-2-line"></i>
+            <input type="text" id="name" name="name" required><br>
+    
+            <label for="cuisine">Cuisine:</label>
+            <i class="ri-restaurant-line"></i>
+            <input type="text" id="cuisine" name="cuisine" required><br>
+    
+            <label for="price_range">Price Range:</label>
+            <i class='bx bx-purchase-tag-alt'></i>
+            <input type="text" id="price_range" name="price_range" required><br>
+    
+            <label for="delivery_time">Delivery Time (in minutes):</label>
+            <i class='bx bx-time'></i>
+            <input type="number" id="delivery_time" name="delivery_time" required><br>
+    
+            <input type="submit" value="Add Restaurant" class="button">
+        </form>
+    
+        <a href="{{ url_for('seller_home') }}">Back to Home</a>
+    </div>
 </body>
 </html>

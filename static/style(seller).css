@@ -1,0 +1,94 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: "Protest Guerrilla", sans-serif; 
+} 
+
+body{
+    background-color: #e8e8e8 ;
+    background:linear-gradient(to right , #f1f3c7,#f8e58d) ;
+}
+h1{
+    text-align: center; 
+    margin-bottom: 20px;
+    margin-top: 20px;
+    font-family: "Rubik Bubbles", system-ui;
+    font-size: 50px;
+}
+.container{
+    display: flex;
+    flex-direction: column;
+    font-size: 20px;
+    justify-content: center;
+    align-items: center;
+}
+.container h1{
+    justify-content: center;
+}
+.nav-bar{
+    background: #f1f3c7;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    max-width: 80%;
+    position: sticky;
+    top: 0;
+    z-index: 1000; 
+    margin: 20px auto;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.nav-links{
+    display:flex;
+    gap: 5rem;
+}
+.nav-links{
+    list-style: none;
+    height: 100%;
+    padding: 0.5rem 1rem;
+    font-weight:600;
+    cursor: pointer; 
+    letter-spacing: 0.3px;
+}
+a{
+    text-decoration: none;
+    color: black;
+    letter-spacing: 1.5px;
+}
+a:hover {
+    color: #f8e58d;
+}
+
+.nav-link:hover{
+    color:#f8e58d;
+    border-radius: 0.5rem;
+}
+.profile:hover .dropdown-content{
+    display: block;
+}
+.profile a{
+    display: flex;
+}
+.button{
+    display: inline-block;
+    padding: 13px 32px;
+    background: #ffdf4f;
+    border: 2px solid transparent;
+    border-radius: 7px;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all .6s ease;
+    margin-right: 20px;
+ }
+ .button:hover{
+    transform: scale(1.1);
+    background-color:#f1f3c7;
+ }

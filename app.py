@@ -4,6 +4,8 @@ import json
 import sqlite3
 import logging
 logging.basicConfig(level=logging.DEBUG)
+import logging
+logging.basicConfig(level=logging.DEBUG)
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -12,9 +14,13 @@ from datetime import datetime
 from flask_socketio import SocketIO, emit
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+from flask_socketio import SocketIO, emit
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
+socketio = SocketIO(app)
 socketio = SocketIO(app)
 
 def get_db_connection():
@@ -33,20 +39,19 @@ def get_tasks(task_type):
     return tasks
 
 ######### Admin Page Editor##########
+######### Admin Page Editor##########
 def load_content():
     """Load content from content.json."""
     try:
         with open("content.json", "r") as content_file:
             return json.load(content_file)
     except FileNotFoundError:
-        # Return default values if the file does not exist
         return {
             "home_content": "",
             "shop_name": "",
             "logo": ""
         }
     except json.JSONDecodeError:
-        # Handle JSON decoding errors
         return {
             "home_content": "",
             "shop_name": "",
@@ -67,7 +72,6 @@ def page_editor():
         home_content = request.form.get("home_content")
         shop_name = request.form.get("shop_name")
         
-        # Handle file upload
         filename = ""
         if "logo" in request.files:
             file = request.files["logo"]
@@ -75,47 +79,18 @@ def page_editor():
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-        # Update content (ensure 'content' is defined or retrieved appropriately)
         content = {
             "home_content": home_content,
             "shop_name": shop_name,
             "logo": filename
         }
-        
-        # Save content (define `save_content` function or method)
+
         save_content(content)
         
         flash("Content updated successfully!")
         return redirect(url_for("page_editor"))
     
     return render_template("pageEditor.html")
-
-@app.route('/change_admin_credentials', methods=['POST'])
-def change_admin_credentials():
-    admin_current_email = request.form.get('admin_current_email')
-    admin_new_email = request.form.get('admin_email')
-    admin_current_password = request.form.get('admin_current_password')
-    admin_new_password = request.form.get('admin_password')
-
-    # Example admin credentials validation and update logic
-    # Ensure that the admin credentials are stored securely and hashed properly
-    if admin_current_email == admin_email and admin_current_password == admin_password:
-        if admin_new_email:
-            admin_email = admin_new_email
-        if admin_new_password:
-            admin_password = admin_new_password
-        # Commit changes to the database here
-        # Example: db.session.commit()
-        
-        flash("Email and/or password updated successfully!")
-    else:
-        flash("Invalid email or password!")
-
-    admin_data = {"email": admin_email, "password": admin_password}
-    with open("admin.json", "w") as admin_file:
-        json.dump(admin_data, admin_file)
-    
-    return redirect(url_for("page_editor"))
 
 ######### Admin ##########
 @app.route('/admin-login', methods=['GET', 'POST'])
@@ -185,9 +160,36 @@ def admin_dashboard():
         GROUP BY restaurant_name
     """)
     financial_overview = cursor.fetchall()
+    cursor.execute("SELECT COUNT(*) FROM orders")
+    num_orders = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT restaurant_name, 
+               SUM(total_price) AS total_earnings, 
+               COUNT(id) AS total_orders 
+        FROM orders 
+        GROUP BY restaurant_name
+    """)
+    financial_overview = cursor.fetchall()
 
     conn.close()
 
+    financial_data = {
+        restaurant['restaurant_name']: {
+            'total_earnings': restaurant['total_earnings'],
+            'total_orders': restaurant['total_orders']
+        }
+        for restaurant in financial_overview
+    }
+
+    return render_template(
+        'admin.html',
+        num_runners=num_runners,
+        num_buyers=num_buyers,
+        num_sellers=num_sellers,
+        num_orders=num_orders,
+        financial_data=financial_data
+    )
     financial_data = {
         restaurant['restaurant_name']: {
             'total_earnings': restaurant['total_earnings'],
@@ -500,7 +502,8 @@ def delete_restaurant(restaurant_id):
 ######### home ##########
 @app.route("/")
 def index():
-    return render_template("index.html")
+    content = load_content()
+    return render_template("index.html", content=content)
 
 ######### Runner ##########
 @app.route('/runner_home')

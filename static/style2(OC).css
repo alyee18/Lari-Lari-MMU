@@ -2,7 +2,7 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    font-family: "New Amsterdam", sans-serif;
+    font-family: "Protest Guerrilla", sans-serif;
 }
 body{
     display: flex;
@@ -24,4 +24,26 @@ body{
     text-align: center;
     padding: 0 30px 30px;
     color: #333;
+}
+.popup a{
+    font-size: 20px;
+}
+.popup h1{
+    color: #1ba94f;
+}
+.button{
+    display: block;
+    padding: 13px 32px;
+    background: #a9ee42;
+    border: 2px transparent;
+    border-radius: 7px;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    outline: none;
+}
+.button:hover{
+    transform: scale(1.1);
 }

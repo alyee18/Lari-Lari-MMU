@@ -1,0 +1,124 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: "Protest Guerrilla", sans-serif;
+} 
+
+body {
+    min-height: 100vh;
+    width: 100%;
+    background-image: url(../static/background.jpg);
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+.container{
+    display: flex;
+    flex-direction: column;
+    font-size: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-bar{
+    background: #f5e9ff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    max-width: 80%;
+    position: sticky;
+    top: 0;
+    z-index: 1000; 
+    margin: 20px auto;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.nav-links{
+    display:flex;
+    gap: 5rem;
+}
+.nav-links{
+    list-style: none;
+    height: 100%;
+    padding: 0.5rem 1rem;
+    font-weight:600;
+    cursor: pointer; 
+    letter-spacing: 0.3px;
+}
+a{
+    text-decoration: none;
+    color: black;
+    letter-spacing: 1.5px;
+}
+a:hover{
+    color: #783bbe;
+}
+.nav-link:hover{
+    color:#783bbe;
+    border-radius: 0.5rem;
+}
+.topic{
+    position: relative;
+    width: 100%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin-top: 40px;
+    box-sizing: border-box; 
+    justify-content: center; 
+ }
+ .topic-text h1{
+    font-size: 6.6rem;
+    font-weight: 700;
+    margin: 15px 0;
+    color: white;
+    
+ }
+ .topic-text h5{
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    color: #9a77f2;
+
+ }
+ .topic-text p{
+    font-size: 25px;
+    font-weight: 350;
+    width: 100%;
+    max-width: 620px;
+    line-height: 32px;
+    color: #f5e9ff;
+    margin-bottom: 70px;
+ }
+ .main-topic{
+    display: flex;
+    align-items: center;
+ }
+ .button{
+    display: inline-block;
+    padding: 13px 32px;
+    background: #9a77f2;
+    border: 2px solid transparent;
+    border-radius: 7px;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all .6s ease;
+    margin-right: 20px;
+ }
+ .button:hover{
+    transform: scale(1.1);
+    background-color: #783bbe;
+ }

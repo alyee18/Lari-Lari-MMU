@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="../static/style2.css">
+    <link rel="stylesheet" type="text/css" href="../static/style(restaurant).css">
     <title>Restaurants List</title>
 
 <!--------------------------box-icon-link---------------------------------------------------->
@@ -13,9 +13,9 @@
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
     
 <!--------------------------google-font-link---------------------------------------------------->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
 
 <!--------------------------aos-animation-link---------------------------------------------------->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
@@ -23,22 +23,27 @@
 </head>
 <body>
     <h1>Restaurants</h1>
-
-    <p><a href="{{ url_for('view_cart') }}">View Cart</a></p> 
-
-    <ul>
-            {% for restaurant in restaurants %}
-                <li>
-                    <strong><a href="{{ url_for('restaurant_detail', restaurant_id=restaurant.id) }}">{{ restaurant.name }}</a></strong><br>
-                    <div class="details">
-                        Cuisine: {{ restaurant.cuisine }}<br>
-                        Price Range: {{ restaurant.price_range }}<br>
-                        Delivery Time: {{ restaurant.delivery_time }} minutes<br>
-                        Rating: {{ restaurant.rating }}
-                    </div>
-                </li>
-            {% endfor %}
-    </ul>
-    <li><a href="{{ url_for('buyer_home') }}">Back to Home</a></li>
+    <div class="container">
+        <p><a href="{{ url_for('view_cart') }}" class="button">View Cart</a></p>
+        <div class="restaurant-container">
+            <ul>
+                {% for restaurant in restaurants %}
+                    <li class="restaurant-card">
+                        <strong><a href="{{ url_for('restaurant_detail', restaurant_id=restaurant.id) }}" class="restaurant-name">{{ restaurant.name }}</a></strong>
+                        <div class="card-data">
+                            <span class="card-discription">
+                                <p><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
+                                <p><strong>Price Range:</strong> {{ restaurant.price_range }}</p>
+                                <p><strong>Delivery Time:</strong> {{ restaurant.delivery_time }} minutes</p>
+                                <p><strong>Rating:</strong> {{ restaurant.rating }}</p>
+                            </span>
+                        </div>
+                    </li>
+                {% endfor %}
+                <p><a href="{{ url_for('buyer_home') }}" >Back to Home</a></p>
+            </ul>
+        </div>   
+    </div>
+    
 </body>
 </html>
