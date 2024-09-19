@@ -6,18 +6,18 @@
     <title>{{ restaurant.name }}</title>
     <link rel="stylesheet" type="text/css" href="../static/style2.css">
 
-<!--------------------------box-icon-link---------------------------------------------------->
+    <!--------------------------box-icon-link---------------------------------------------------->
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
 
-<!--------------------------remix-icon-link---------------------------------------------------->
-<link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+    <!--------------------------remix-icon-link---------------------------------------------------->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
     
-<!--------------------------google-font-link---------------------------------------------------->
+    <!--------------------------google-font-link---------------------------------------------------->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
 
-<!--------------------------aos-animation-link---------------------------------------------------->
+    <!--------------------------aos-animation-link---------------------------------------------------->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
@@ -28,7 +28,8 @@
     <h2>Menu</h2>
     <ul>
         {% for item in menu_items %}
-            <li>{{ item.name }} - ${{ item.price }}</li>
+            <li>{{ item.name }} - ${{ item.price }} 
+            <br>Estimated Time: {{ item.estimated_time }} minutes</li>
         {% endfor %}
     </ul>
 
@@ -37,7 +38,7 @@
         <label for="item_name">Choose an item:</label>
         <select name="item_name" id="item_name">
             {% for item in menu_items %}
-                <option value="{{ item.name }}">{{ item.name }}</option>
+                <option value="{{ item.name }}">{{ item.name }} ({{ item.estimated_time }} mins)</option>
             {% endfor %}
         </select>
         <label for="quantity">Quantity:</label>
