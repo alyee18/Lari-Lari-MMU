@@ -18,34 +18,34 @@
             <li><a href="/logout">Log Out</a></li>
         </ul>
     </div>
-
-    <div class="content">
+    <div class="container">
         <h2>Menu Control</h2>
         <table>
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Name</th>
+                    <th>Item Name</th>
                     <th>Price</th>
                     <th>Restaurant</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                {% for item in menu_items %}
+                {% for menu_item in menu_items %}
                 <tr>
                     <td>{{ loop.index }}</td>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.price }}</td>
-                    <td>{{ item.restaurant_id }}</td>
+                    <td>{{ menu_item.name }}</td>
+                    <td>{{ menu_item.price }}</td>
+                    <td>{{ menu_item.restaurant_name }}</td>
                     <td>
-                        <a href="{{ url_for('edit_menu_item', item_id=item.id) }}">Edit</a>
-                        
+                        <a href="{{ url_for('edit_menu_item', item_id=menu_item.id) }}">Edit</a>
+                        <a href="{{ url_for('admin_delete_menu_item', menu_id=menu_item.id) }}" onclick="return confirm('Are you sure you want to delete this item?')">Delete</a>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <a href="{{ url_for('admin_add_menu_item') }}">Add New Menu Item</a>
     </div>
 </body>
 </html>

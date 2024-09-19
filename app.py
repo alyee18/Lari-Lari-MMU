@@ -174,12 +174,36 @@ def admin_dashboard():
     cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'seller'")
     num_sellers = cursor.fetchone()[0]
 
-    cursor.execute('SELECT * FROM orders')
-    orders = cursor.fetchall()
+    cursor.execute("SELECT COUNT(*) FROM orders")
+    num_orders = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT restaurant_name, 
+               SUM(total_price) AS total_earnings, 
+               COUNT(id) AS total_orders 
+        FROM orders 
+        GROUP BY restaurant_name
+    """)
+    financial_overview = cursor.fetchall()
 
     conn.close()
 
-    return render_template('admin.html', num_runners=num_runners, num_buyers=num_buyers, num_sellers=num_sellers, orders=orders)
+    financial_data = {
+        restaurant['restaurant_name']: {
+            'total_earnings': restaurant['total_earnings'],
+            'total_orders': restaurant['total_orders']
+        }
+        for restaurant in financial_overview
+    }
+
+    return render_template(
+        'admin.html',
+        num_runners=num_runners,
+        num_buyers=num_buyers,
+        num_sellers=num_sellers,
+        num_orders=num_orders,
+        financial_data=financial_data
+    )
     
 @app.route('/usercontrol')
 def user_control():
@@ -248,30 +272,94 @@ def delete_user(user_id):
     flash('User deleted and IDs renumbered successfully!', 'success')
     return redirect(url_for('admin_dashboard'))
 
-
-@app.route('/menucontrol')
-def menu_control():
+@app.route('/menucontrol', methods=['GET'])
+def menucontrol():
     conn = get_db_connection()
-    menu_items = conn.execute('SELECT * FROM menu_items').fetchall()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT id, name, price, restaurant_id
+        FROM menu_items
+    """
+    cursor.execute(query)
+    menu_items = cursor.fetchall()
     conn.close()
+
     return render_template('menucontrol.html', menu_items=menu_items)
+
+@app.route('/admin/add_menu_item', methods=['GET', 'POST'])
+def admin_add_menu_item():
+    if request.method == 'POST':
+        name = request.form['name']
+        price = request.form['price']
+        restaurant_name = request.form['restaurant_name']
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO menu (name, price, restaurant_name)
+            VALUES (?, ?, ?)
+        """
+        cursor.execute(query, (name, price, restaurant_name))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('menucontrol'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM restaurants")
+    restaurants = cursor.fetchall()
+    conn.close()
+
+    return render_template('admin_add_menu_item.html', restaurants=restaurants)
 
 @app.route('/admin/edit_menu_item/<int:item_id>', methods=['GET', 'POST'])
 def edit_menu_item(item_id):
     conn = get_db_connection()
-    item = conn.execute('SELECT * FROM menu_items WHERE id = ?', (item_id,)).fetchone()
+    cursor = conn.cursor()
 
     if request.method == 'POST':
         name = request.form['name']
         price = request.form['price']
-        conn.execute('UPDATE menu_items SET name = ?, price = ? WHERE id = ?', (name, price, item_id))
+        restaurant_name = request.form['restaurant_name']
+
+        query = """
+            UPDATE menu
+            SET name = ?, price = ?, restaurant_name = ?
+            WHERE id = ?
+        """
+        cursor.execute(query, (name, price, restaurant_name))
         conn.commit()
         conn.close()
-        flash('Menu item updated successfully!', 'success')
-        return redirect(url_for('admin_dashboard'))
 
+        return redirect(url_for('menucontrol'))
+    
+    query = """
+        SELECT id, name, price, restaurant_name
+        FROM menu
+        WHERE id = ?
+    """
+    cursor.execute(query)
+    menu_item = cursor.fetchone()
     conn.close()
-    return render_template('edit_menu_item.html', item=item)
+
+    return render_template('edit_menu_item.html', menu_item=menu_item)
+
+@app.route('/admin/delete_menu_item/<int:menu_id>', methods=['GET'])
+def admin_delete_menu_item(menu_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        DELETE FROM menu
+        WHERE id = ?
+    """
+    cursor.execute(query, (menu_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('menu_control'))
 
 @app.route('/ordercontrol', methods=['GET'])
 def ordercontrol():
@@ -344,37 +432,70 @@ def delete_order(order_id):
 
     return redirect(url_for('ordercontrol'))
 
-@app.route('/restaurantcontrol')
-def restaurant_control():
+@app.route('/restaurantcontrol', methods=['GET'])
+def restaurantcontrol():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, cuisine, price_range FROM restaurants")
+
+    query = """
+        SELECT id, name, cuisine, price_range
+        FROM restaurants
+    """
+    cursor.execute(query)
     restaurants = cursor.fetchall()
     conn.close()
-    print(restaurants)
 
     return render_template('restaurantcontrol.html', restaurants=restaurants)
 
 @app.route('/admin/edit_restaurant/<int:restaurant_id>', methods=['GET', 'POST'])
 def edit_restaurant(restaurant_id):
     conn = get_db_connection()
-    restaurant = conn.execute('SELECT * FROM restaurants WHERE id = ?', (restaurant_id,)).fetchone()
+    cursor = conn.cursor()
     
     if request.method == 'POST':
         name = request.form['name']
         cuisine = request.form['cuisine']
         price_range = request.form['price_range']
-        
-        conn.execute('UPDATE restaurants SET name = ?, cuisine = ?, price_range = ? WHERE id = ?',
-                     (name, cuisine, price_range, restaurant_id))
+
+        query = """
+            UPDATE restaurants
+            SET name = ?, cuisine = ?, price_range = ?
+            WHERE id = ?
+        """
+        cursor.execute(query, (name, cuisine, price_range, restaurant_id))
         conn.commit()
         conn.close()
-        flash('Restaurant updated successfully!', 'success')
-        return redirect(url_for('restaurant_control'))
+
+        return redirect(url_for('restaurantcontrol'))
     
+    query = """
+        SELECT id, name, cuisine, price_range
+        FROM restaurants
+        WHERE id = ?
+    """
+    cursor.execute(query, (restaurant_id,))
+    restaurant = cursor.fetchone()
     conn.close()
+
+    if restaurant is None:
+        return redirect(url_for('restaurantcontrol'))
+
     return render_template('edit_restaurant.html', restaurant=restaurant)
 
+@app.route('/delete_restaurant/<int:restaurant_id>', methods=['GET'])
+def delete_restaurant(restaurant_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        DELETE FROM restaurants
+        WHERE id = ?
+    """
+    cursor.execute(query, (restaurant_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('restaurantcontrol'))
 
 ######### home ##########
 @app.route("/")
@@ -1346,7 +1467,7 @@ def view_cart():
 
     # Add restaurant names to cart items
     for item in cart_items:
-        item["restaurant_name"] = restaurants.get(item["restaurant_id"], "Unknown")
+        item["restaurant_name"] = restaurants.get(item.get("restaurant_id"), "Unknown")
 
     order_id = 1
 

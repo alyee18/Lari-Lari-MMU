@@ -1,22 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
-   async function fetchDashboardData() {
-       try {
-           const response = await fetch('/api/dashboard_data');
-           const data = await response.json();
+    async function fetchDashboardData() {
+        try {
+            const response = await fetch('/api/dashboard_data');
+            const data = await response.json();
+            updateCharts(data);
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+        }
+    }
 
-           updateCharts(data);
-       } catch (error) {
-           console.error('Error fetching dashboard data:', error);
-       }
-   }
+    function updateCharts(data) {
+        // Example data structure
+        const numOrders = data.num_orders;
+        const numRunners = data.num_runners;
+        const numBuyers = data.num_buyers;
+        const numSellers = data.num_sellers;
+        const financialData = data.financial_data; // Ensure this is an object with restaurant data
 
-   function updateCharts(data) {
-       const numOrders = data.num_orders;
-       const numRunners = data.num_runners;
-       const numBuyers = data.num_buyers;
-       const numSellers = data.num_sellers;
-
-       // Bar Chart - Summary
+        // Bar Chart - Summary
        const ctxSummary = document.getElementById('summaryChart').getContext('2d');
        new Chart(ctxSummary, {
            type: 'bar',
@@ -57,25 +58,36 @@ document.addEventListener('DOMContentLoaded', () => {
            
        });
 
-       
-   }
+        // Pie Chart - Financial Overview
+        const ctxFinancial = document.getElementById('financialOverviewChart').getContext('2d');
+        new Chart(ctxFinancial, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(financialData),
+                datasets: [{
+                    label: 'Financial Overview',
+                    data: Object.values(financialData).map(r => r.total_earnings),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            }
+        });
+    }
 
-   fetchDashboardData();
-
-   // Search functionality for orders
-   document.getElementById('search').addEventListener('input', function () {
-       const searchQuery = this.value.toLowerCase();
-       const rows = document.querySelectorAll('#orders_table tbody tr');
-       rows.forEach(row => {
-           const cells = row.getElementsByTagName('td');
-           let match = false;
-           for (let i = 0; i < cells.length; i++) {
-               if (cells[i].textContent.toLowerCase().includes(searchQuery)) {
-                   match = true;
-                   break;
-               }
-           }
-           row.style.display = match ? '' : 'none';
-       });
-   });
+    fetchDashboardData();
 });
