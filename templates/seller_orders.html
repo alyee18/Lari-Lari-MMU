@@ -31,11 +31,13 @@
                 <tr>
                     <th>Order ID</th>
                     <th>Buyer Username</th>
-                    <th>Restaurant</th>
+                    <th>Restaurant Name</th>
+                    <th>Item Name</th>
                     <th>Total Price</th>
-                    <th>Order Status</th>
+                    <th>Quantity</th>
                     <th>Date</th>
-                    <th>Actions</th> <!-- Added Actions column for updating status -->
+                    <th>Order Status</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,22 +52,25 @@
                         <td>{{ order.quantity }}</td>
                         <td>{{ order.order_date }}</td>
                         <td>{{ order.order_status }}</td>
+                        <td>{{ order.status }}</td>
                         <td>
-                            <!-- Form to update order status -->
-                            <form method="POST" action="{{ url_for('update_order_status', order_id=order.id) }}">
-                                <select name="order_status">
-                                    <option value="pending" {% if order.order_status == 'pending' %}selected{% endif %}>Pending</option>
-                                    <option value="completed" {% if order.order_status == 'completed' %}selected{% endif %}>Completed</option>
-                                    <option value="canceled" {% if order.order_status == 'canceled' %}selected{% endif %}>Canceled</option>
+                            {% if order.order_status == 'current' %}
+                            <form method="POST" action="{{ url_for('update_seller_order_status', order_id=order.id) }}">
+                                <select name="status">
+                                    <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
+                                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
                                 </select>
                                 <button type="submit">Update Status</button>
                             </form>
+                            {% else %}
+                                    <span>N/A</span>
+                                {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
-            {% else %}
-                <tr><td colspan="8">No orders found for this restaurant.</td></tr>
-            {% endif %}
+                {% else %}
+                <tr><td colspan="10">No orders found for this restaurant.</td></tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

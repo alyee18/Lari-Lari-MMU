@@ -28,14 +28,14 @@ def createtables():
             """
             CREATE TABLE IF NOT EXISTS restaurants (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
+                name TEXT NOT NULL UNIQUE,
                 cuisine TEXT NOT NULL,
                 price_range TEXT NOT NULL,
                 delivery_time INTEGER NOT NULL,
                 owner_username TEXT NOT NULL,
                 FOREIGN KEY (owner_username) REFERENCES users(username)
             )
-        """
+            """
         )
 
         # Create menu_items table with a description column
@@ -51,18 +51,6 @@ def createtables():
         """
         )
 
-        # Create tasks table
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS tasks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                task_type TEXT NOT NULL,
-                description TEXT NOT NULL,
-                status TEXT NOT NULL
-            )
-            """
-        )
-
          # Create the orders table
         cursor.execute(
             """
@@ -74,7 +62,14 @@ def createtables():
                 total_price REAL NOT NULL,
                 quantity INTEGER NOT NULL,
                 order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-                order_status TEXT DEFAULT 'pending'
+                order_status TEXT DEFAULT 'available',
+                status TEXT DEFAULT 'pending',
+                runner_name TEXT,
+                runner_lat REAL,
+                runner_lng REAL,
+                delivery_address TEXT,
+                delivery_lat REAL,
+                delivery_lng REAL
             )
             """
         )

@@ -51,27 +51,38 @@
             <thead>
                 <tr>
                     <th>Order ID</th>
-                    <th>Restaurant</th>
-                    <th>Order Items</th>
+                    <th>Restaurant Name</th>
+                    <th>Item Name</th>
                     <th>Total Price</th>
+                    <th>Quantity</th>
                     <th>Order Status</th>
                     <th>Date</th>
+                    <th>Delivery Address</th>
+                    <th>Details</th>
                 </tr>
             </thead>
             <tbody>
+                {% if orders %}
                 {% for order in orders %}
                 <tr>
                     <td>{{ order.id }}</td>
                     <td>{{ order.restaurant_name }}</td>
                     <td>{{ order.item_name }}</td> 
                     <td>{{ order.total_price }}</td>
+                    <td>{{ order.quantity }}</td>
                     <td>{{ order.order_status }}</td>
                     <td>{{ order.order_date }}</td>
+                    <td>{{ order.delivery_address }}</td>
+                    <td>
+                        <a href="{{ url_for('buyer_order_details', order_id=order.id) }}">View Details</a>
+                    </td>
                 </tr>
                 {% endfor %}
+                {% else %}
+                <tr><td colspan="8">No orders found.</td></tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
-
 </body>
 </html>

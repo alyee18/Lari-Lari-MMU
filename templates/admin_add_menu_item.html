@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Menu Item</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Add Menu Item</h2>
+        <form action="{{ url_for('admin_add_menu_item') }}" method="post">
+            <div class="form-group">
+                <label for="name">Item Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="restaurant_id">Restaurant:</label>
+                <select id="restaurant_id" name="restaurant_id">
+                    {% for restaurant in restaurants %}
+                        <option value="{{ restaurant.id }}">{{ restaurant.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit">Add Menu Item</button>
+            </div>
+        </form>
+        <a href="{{ url_for('menucontrol') }}" class="back-link">Back to Menu Control</a>
+    </div>
+</body>
+</html>

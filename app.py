@@ -2,14 +2,20 @@ from flask import Flask, render_template, redirect, url_for, session, flash, req
 import os
 import json
 import sqlite3
+import logging
+logging.basicConfig(level=logging.DEBUG)
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 from datetime import datetime
+from flask_socketio import SocketIO, emit
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
+socketio = SocketIO(app)
 
 def get_db_connection():
     con = sqlite3.connect("database.db")
@@ -26,7 +32,7 @@ def get_tasks(task_type):
     conn.close()
     return tasks
 
-######### Admin ##########
+######### Admin Page Editor##########
 def load_content():
     """Load content from content.json."""
     try:
@@ -111,6 +117,7 @@ def change_admin_credentials():
     
     return redirect(url_for("page_editor"))
 
+######### Admin ##########
 @app.route('/admin-login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
@@ -167,12 +174,36 @@ def admin_dashboard():
     cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'seller'")
     num_sellers = cursor.fetchone()[0]
 
-    cursor.execute('SELECT * FROM orders')
-    orders = cursor.fetchall()
+    cursor.execute("SELECT COUNT(*) FROM orders")
+    num_orders = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT restaurant_name, 
+               SUM(total_price) AS total_earnings, 
+               COUNT(id) AS total_orders 
+        FROM orders 
+        GROUP BY restaurant_name
+    """)
+    financial_overview = cursor.fetchall()
 
     conn.close()
 
-    return render_template('admin.html', num_runners=num_runners, num_buyers=num_buyers, num_sellers=num_sellers, orders=orders)
+    financial_data = {
+        restaurant['restaurant_name']: {
+            'total_earnings': restaurant['total_earnings'],
+            'total_orders': restaurant['total_orders']
+        }
+        for restaurant in financial_overview
+    }
+
+    return render_template(
+        'admin.html',
+        num_runners=num_runners,
+        num_buyers=num_buyers,
+        num_sellers=num_sellers,
+        num_orders=num_orders,
+        financial_data=financial_data
+    )
     
 @app.route('/usercontrol')
 def user_control():
@@ -241,89 +272,230 @@ def delete_user(user_id):
     flash('User deleted and IDs renumbered successfully!', 'success')
     return redirect(url_for('admin_dashboard'))
 
-
-@app.route('/menucontrol')
-def menu_control():
+@app.route('/menucontrol', methods=['GET'])
+def menucontrol():
     conn = get_db_connection()
-    menu_items = conn.execute('SELECT * FROM menu_items').fetchall()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT id, name, price, restaurant_id
+        FROM menu_items
+    """
+    cursor.execute(query)
+    menu_items = cursor.fetchall()
     conn.close()
+
     return render_template('menucontrol.html', menu_items=menu_items)
+
+@app.route('/admin/add_menu_item', methods=['GET', 'POST'])
+def admin_add_menu_item():
+    if request.method == 'POST':
+        name = request.form['name']
+        price = request.form['price']
+        restaurant_name = request.form['restaurant_name']
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO menu (name, price, restaurant_name)
+            VALUES (?, ?, ?)
+        """
+        cursor.execute(query, (name, price, restaurant_name))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('menucontrol'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM restaurants")
+    restaurants = cursor.fetchall()
+    conn.close()
+
+    return render_template('admin_add_menu_item.html', restaurants=restaurants)
 
 @app.route('/admin/edit_menu_item/<int:item_id>', methods=['GET', 'POST'])
 def edit_menu_item(item_id):
     conn = get_db_connection()
-    item = conn.execute('SELECT * FROM menu_items WHERE id = ?', (item_id,)).fetchone()
+    cursor = conn.cursor()
 
     if request.method == 'POST':
         name = request.form['name']
         price = request.form['price']
-        conn.execute('UPDATE menu_items SET name = ?, price = ? WHERE id = ?', (name, price, item_id))
+        restaurant_name = request.form['restaurant_name']
+
+        query = """
+            UPDATE menu
+            SET name = ?, price = ?, restaurant_name = ?
+            WHERE id = ?
+        """
+        cursor.execute(query, (name, price, restaurant_name))
         conn.commit()
         conn.close()
-        flash('Menu item updated successfully!', 'success')
-        return redirect(url_for('admin_dashboard'))
 
+        return redirect(url_for('menucontrol'))
+    
+    query = """
+        SELECT id, name, price, restaurant_name
+        FROM menu
+        WHERE id = ?
+    """
+    cursor.execute(query)
+    menu_item = cursor.fetchone()
     conn.close()
-    return render_template('edit_menu_item.html', item=item)
 
-@app.route('/ordercontrol')
-def order_control():
+    return render_template('edit_menu_item.html', menu_item=menu_item)
+
+@app.route('/admin/delete_menu_item/<int:menu_id>', methods=['GET'])
+def admin_delete_menu_item(menu_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT * FROM orders')
-    orders = cursor.fetchall()
+    query = """
+        DELETE FROM menu
+        WHERE id = ?
+    """
+    cursor.execute(query, (menu_id,))
+    conn.commit()
+    conn.close()
 
+    return redirect(url_for('menu_control'))
+
+@app.route('/ordercontrol', methods=['GET'])
+def ordercontrol():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, status
+        FROM orders
+    """
+    cursor.execute(query)
+    orders = cursor.fetchall()
     conn.close()
 
     return render_template('ordercontrol.html', orders=orders)
 
-@app.route('/updateorderstatus/<int:order_id>', methods=('GET', 'POST'))
-def update_order_status(order_id):
-    conn = get_db_connection()
-    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
-    
-    if request.method == 'POST':
-        status = request.form['status']
-        conn.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id))
-        conn.commit()
-        conn.close()
-        return redirect('/ordercontrol')
-    
-    conn.close()
-    return render_template('update_order_status.html', order=order)
-
-@app.route('/restaurantcontrol')
-def restaurant_control():
+@app.route('/edit_order/<int:order_id>', methods=['GET'])
+def edit_order(order_id):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, cuisine, price_range FROM restaurants")
+
+    query = """
+        SELECT id, item_name, total_price, quantity, status
+        FROM orders
+        WHERE id = ?
+    """
+    cursor.execute(query, (order_id,))
+    order = cursor.fetchone()
+    conn.close()
+
+    if order is None:
+        return redirect(url_for('order_control'))
+
+    return render_template('edit_order.html', order=order)
+
+
+@app.route('/update_order_status/<int:order_id>', methods=['POST'])
+def update_order_status(order_id):
+    item_name = request.form['item_name']
+    total_price = float(request.form['total_price'])
+    quantity = int(request.form['quantity'])
+    status = request.form['status']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        UPDATE orders
+        SET item_name = ?, total_price = ?, quantity = ?, status = ?
+        WHERE id = ?
+    """
+    cursor.execute(query, (item_name, total_price, quantity, status, order_id))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('ordercontrol'))
+
+@app.route('/delete_order/<int:order_id>', methods=['GET'])
+def delete_order(order_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        DELETE FROM orders
+        WHERE id = ?
+    """
+    cursor.execute(query, (order_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('ordercontrol'))
+
+@app.route('/restaurantcontrol', methods=['GET'])
+def restaurantcontrol():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT id, name, cuisine, price_range
+        FROM restaurants
+    """
+    cursor.execute(query)
     restaurants = cursor.fetchall()
     conn.close()
-    print(restaurants)
 
     return render_template('restaurantcontrol.html', restaurants=restaurants)
 
 @app.route('/admin/edit_restaurant/<int:restaurant_id>', methods=['GET', 'POST'])
 def edit_restaurant(restaurant_id):
     conn = get_db_connection()
-    restaurant = conn.execute('SELECT * FROM restaurants WHERE id = ?', (restaurant_id,)).fetchone()
+    cursor = conn.cursor()
     
     if request.method == 'POST':
         name = request.form['name']
         cuisine = request.form['cuisine']
         price_range = request.form['price_range']
-        
-        conn.execute('UPDATE restaurants SET name = ?, cuisine = ?, price_range = ? WHERE id = ?',
-                     (name, cuisine, price_range, restaurant_id))
+
+        query = """
+            UPDATE restaurants
+            SET name = ?, cuisine = ?, price_range = ?
+            WHERE id = ?
+        """
+        cursor.execute(query, (name, cuisine, price_range, restaurant_id))
         conn.commit()
         conn.close()
-        flash('Restaurant updated successfully!', 'success')
-        return redirect(url_for('restaurant_control'))
+
+        return redirect(url_for('restaurantcontrol'))
     
+    query = """
+        SELECT id, name, cuisine, price_range
+        FROM restaurants
+        WHERE id = ?
+    """
+    cursor.execute(query, (restaurant_id,))
+    restaurant = cursor.fetchone()
     conn.close()
+
+    if restaurant is None:
+        return redirect(url_for('restaurantcontrol'))
+
     return render_template('edit_restaurant.html', restaurant=restaurant)
 
+@app.route('/delete_restaurant/<int:restaurant_id>', methods=['GET'])
+def delete_restaurant(restaurant_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        DELETE FROM restaurants
+        WHERE id = ?
+    """
+    cursor.execute(query, (restaurant_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('restaurantcontrol'))
 
 ######### home ##########
 @app.route("/")
@@ -338,13 +510,248 @@ def runner_home():
         return redirect(url_for('index'))
     return render_template('runner_home.html')
 
+@app.route('/runner_tasks/<runner_name>/<task_type>')
+def runner_tasks(runner_name, task_type):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if task_type in ['available', 'current', 'completed']:
+        cursor.execute(
+            """
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, runner_name
+            FROM orders
+            WHERE order_status = ? AND (runner_name = ? OR runner_name IS NULL)
+            """,
+            (task_type, runner_name)
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, runner_name
+            FROM orders
+            WHERE runner_name = ?
+            """,
+            (runner_name,)
+        )
+
+    tasks = cursor.fetchall()
+    
+    cursor.execute("SELECT username FROM users WHERE role = 'runner'")
+    runners = cursor.fetchall()
+
+    conn.close()
+    return render_template('runner_tasks.html', task_type=task_type, tasks=tasks)
+
+@app.route('/place_order', methods=['POST'])
+def place_order():
+    buyer_username = request.form['buyer_username']
+    restaurant_name = request.form['restaurant_name']
+    item_name = request.form['item_name']
+    total_price = float(request.form['total_price'])
+    quantity = int(request.form['quantity'])
+    order_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    delivery_address = request.form['delivery_address']
+
+    geolocator = Nominatim(user_agent="myApp")
+    try:
+        location = geolocator.geocode(delivery_address)
+        if location:
+            delivery_lat = location.latitude
+            delivery_lng = location.longitude
+        else:
+            delivery_lat = None
+            delivery_lng = None
+            print(f"Failed to geocode address: {delivery_address}")
+    except (GeocoderTimedOut, GeocoderServiceError) as e:
+        print(f"Geocoding error: {e}")
+        delivery_lat = None
+        delivery_lng = None
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity, order_status, order_date, delivery_address, delivery_lat, delivery_lng)
+        VALUES (?, ?, ?, ?, ?, 'available', ?, ?, ?, ?)
+        """,
+        (buyer_username, restaurant_name, item_name, total_price, quantity, order_date, delivery_address, delivery_lat, delivery_lng)
+    )
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('order_confirmation'))
+
+@app.route('/accept_order/<int:order_id>', methods=['POST'])
+def accept_order(order_id):
+    runner_name = request.form.get('runner_name')
+    logging.debug(f"Attempting to accept order ID {order_id} for runner {runner_name}")
+
+    if not runner_name:
+        return "Runner name is required", 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+    """
+    UPDATE orders
+    SET order_status = 'current', runner_name = ?
+    WHERE id = ?
+    """,
+    (runner_name, order_id)
+)
+
+    conn.commit()
+    conn.close()
+    return redirect(url_for('task_management', task_type='current'))
+
+@app.route('/complete_order/<int:order_id>', methods=['POST'])
+def complete_order(order_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(
+    """
+    UPDATE orders
+    SET order_status = 'completed'
+    WHERE id = ?
+    """,
+    (order_id,)
+)
+
+    conn.commit()
+    conn.close()
+    return redirect(url_for('task_management', task_type='completed'))
+
 @app.route('/task_management/<task_type>')
 def task_management(task_type):
-    task_list = get_tasks(task_type)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    runner_name = session.get('username')
 
-    task_list = [{'id': task['id'], 'description': task['description']} for task in task_list]
+    # Determine the status to filter tasks
+    if task_type == 'current':
+        cursor.execute(
+            """
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, delivery_address, status, order_status
+            FROM orders
+            WHERE order_status = 'current' AND (runner_name IS NULL OR runner_name = ?)
+            """,
+            (runner_name,)
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT id, item_name, restaurant_name, total_price, quantity, buyer_username, order_date, delivery_address, status, order_status
+            FROM orders
+            WHERE order_status = ? AND (runner_name IS NULL OR runner_name = ?)
+            """,
+            (task_type, runner_name)
+        )
 
-    return render_template('task_management.html', tasks=task_list, task_type=task_type)
+    tasks = cursor.fetchall()
+
+    cursor.execute("SELECT username FROM users WHERE role = 'runner'")
+    runners = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('task_management.html', task_type=task_type, tasks=tasks, runners=runners)
+
+@app.route('/update_status/<int:order_id>', methods=['POST'])
+def update_status(order_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT status, order_status FROM orders WHERE id = ?", (order_id,))
+        result = cursor.fetchone()
+
+        if result:
+            current_status, order_status = result
+
+            if order_status == 'current' and current_status == 'delivered':
+                cursor.execute(
+                    "UPDATE orders SET status = 'picked up', runner_name = ? WHERE id = ?", 
+                    (session['username'], order_id)
+                )
+                conn.commit()
+                flash('Order successfully picked up.', 'success')
+                return redirect(url_for('share_location', order_id=order_id))
+            else:
+                flash('Order cannot be picked up (incorrect status).', 'error')
+        else:
+            flash('Order not found.', 'error')
+
+    except sqlite3.Error as e:
+        print(f"Error updating order status: {e}")
+        conn.rollback()
+        flash('An unexpected error occurred while updating the order status.', 'error')
+
+    finally:
+        conn.close()
+
+    return redirect(url_for('task_management', task_type='current'))
+
+@app.route('/share_location/<int:order_id>')
+def share_location(order_id):
+    return render_template('share_location.html', order_id=order_id)
+
+@socketio.on('share_location')
+def handle_location(data):
+    order_id = data['order_id']
+    lat = data['lat']
+    lng = data['lng']
+
+    print(f"Order ID: {order_id}, Latitude: {lat}, Longitude: {lng}")
+
+    try:
+        with sqlite3.connect('database.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE orders
+                SET runner_lat = ?, runner_lng = ?
+                WHERE id = ?
+            ''', (lat, lng, order_id))
+            conn.commit()
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+
+    emit('location_received', {'status': 'success', 'order_id': order_id}, broadcast=True)
+
+@app.route('/runner_location/<int:order_id>', methods=['GET'])
+def runner_location(order_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT runner_lat, runner_lng, delivery_address_lat, delivery_address_lng
+        FROM orders
+        WHERE id = ?
+    """
+    cursor.execute(query, (order_id,))
+    order = cursor.fetchone()
+    conn.close()
+    
+    if order is None:
+        return "Order not found", 404
+
+    runner_lat = order['runner_lat']
+    runner_lng = order['runner_lng']
+    delivery_lat = order['delivery_address_lat']
+    delivery_lng = order['delivery_address_lng']
+    
+    return render_template('runner_location.html', 
+                           runner_lat=runner_lat, runner_lng=runner_lng,
+                           delivery_lat=delivery_lat, delivery_lng=delivery_lng)
+
+def geocode_address(address):
+    geolocator = Nominatim(user_agent="myGeocoder")
+    location = geolocator.geocode(address)
+    if location:
+        return location.latitude, location.longitude
+    else:
+        return None, None
 
 @app.route('/progress_tracking')
 def progress_tracking():
@@ -822,57 +1229,63 @@ def seller_progress_tracking():
 @app.route('/seller_orders')
 @login_required(role='seller')
 def seller_orders():
-    restaurant_name = session.get('restaurant_name')
-
-    if not restaurant_name:
-        flash("Restaurant name is missing. Please select a restaurant.", "error")
-        return redirect(url_for('seller_home'))
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        # Fetch all orders for the seller's restaurant
         cursor.execute("""
-            SELECT id, buyer_username, item_name, total_price, quantity, order_date, order_status
+            SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, order_status, status
             FROM orders
-            WHERE restaurant_name = ?
             ORDER BY order_date DESC
-        """, (restaurant_name,))
+        """)
         orders = cursor.fetchall()
+        print(f"Orders fetched: {orders}")
+        
     except sqlite3.Error as e:
-        flash(f"An error occurred while fetching orders: {e}", "error")
         orders = []
-
-    conn.close()
+        print(f"Database error: {e}")
+    finally:
+        conn.close()
 
     return render_template('seller_orders.html', orders=orders)
 
-
-@app.route('/update_order_status/<int:order_id>', methods=['POST'])
+@app.route('/update_seller_order_status/<int:order_id>', methods=['POST'])
 @login_required(role='seller')
-def update_order_status_handler(order_id):
-    new_status = request.form.get('order_status')
+def update_seller_order_status(order_id):
+    new_status = request.form['status']
 
-    if new_status not in ['pending', 'completed', 'canceled']:
-        flash("Invalid status.", "error")
+    if new_status not in ['preparing', 'delivered']:
+        flash('Invalid status selected.', 'error')
         return redirect(url_for('seller_orders'))
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        cursor.execute(
-            """
+        cursor.execute("""
+            SELECT order_status FROM orders WHERE id = ?
+        """, (order_id,))
+        order = cursor.fetchone()
+
+        if not order:
+            flash('Order not found.', 'error')
+            return redirect(url_for('seller_orders'))
+        
+        if order[0] != 'current':
+            flash('Order status cannot be updated from its current state.', 'error')
+            return redirect(url_for('seller_orders'))
+        
+        cursor.execute("""
             UPDATE orders
-            SET order_status = ?
+            SET status = ?
             WHERE id = ?
-            """,
-            (new_status, order_id)
-        )
+        """, (new_status, order_id))
         conn.commit()
-        flash("Order status updated successfully!", "success")
+        flash('Order status updated successfully.', 'success')
     except sqlite3.Error as e:
-        flash(f"An error occurred: {e}", "error")
+        print(f"Error updating order status: {e}")
+        flash('An error occurred while updating the order status.', 'error')
     finally:
         conn.close()
 
@@ -908,52 +1321,53 @@ def restaurant_list():
 
 @app.route('/order_confirmation')
 def order_confirmation():
-    return render_template('order_confirmation.html', message="Your order has been confirmed!")
+    delivery_address = session.get('delivery_address', 'Address not found')
+    return render_template('order_confirmation.html', delivery_address=delivery_address, message="Your order has been confirmed!")
     
 @app.route('/confirm_order', methods=['POST'])
 @login_required(role='buyer')
 def confirm_order():
     conn = None
     try:
-        print("Confirm Order route accessed")
         cart_items = session.get('cart', [])
-        print(f"Cart items: {cart_items}")
+        delivery_address = request.form.get('delivery_address')
 
         if not cart_items:
             flash("Cart is empty. Please add items before confirming the order.", "error")
             return redirect(url_for('view_cart'))
 
-        restaurant_id = cart_items[0].get("restaurant_id")
-        total_price = sum(float(item.get('price', 0)) * int(item.get('quantity', 1)) for item in cart_items)
-        print(f"Total price: {total_price}")
-
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Fetch the restaurant name from the database using restaurant_id
-        cursor.execute("SELECT name FROM restaurants WHERE id = ?", (restaurant_id,))
-        restaurant_row = cursor.fetchone()
-
-        if not restaurant_row:
-            flash("Restaurant not found.", "error")
-            return redirect(url_for('view_cart'))
-
-        restaurant_name = restaurant_row[0]
-        print(f"Restaurant name from DB: {restaurant_name}")
-
-        # Insert the order into the orders table
+        # Insert each item as a separate order with its correct restaurant name
         for item in cart_items:
+            restaurant_id = item.get("restaurant_id")
+            item_name = item.get("item_name")
+            quantity = int(item.get("quantity", 1))
+            price = float(item.get("price", 0))
+            item_total_price = price * quantity
+
+            cursor.execute("SELECT name FROM restaurants WHERE id = ?", (restaurant_id,))
+            restaurant_row = cursor.fetchone()
+
+            if not restaurant_row:
+                flash(f"Restaurant not found for item {item_name}.", "error")
+                return redirect(url_for('view_cart'))
+
+            restaurant_name = restaurant_row[0]
+
+            # Insert the order with the correct restaurant name
             cursor.execute(
                 """
-                INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity, delivery_address)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                (session["username"], restaurant_name, item["item_name"], total_price, item["quantity"])
+                (session["username"], restaurant_name, item_name, item_total_price, quantity, delivery_address)
             )
 
         conn.commit()
-        flash("Order confirmed successfully!", "success")
-        session.pop('cart', None)
+        session.pop('cart', None)  # Clear the cart after order confirmation
+        session['delivery_address'] = delivery_address  # Save address to session
 
     except sqlite3.Error as e:
         if conn:
@@ -965,9 +1379,7 @@ def confirm_order():
         if conn:
             conn.close()
 
-    # Ensure 'order_confirmation' is a valid endpoint
     return redirect(url_for('order_confirmation'))
-
 
 @app.route("/restaurant/<int:restaurant_id>")
 @login_required(role='buyer')
@@ -1055,22 +1467,24 @@ def view_cart():
 
     # Add restaurant names to cart items
     for item in cart_items:
-        item["restaurant_name"] = restaurants.get(item["restaurant_id"], "Unknown")
+        item["restaurant_name"] = restaurants.get(item.get("restaurant_id"), "Unknown")
 
-    return render_template("cart.html", cart_items=cart_items, total_price=total_price)
+    order_id = 1
+
+    return render_template("cart.html", cart_items=cart_items, total_price=total_price, order_id=order_id)
 
 @app.route("/update_cart", methods=["POST"])
 @login_required(role='buyer')
 def update_cart():
-    item_index = int(request.form.get("item_index"))
-    quantity = int(request.form.get("quantity"))
+    item_index = int(request.form.get('item_index'))
+    new_quantity = int(request.form.get('quantity'))
 
-    if "cart" in session:
-        if 0 <= item_index < len(session["cart"]):
-            session["cart"][item_index]["quantity"] = quantity
-            session.modified = True
+    cart_items = session.get('cart', [])
+    if item_index < len(cart_items):
+        cart_items[item_index]['quantity'] = new_quantity
+        session['cart'] = cart_items
 
-    return redirect(url_for("view_cart"))
+    return redirect(url_for('view_cart'))
 
 @app.route("/remove_from_cart", methods=["POST"])
 @login_required(role='buyer')
@@ -1162,9 +1576,9 @@ def buyer_orders():
     cursor = conn.cursor()
 
     try:
-        # Fetch orders with correct schema
+        # Fetch orders for the current buyer, including the restaurant name
         cursor.execute("""
-            SELECT orders.id, orders.restaurant_name, orders.item_name,orders.total_price,orders.order_status, orders.order_date
+            SELECT orders.id, orders.restaurant_name, orders.item_name, orders.total_price, orders.quantity, orders.order_status, orders.order_date, orders.delivery_address
             FROM orders
             WHERE orders.buyer_username = ?
             ORDER BY orders.order_date DESC
@@ -1182,5 +1596,25 @@ def buyer_orders():
 
     return render_template('buyer_orders.html', orders=orders)
 
+@app.route('/buyer_order_details/<int:order_id>', methods=['GET'])
+def buyer_order_details(order_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, delivery_address, delivery_lat, delivery_lng, runner_lat, runner_lng, runner_name, status, order_status
+        FROM orders
+        WHERE id = ?
+        """
+    cursor.execute(query, (order_id,))
+    order = cursor.fetchone()
+    conn.close()
+
+    if order is None:
+        return redirect(url_for('buyer_orders'))
+    
+    return render_template('buyer_order_details.html', order=order)
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    socketio.run(app, debug=True)
