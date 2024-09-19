@@ -930,6 +930,7 @@ def confirm_order():
         conn = get_db_connection()
         cursor = conn.cursor()
 
+        # Insert each item as a separate order with its correct restaurant name
         for item in cart_items:
             restaurant_id = item.get("restaurant_id")
             item_name = item.get("item_name")
@@ -945,8 +946,9 @@ def confirm_order():
                 flash(f"Restaurant not found for item {item_name}.", "error")
                 return redirect(url_for('view_cart'))
 
-            restaurant_name = restaurant_row[0]  
+            restaurant_name = restaurant_row[0]  # Get the restaurant name
 
+            # Insert the order with the correct restaurant name
             cursor.execute(
                 """
                 INSERT INTO orders (buyer_username, restaurant_name, item_name, total_price, quantity)
@@ -956,7 +958,7 @@ def confirm_order():
             )
 
         conn.commit()
-        session.pop('cart', None)  
+        session.pop('cart', None)  # Clear the cart after order confirmation
 
     except sqlite3.Error as e:
         if conn:
