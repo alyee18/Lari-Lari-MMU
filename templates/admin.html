@@ -69,8 +69,13 @@
     <div class="graphcontainer">
         <div class="graph">
             <canvas id="summaryChart" width="400" height="200"></canvas>
-            <canvas id="financialOverviewChart" width="400" height="200"></canvas>
+            <canvas id="earningsChart" width="400" height="200"></canvas>
+            <canvas id="ordersChart" width="400" height="200"></canvas>
         </div>
     </div>
+
+    <script id="financialData" type="application/json">
+        {{ financial_data | tojson }}
+    </script>
 </body>
 </html>
