@@ -31,7 +31,6 @@ def createtables():
                 name TEXT NOT NULL UNIQUE,
                 cuisine TEXT NOT NULL,
                 price_range TEXT NOT NULL,
-                delivery_time INTEGER NOT NULL,
                 owner_username TEXT NOT NULL,
                 FOREIGN KEY (owner_username) REFERENCES users(username)
             )
@@ -46,6 +45,7 @@ def createtables():
                 restaurant_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 price REAL NOT NULL,
+                categorie TEXT NOT NULL,
                 FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
             )
         """
