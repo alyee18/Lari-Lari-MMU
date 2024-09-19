@@ -19,47 +19,48 @@
     
     <!--------------------------aos-animation-link---------------------------------------------------->
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-</head>
-<body>
-    <div class="cart">
-        <div class="cart-header">
-            <div class="cart-icon">
-                <i class='bx bx-cart'></i>
+    </head>
+    <body>
+        <div class="cart">
+            <div class="cart-header">
+                <div class="cart-icon">
+                    <i class='bx bx-cart'></i>
+                </div>
+                <h1>Your Cart</h1>
             </div>
-            <h1>Your Cart</h1>
-        </div>
-    {% if cart_items %}
-    <ul class="cart-item">
-        {% for item in cart_items %}
-            
-            <li class="item-info">
-                    {{ item['item_name'] }} - {{ item['quantity'] }} x ${{ item['price'] }} from {{ item['restaurant_name'] }}
-                    <form action="{{ url_for('update_cart') }}" method="post" style="display:inline;">
-                        <input type="hidden" name="item_index" value="{{ loop.index0 }}">
-                        <input type="number" name="quantity" value="{{ item['quantity'] }}" min="1">
-                        <button type="submit">Update</button>
-                    </form>
-                    <form action="{{ url_for('remove_from_cart') }}" method="post" style="display:inline;">
-                        <input type="hidden" name="item_index" value="{{ loop.index0 }}">
-                        <button type="submit">Remove</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
-
-        <h2>Total: ${{ total_price }}</h2>
+        {% if cart_items %}
+        <ul class="cart-item">
+            {% for item in cart_items %}
+                
+                <li class="item-info">
+                        {{ item['item_name'] }} - {{ item['quantity'] }} x ${{ item['price'] }} from {{ item['restaurant_name'] }}
+                        <form action="{{ url_for('update_cart') }}" method="post" style="display:inline;">
+                            <input type="hidden" name="item_index" value="{{ loop.index0 }}">
+                            <input type="number" name="quantity" value="{{ item['quantity'] }}" min="1">
+                            <button type="submit">Update</button>
+                        </form>
+                        <form action="{{ url_for('remove_from_cart') }}" method="post" style="display:inline;">
+                            <input type="hidden" name="item_index" value="{{ loop.index0 }}">
+                            <button type="submit">Remove</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+    
+            <h2>Total: ${{ total_price }}</h2>
 
         <form action="{{ url_for('confirm_order') }}" method="POST">
+            <label for="delivery_address">Enter Delivery Address:</label>
+            <input type="text" id="delivery_address" name="delivery_address" required>
             <button type="submit">Confirm Order</button>
         </form>
-
-    {% else %}
-        <p>Your cart is empty.</p>
-    {% endif %}
-
-    <ul>
-        <li><a href="{{ url_for('restaurant_list') }}">Back to Restaurant List</a></li>
-        <li><a href="{{ url_for('buyer_home') }}">Back to Home</a></li>
-    </ul>
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
+        <ul>
+            <li><a href="{{ url_for('restaurant_list') }}">Back to Restaurant List</a></li>
+            <li><a href="{{ url_for('buyer_home') }}">Back to Home</a></li>
+        </ul>
+    </div>
 </body>
 </html>
