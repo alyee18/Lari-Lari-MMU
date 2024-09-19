@@ -4,48 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Control</title>
+    <link rel="stylesheet" type="text/css" href="../static/style(admin2).css">
+    <!--------------------------box-icon-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    
+</head>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>Dashboard</h2>
-        <ul>
-            <li><a href="/admin">Dashboard</a></li>
-            <li><a href="/usercontrol">User Control</a></li>
-            <li><a href="/restaurantcontrol">Restaurant Control</a></li>
-            <li><a href="/ordercontrol">Order Control</a></li>
-            <li><a href="/menucontrol">Menu Control</a></li>
-            <li><a href="/pageEditor">Page Editor</a></li>
-            <li><a href="/logout">Log Out</a></li>
-        </ul>
+    <div class="admincontainer">
+        <div class="navbar">
+            <ul>
+                <li><a href="#">Lari Lari MMU</a></li>
+                <li><i class='bx bx-home'></i><a href="/admin">Dashboard</a></li>
+                <li><i class='bx bx-user'></i><a href="/usercontrol">User Control</a></li>
+                <li><i class='bx bx-store-alt'></i><a href="/restaurantcontrol">Restaurant Control</a></li>
+                <li><i class='bx bx-cart'></i><a href="/ordercontrol">Order Control</a></li>
+                <li><i class='bx bx-food-menu'></i><a href="/menucontrol">Menu Control</a></li>
+                <li><i class='bx bx-edit'></i><a href="/pageEditor">Page Editor</a></li>
+                <li><i class='bx bx-log-out'></i><a href="/logout">Log Out</a></li>
+            </ul>
+        </div>
     </div>
 
-    <div class="content">
-        <h2>Menu Control</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Restaurant</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in menu_items %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.price }}</td>
-                    <td>{{ item.restaurant_id }}</td>
-                    <td>
-                        <a href="{{ url_for('edit_menu_item', item_id=item.id) }}">Edit</a>
-                        
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="admin-main">
+        <div class="admin-header">
+            <h2>Menu Control</h2>
+        </div>
+        <div class="admin-table">
+            <div class="table-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Item Name</th>
+                            <th>Price</th>
+                            <th>Restaurant</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for menu_item in menu_items %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ menu_item.name }}</td>
+                            <td>{{ menu_item.price }}</td>
+                            <td>{{ menu_item.restaurant_name }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_menu_item', item_id=menu_item.id) }}">Edit</a>
+                                <a href="{{ url_for('admin_delete_menu_item', menu_id=menu_item.id) }}" onclick="return confirm('Are you sure you want to delete this item?')">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{{ url_for('admin_add_menu_item') }}">Add New Menu Item</a>    
+            </div>    
+        </div>
     </div>
 </body>
 </html>

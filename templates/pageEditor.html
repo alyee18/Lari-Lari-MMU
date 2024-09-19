@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page Editor</title>
-    <link rel="stylesheet" type="text/css" href="../static/style5(PE).css">
+    <link rel="stylesheet" type="text/css" href="../static/style(admin2).css">
 
 <!--------------------------box-icon-link---------------------------------------------------->
 <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
@@ -21,65 +21,42 @@
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
-    <header>
-        <h1>Admin Page Editor</h1>
-    </header>
-    <div class="navigation-bar">
-        <ul>
-            <li><i class='bx bx-home'></i><a href="/admin">Dashboard</a></li>
-            <li><i class='bx bx-user'></i><a href="/usercontrol">User Control</a></li>
-            <li><i class='bx bx-cart'></i><a href="/ordercontrol">Order Control</a></li>
-            <li><i class='bx bx-food-menu'></i><a href="/menucontrol">Menu Control</a></li>
-            <li><i class='bx bx-edit'></i><a href="/pageEditor">Page Editor</a></li>
-            <li><i class='bx bx-log-out'></i><a href="/logout">Logout</a></li>
-        </ul>
+    <div class="admincontainer">
+        <div class="navbar">
+            <ul>
+                <li><a href="#">Lari Lari MMU</a></li>
+                <li><i class='bx bx-home'></i><a href="/admin">Dashboard</a></li>
+                <li><i class='bx bx-user'></i><a href="/usercontrol">User Control</a></li>
+                <li><i class='bx bx-store-alt'></i><a href="/restaurantcontrol">Restaurant Control</a></li>
+                <li><i class='bx bx-cart'></i><a href="/ordercontrol">Order Control</a></li>
+                <li><i class='bx bx-food-menu'></i><a href="/menucontrol">Menu Control</a></li>
+                <li><i class='bx bx-edit'></i><a href="/pageEditor">Page Editor</a></li>
+                <li><i class='bx bx-log-out'></i><a href="/logout">Log Out</a></li>
+            </ul>
+        </div>
     </div>
-    <div class="admin-container">
-        <div class="containerTT">
+    <div class="admin-main">
+        <div class="admin-header">
             <h2>Change HOME page content</h2>
         </div>
-        <div class="containerBody">
-            <form action="/pageEditor" method="post" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="home_content"> Home Page Content: </label>
-                    <textarea id="home_content" name="home_content" rows="10" cols="50" placeholder="Edit your content here...">{{ home_content }}</textarea>
-                </div>
-                <div class="form-group">
-                    <label> Shop Name: </label>
-                    <input type="text" id="shop_name" name="shop_name" value="{{ shop_name }}" placeholder="Enter shop name">
-                </div>
-                <div class="form-group">
-                    <label> Upload Logo: </label>
-                    <input type="file" id="logo" name="logo">
-                </div>
-                <button type="submit">Save Change</button>
-            </form>
-        </div>
-    </div>
-    <div class="admin-container">
-        <div class="containerTT">
-           <h2>Change ADMIN Credentials</h2> 
-        </div>
-        <div class="containerBody"></div>
-        <form action="/change_admin_credentials" method="post">
-            <div class="form-group">
-                <label> Admin Current Email: </label>
-                <input type="email" name="admin_current_email" value="{{ admin_current_email }}">
+        <div class="admin-body">
+            <div class="containerBody">
+                <form action="/pageEditor" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="home_content"> Home Page Content: </label>
+                        <textarea id="home_content" name="home_content" rows="10" cols="50" placeholder="Edit your content here...">{{ home_content }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label> Shop Name: </label>
+                        <input type="text" id="shop_name" name="shop_name" value="{{ shop_name }}" placeholder="Enter shop name">
+                    </div>
+                    <div class="form-group">
+                        <label> Upload Logo: </label>
+                        <input type="file" id="logo" name="logo">
+                    </div>
+                    <button type="submit">Save Change</button>
+                </form>
             </div>
-            <div class="form-group">
-                <label> Admin New Email: </label>
-                <input type="email" name="admin_email" placeholder="Enter NEW email">
-            </div>
-            <div class="form-group">
-                <label> Admin Current Password: </label>
-                <input type="password" name="admin_current_password" value="{{ admin_current_password }}">
-            </div>
-            <div class="form-group">
-                <label> Admin New Password:</label>
-                <input type="password"  name="admin_password" placeholder="Enter NEW password">
-            </div>
-            <button type="submit">Save Change</button>
-        </form>
     </div>
 </body>
 </html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runner Tasks</title>
+</head>
+<body>
+    <div class="container">
+        <h2>{{ task_type.replace('_', ' ').title() }} Deliveries</h2>
+        {% if tasks %}
+            <ul>
+                {% for task in tasks %}
+                    <li class="task-item">
+                        Order ID: {{ task.id }}
+                        <br>Item: {{ task.item_name }} from {{ task.restaurant_name }}
+                        <br>Total Price: {{ task.total_price }}
+                        <br>Quantity: {{ task.quantity }}
+                        <br>Buyer: {{ task.buyer_username }}
+                        <br>Order Date: {{ task.order_date }}
+                        <br>Assigned to: {{ task.runner_name if task.runner_name else 'Not yet assigned' }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No tasks available.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

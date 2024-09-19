@@ -64,7 +64,12 @@ def createtables():
                 order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
                 order_status TEXT DEFAULT 'available',
                 status TEXT DEFAULT 'pending',
-                runner_name TEXT
+                runner_name TEXT,
+                runner_lat REAL,
+                runner_lng REAL,
+                delivery_address TEXT,
+                delivery_lat REAL,
+                delivery_lng REAL
             )
             """
         )
