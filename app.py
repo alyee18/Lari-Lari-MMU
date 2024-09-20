@@ -1023,10 +1023,8 @@ def add_restaurant():
         name = request.form.get("name")
         cuisine = request.form.get("cuisine")
         price_range = request.form.get("price_range")
-        delivery_time = int(request.form.get("delivery_time", 0))
 
-        if not all([name, cuisine, price_range]) or delivery_time <= 0:
-            flash("All fields are required and delivery time must be positive!", "error")
+        if not all([name, cuisine, price_range]):
             return render_template("add_restaurant.html")
 
         try:
@@ -1034,10 +1032,10 @@ def add_restaurant():
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO restaurants (name, cuisine, price_range, delivery_time, owner_username)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO restaurants (name, cuisine, price_range, owner_username)
+                VALUES (?, ?, ?, ?)
                 """,
-                (name, cuisine, price_range, delivery_time, session["username"]),
+                (name, cuisine, price_range, session["username"]),
             )
             conn.commit()
             restaurant_id = cursor.lastrowid
@@ -1052,39 +1050,56 @@ def add_restaurant():
 
     return render_template("add_restaurant.html")
 
+def get_categories():
+    return [
+        {"name": "Main Course", "estimated_time": 30},
+        {"name": "Desserts", "estimated_time": 10},
+        {"name": "Beverages", "estimated_time": 5},
+        {"name": "Snack", "estimated_time": 5},
+        {"name": "Daily Necessities", "estimated_time": 5}
+    ]
+
 @app.route("/add_menu_item/<int:restaurant_id>", methods=["GET", "POST"])
 @login_required(role='seller')
 def add_menu_item(restaurant_id):
     if request.method == "POST":
         name = request.form.get("name")
-        price = float(request.form.get("price", 0))
+        try:
+            price = float(request.form.get("price", 0))
+        except ValueError:
+            flash("Invalid price entered. Please enter a valid number.", "error")
+            return render_template("add_menu_item.html", restaurant_id=restaurant_id, categories=get_categories())
 
-        # Check if all required fields are present
-        if not name or price <= 0:
-            flash("All fields are required and price must be positive!", "error")
-            return render_template("add_menu_item.html", restaurant_id=restaurant_id)
+        category_name = request.form.get("category")
+
+        if not name or price <= 0 or not category_name:
+            flash("All fields are required, and price must be a positive number.", "error")
+            return render_template("add_menu_item.html", restaurant_id=restaurant_id, categories=get_categories())
+
+        categories = get_categories()
+        estimated_time = next((category['estimated_time'] for category in categories if category['name'] == category_name), 5)
 
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO menu_items (restaurant_id, name, price)
-                VALUES (?, ?, ?)
+                INSERT INTO menu_items (restaurant_id, name, price, category, estimated_time)
+                VALUES (?, ?, ?, ?, ?)
                 """,
-                (restaurant_id, name, price),
+                (restaurant_id, name, price, category_name, estimated_time),
             )
             conn.commit()
+            flash("Menu item added successfully!", "success")
         except sqlite3.Error as e:
             flash(f"An error occurred: {e}", "error")
             print(f"SQLite error: {e}")
         finally:
             conn.close()
 
-        flash("Menu item added successfully!", "success")
-        return redirect(url_for("seller_home"))
+        return redirect(url_for("restaurant_items", restaurant_id=restaurant_id))
 
-    return render_template("add_menu_item.html", restaurant_id=restaurant_id)
+    return render_template("add_menu_item.html", restaurant_id=restaurant_id, categories=get_categories())
 
 @app.route('/restaurant/<int:restaurant_id>/menu/update/<int:item_id>', methods=['POST'])
 @login_required(role='seller')
@@ -1299,7 +1314,7 @@ def update_seller_order_status(order_id):
 def select_restaurant():
     restaurant_id = request.form.get('restaurant_id')
     if restaurant_id:
-        session['restaurant_id'] = restaurant_id  # Store restaurant_id in the session
+        session['restaurant_id'] = restaurant_id 
     return redirect(url_for('seller_orders'))
 
 ######### Buyer Page ##########
