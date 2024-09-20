@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ restaurant.name }}</title>
-    <link rel="stylesheet" type="text/css" href="../static/style2.css">
+    <link rel="stylesheet" type="text/css" href="../static/style(RD).css">
 
     <!--------------------------box-icon-link---------------------------------------------------->
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
@@ -12,40 +12,53 @@
     <!--------------------------remix-icon-link---------------------------------------------------->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
     
-    <!--------------------------google-font-link---------------------------------------------------->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+<!--------------------------google-font-link---------------------------------------------------->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
 
     <!--------------------------aos-animation-link---------------------------------------------------->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
-    <h1>{{ restaurant.name }}</h1>
-    <p>Cuisine: {{ restaurant.cuisine }}</p>
-    <p>Price Range: {{ restaurant.price_range }}</p>
+    <div class="main-container">
+        <div class="restaurant-container">
+        <h1>{{ restaurant.name }}</h1>
+        <p>Cuisine: {{ restaurant.cuisine }}</p>
+        <p>Price Range: {{ restaurant.price_range }}</p>
+        <p>Delivery Time: {{ restaurant.delivery_time }} minutes</p>
+        <p>Rating: {{ restaurant.rating }}</p>
+        </div>  
+        
+        <div class="menu-container">
+            <div class="menu-header">
+                <h2>Menu</h2>
+            </div>
+            <div class="menu-body">
+                <ul>
+                    {% for item in menu_items %}
+                        <li>{{ item.name }} - ${{ item.price }}</li>
+                        <br>Estimated Time: {{ item.estimated_time }} minutes</li>
+                    {% endfor %}
+                </ul>
+                <div class="menu-items">
+                    <form action="{{ url_for('add_to_cart') }}" method="post">
+                        <input type="hidden" name="restaurant_id" value="{{ restaurant.id }}">
+                        <label for="item_name">Choose an item:</label>
+                        <select name="item_name" id="item_name">
+                            {% for item in menu_items %}
+                                <option value="{{ item.name }}">{{ item.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" name="quantity" id="quantity" value="1" min="1">
+                        <button type="submit" class="button">Add to Cart</button>
+                        <a href="{{ url_for('restaurant_list') }}">Back to Restaurant List</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     
-    <h2>Menu</h2>
-    <ul>
-        {% for item in menu_items %}
-            <li>{{ item.name }} - ${{ item.price }} 
-            <br>Estimated Time: {{ item.estimated_time }} minutes</li>
-        {% endfor %}
-    </ul>
-
-    <form action="{{ url_for('add_to_cart') }}" method="post">
-        <input type="hidden" name="restaurant_id" value="{{ restaurant.id }}">
-        <label for="item_name">Choose an item:</label>
-        <select name="item_name" id="item_name">
-            {% for item in menu_items %}
-                <option value="{{ item.name }}">{{ item.name }} ({{ item.estimated_time }} mins)</option>
-            {% endfor %}
-        </select>
-        <label for="quantity">Quantity:</label>
-        <input type="number" name="quantity" id="quantity" value="1" min="1">
-        <button type="submit">Add to Cart</button>
-    </form>
-
-    <a href="{{ url_for('restaurant_list') }}">Back to Restaurant List</a>
 </body>
 </html>

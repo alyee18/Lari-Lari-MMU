@@ -4,112 +4,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="../static/style(admin2).css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='myscripts.js') }}" defer></script>
+    <!--------------------------box-icon-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     
 </head>
 <body>
-    <header>
-        <h2>Admin Dashboard</h2>
-    </header>
-    <div class="sidebar">
-        <ul>
-            <li><i class='bx bx-home'></i><a href="/admin">Dashboard</a></li>
-            <li><i class='bx bx-user'></i><a href="/usercontrol">User Control</a></li>
-            <li><i class='bx bx-store-alt'></i><a href="/restaurantcontrol">Restaurant Control</a></li>
-            <li><i class='bx bx-cart'></i><a href="/ordercontrol">Order Control</a></li>
-            <li><i class='bx bx-food-menu'></i><a href="/menucontrol">Menu Control</a></li>
-            <li><i class='bx bx-edit'></i><a href="/pageEditor">Page Editor</a></li>
-            <li>
-               <form action="{{ url_for('logout') }}" method="POST">
-                  <button type="submit" class="logout-button">Logout</button>
-              </form>
-            </li>
-        </ul>
-    </div>
     <div class="admincontainer">
-      <div class="subadmincontainer">
-          <div class="subdes">
-              <h2>{{ num_orders }}</h2>
-              <h4>Orders</h4>
-          </div>
-          <div class="icon">
-              <i class='bx bxs-cart'></i>
-          </div>
-      </div>
-      <div class="subadmincontainer">
-          <div class="subdes">
-              <h2>{{ num_runners }}</h2>
-              <h4>Runners</h4>
-          </div>
-          <div class="icon">
-              <i class='bx bxs-bike'></i>
-          </div>
-      </div>
-      <div class="subadmincontainer">
-          <div class="subdes">
-              <h2>{{ num_buyers }}</h2>
-              <h4>Buyers</h4>
-          </div>
-          <div class="icon">
-              <i class='bx bxs-user'></i>
-          </div>
-      </div>
-      <div class="subadmincontainer">
-          <div class="subdes">
-              <h2>{{ num_sellers }}</h2>
-              <h4>Sellers</h4>
-          </div>
-          <div class="icon">
-              <i class='bx bxs-store'></i>
-          </div>
-      </div>
-    </div>
-    
-    <div class="graphcontainer">
-      <div class="graph">
-          <canvas id="summaryChart" width="400" height="200"></canvas>
-          <canvas id="breakdownChart" width="400" height="200"></canvas>
-      </div>
-  </div>
-  
-  <div class="table" id="orders_table">
-    <div class="table__header">
-        <h1>Orders List</h1>
-        <div class="input-group">
-            <input type="search" id="search" placeholder="Search Orders...">
-            <i class='bx bx-search' onclick="searchOrders()"></i>
+        <div class="navbar">
+            <ul>
+                <li><a href="#">Lari Lari MMU</a></li>
+                <li><i class='bx bx-home'></i><a href="/admin">Dashboard</a></li>
+                <li><i class='bx bx-user'></i><a href="/usercontrol">User Control</a></li>
+                <li><i class='bx bx-store-alt'></i><a href="/restaurantcontrol">Restaurant Control</a></li>
+                <li><i class='bx bx-cart'></i><a href="/ordercontrol">Order Control</a></li>
+                <li><i class='bx bx-food-menu'></i><a href="/menucontrol">Menu Control</a></li>
+                <li><i class='bx bx-edit'></i><a href="/pageEditor">Page Editor</a></li>
+                <li><i class='bx bx-log-out'></i><a href="/logout">Log Out</a></li>
+            </ul>
         </div>
     </div>
-    <div class="table__body">
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Order ID</th>
-                    <th>Buyer</th>
-                    <th>Restaurant</th>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ order.order_id }}</td>
-                    <td>{{ order.buyer_username }}</td>
-                    <td>{{ order.restaurant_name }}</td>
-                    <td>{{ order.item_name }}</td>
-                    <td>{{ order.quantity }}</td>
-                    <td>{{ order.order_date }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>                               
-        </table>
+
+    <div class="admin-main">
+        <div class="admin-header">
+            <h2>Admin Dashboard</h2>
+        </div>
+        <div class="admin-body">
+            <div class="subcontainer">
+                <div class="subdes">
+                    <h2>{{ num_orders }}</h2>
+                    <h4>Orders</h4>
+                </div>
+                <div class="icon">
+                    <i class='bx bxs-cart'></i>
+                </div>
+            </div>
+            <div class="subcontainer">
+                <div class="subdes">
+                    <h2>{{ num_runners }}</h2>
+                    <h4>Runners</h4>
+                </div>
+                <div class="icon">
+                    <i class='bx bx-run'></i>
+                </div>
+            </div>
+            <div class="subcontainer">
+                <div class="subdes">
+                    <h2>{{ num_buyers }}</h2>
+                    <h4>Buyers</h4>
+                </div>
+                <div class="icon">
+                    <i class='bx bxs-user'></i>
+                </div>
+            </div>
+            <div class="subcontainer">
+                <div class="subdes">
+                    <h2>{{ num_sellers }}</h2>
+                    <h4>Sellers</h4>
+                </div>
+                <div class="icon">
+                    <i class='bx bxs-store'></i>
+                </div>
+            </div>
+            
+          <div class="graphcontainer">
+            <div class="graph">
+                <canvas id="summaryChart" width="400" height="200"></canvas>
+                <canvas id="breakdownChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <div class="admin-table" id="orders_table">
+            <div class="graphcontainer">
+                <div class="graph">
+                    <canvas id="summaryChart" width="400" height="200"></canvas>
+                    <canvas id="earningsChart" width="400" height="200"></canvas>
+                    <canvas id="ordersChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        
+            <script id="financialData" type="application/json">
+                {{ financial_data | tojson }}
+            </script>
+        </div>
     </div>
-</div>
+
 </body>
 </html>

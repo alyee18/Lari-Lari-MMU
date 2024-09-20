@@ -15,7 +15,7 @@
     <!-- google-font-link -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
 
     <!-- aos-animation-link -->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
@@ -25,7 +25,7 @@
 
     <header>
         <a href="#" class="logo">
-            <img src="../static/img-logo.jpg">
+            <p>{{ filename }}></p>
         </a>
         <div class="right-content">
 
@@ -38,25 +38,21 @@
 <!--------------------------TOPIC---------------------------------------------------->     
     <section class="topic">
         <div class="topic-text">
-            <p>{{ home_content }}</p>
-            <p>{{ shop_name }}</p>
             <h5 data-aos="fade-right" data-aos-duration="1500"> #Welcome to the Restaurant Finder </h5>
-            <h1 data-aos="zoom-in-left" data-aos-duration="1800" data-aos-delay="200">LARI LARI MMU</h1>
-            <p>{{ home_content }}</p>
+            <h1 data-aos="zoom-in-left" data-aos-duration="1800" data-aos-delay="200">{{ content.shop_name }}</h1>
+            <p>{{ content.home_content }}</p>
             <p data-aos="fade-right" data-aos-duration="1700" data-aos-delay="300"> YOO YOO YOO wanna find something tasty??<br> Here LARI LARI MMU is the best choice for you !!</p>
-            <p>{{ shop_name }}</p>
+
             <div class="main-topic" data-aos="flip-down" data-aos-duration="1400" data-aos-delay="400">
-                    <p><a href="{{ url_for('login') }}">Log in as a buyer to place an order</a></p>
+                    <a href="{{ url_for('login') }}" class="btn">Log in as a buyer to place an order</a>
             </div>
             </div>
+            
         </div>
     </section>
 
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-        AOS.init({offset: 1,});
-    </script>
     <script>
         AOS.init({offset: 1,});
     </script>

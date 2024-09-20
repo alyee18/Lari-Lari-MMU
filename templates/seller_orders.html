@@ -2,77 +2,100 @@
 <html lang="en">
 <head>
     <title>Orders for Your Restaurants</title>
+    <link rel="stylesheet" href="../static/style(SP).css">
+<!--------------------------box-icon-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+<!--------------------------remix-icon-link---------------------------------------------------->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+            
+<!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+        
+<!--------------------------aos-animation-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
-    <h2>Orders for Your Restaurants</h2>
     <div class="container">
         <nav class="nav-bar">
             <ul class="nav-links">
                 <li class="nav-link">
-                    <a href="{{ url_for('seller_home') }}">Home</a>                
+                    <a href="{{ url_for('seller_home') }}">Home</a>
+                    <i class='bx bx-home'></i>                
                 </li>
                 <li class="nav-link profile">
                     <a href="{{ url_for('progress_tracking') }}" class="dropbtn">Progress Tracking</a>
+                    <i class='bx bx-list-check'></i>
                 </li>
                 <li class="nav-link">
                     <a href="{{ url_for('seller_profile') }}" class="dropbtn">Profile</a>
+                    <i class='bx bx-user'></i>
                 </li>
                 <li class="nav-link">
                     <a href="{{ url_for('seller_orders') }}" class="dropbtn">View Order</a>
                 </li>
                 <li class="nav-link">
                     <a href="{{ url_for('logout') }}" class="dropbtn">Log OUT</a>
+                    <i class='bx bx-log-out'></i>
                 </li>
             </ul>
         </nav>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Buyer Username</th>
-                    <th>Restaurant Name</th>
-                    <th>Item Name</th>
-                    <th>Total Price</th>
-                    <th>Quantity</th>
-                    <th>Date</th>
-                    <th>Order Status</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if orders %}
-                {% for order in orders %}
-                    <tr>
-                        <td>{{ order.id }}</td>
-                        <td>{{ order.buyer_username }}</td>
-                        <td>{{ order.restaurant_name }}</td>
-                        <td>{{ order.item_name }}</td>
-                        <td>{{ order.total_price }}</td>
-                        <td>{{ order.quantity }}</td>
-                        <td>{{ order.order_date }}</td>
-                        <td>{{ order.order_status }}</td>
-                        <td>{{ order.status }}</td>
-                        <td>
-                            {% if order.order_status == 'current' %}
-                            <form method="POST" action="{{ url_for('update_seller_order_status', order_id=order.id) }}">
-                                <select name="status">
-                                    <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
-                                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
-                                </select>
-                                <button type="submit">Update Status</button>
-                            </form>
-                            {% else %}
-                                    <span>N/A</span>
-                                {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-                {% else %}
-                <tr><td colspan="10">No orders found for this restaurant.</td></tr>
-                {% endif %}
-            </tbody>
-        </table>
     </div>
+        <div class="table">
+            <div class="table-header">
+                <h2>Orders for Your Restaurants</h2>
+            </div>
+            <div class="table-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Buyer Username</th>
+                            <th>Restaurant Name</th>
+                            <th>Item Name</th>
+                            <th>Total Price</th>
+                            <th>Quantity</th>
+                            <th>Date</th>
+                            <th>Order Status</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if orders %}
+                        {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.buyer_username }}</td>
+                                <td>{{ order.restaurant_name }}</td>
+                                <td>{{ order.item_name }}</td>
+                                <td>{{ order.total_price }}</td>
+                                <td>{{ order.quantity }}</td>
+                                <td>{{ order.order_date }}</td>
+                                <td>{{ order.order_status }}</td>
+                                <td>{{ order.status }}</td>
+                                <td>
+                                    {% if order.order_status == 'current' %}
+                                    <form method="POST" action="{{ url_for('update_seller_order_status', order_id=order.id) }}">
+                                        <select name="status">
+                                            <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
+                                            <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                        </select>
+                                        <button type="submit">Update Status</button>
+                                    </form>
+                                    {% else %}
+                                            <span>N/A</span>
+                                        {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr><td colspan="10">No orders found for this restaurant.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 </body>
 </html>
