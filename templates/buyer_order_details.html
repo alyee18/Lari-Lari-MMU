@@ -7,85 +7,107 @@
     <style>
         #map { height: 600px; width: 100%; }
     </style>
+        <link rel="stylesheet" type="text/css" href="../static/style(BP).css">
+    
+        <!--------------------------box-icon-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+        
+        <!--------------------------remix-icon-link---------------------------------------------------->
+            <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+            
+        <!--------------------------google-font-link---------------------------------------------------->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+        
+        <!--------------------------aos-animation-link---------------------------------------------------->
+            <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
-    <h2>Order Details</h2>
-
-    <div class="order-summary">
-        <p><strong>Order ID:</strong> {{ order.id }}</p>
-        <p><strong>Buyer Username:</strong> {{ order.buyer_username }}</p>
-        <p><strong>Restaurant Name:</strong> {{ order.restaurant_name }}</p>
-        <p><strong>Item Name:</strong> {{ order.item_name }}</p>
-        <p><strong>Quantity:</strong> {{ order.quantity }}</p>
-        <p><strong>Total Price:</strong> {{ order.total_price }}</p>
-        <p><strong>Order Date:</strong> {{ order.order_date }}</p>
-        <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
-
-        {% if order.runner_name %}
-        <p><strong>Runner Name:</strong> {{ order.runner_name }}</p>
-        {% endif %}
-    
-        {% if order.status == 'picked up' %}
-        <p class="status-message">Runner is delivering your order</p>
-        {% elif order.order_status == 'completed' %}
-        <p class="status-message">Your order is successfully completed</p>
-        {% elif order.status == 'preparing' %}
-        <p class="status-message">Seller is preparing your food</p>
-        {% elif order.status == 'delivered' %}
-        <p class="status-message">Your food is ready for runner to pick up</p>
-        {% else %}
-            <p class="status-message">Order status: {{ order.status }}</p>
-        {% endif %}
+    <div class="container">
+        <div class="table">
+            <div class="table-header">
+                <h2>Order Details</h2>
+            </div>
+        </div>
+            <div class="table-body">
+                <div class="order-summary">
+                    <p><strong>Order ID:</strong> {{ order.id }}</p>
+                    <p><strong>Buyer Username:</strong> {{ order.buyer_username }}</p>
+                    <p><strong>Restaurant Name:</strong> {{ order.restaurant_name }}</p>
+                    <p><strong>Item Name:</strong> {{ order.item_name }}</p>
+                    <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+                    <p><strong>Total Price:</strong> {{ order.total_price }}</p>
+                    <p><strong>Order Date:</strong> {{ order.order_date }}</p>
+                    <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
+            
+                    {% if order.runner_name %}
+                    <p><strong>Runner Name:</strong> {{ order.runner_name }}</p>
+                    {% endif %}
+                
+                    {% if order.status == 'picked up' %}
+                    <p class="status-message">Runner is delivering your order</p>
+                    {% elif order.order_status == 'completed' %}
+                    <p class="status-message">Your order is successfully completed</p>
+                    {% elif order.status == 'preparing' %}
+                    <p class="status-message">Seller is preparing your food</p>
+                    {% elif order.status == 'delivered' %}
+                    <p class="status-message">Your food is ready for runner to pick up</p>
+                    {% else %}
+                        <p class="status-message">Order status: {{ order.status }}</p>
+                    {% endif %}
+                </div>
+            
+                <div class="return-button">
+                    <a href="{{ url_for('buyer_orders') }}" class="button">Return to Order List</a>
+                </div>
+            
+                <div id="map"></div>
+            
+                {% if order.runner_name and order.runner_lat and order.runner_lng %}
+                <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+                <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+                <script>
+                    var orderId = "{{ order.id }}";
+                    var runnerLat = parseFloat("{{ order.runner_lat }}");
+                    var runnerLng = parseFloat("{{ order.runner_lng }}");
+                    var deliveryLat = parseFloat("{{ order.delivery_lat }}");
+                    var deliveryLng = parseFloat("{{ order.delivery_lng }}");
+            
+                    var map = L.map('map').setView([runnerLat, runnerLng], 13);
+            
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                    }).addTo(map);
+            
+                    // Marker for the runner's location
+                    var runnerMarker = L.marker([runnerLat, runnerLng]).addTo(map)
+                        .bindPopup("Runner Location")
+                        .openPopup();
+            
+                    // Marker for the delivery address
+                    var deliveryMarker = L.marker([deliveryLat, deliveryLng]).addTo(map)
+                        .bindPopup("Delivery Address")
+                        .openPopup();
+            
+                    var socket = io();
+            
+                    socket.on(`runner_location_${orderId}`, function (data) {
+                        var newRunnerLat = parseFloat(data.lat);
+                        var newRunnerLng = parseFloat(data.lng);
+            
+                        // Update the runner's marker position
+                        runnerMarker.setLatLng([newRunnerLat, newRunnerLng]);
+            
+                        // Optionally, update the map view if desired
+                        map.setView([newRunnerLat, newRunnerLng]);
+            
+                        // Add a polyline from the runner to the delivery address
+                        L.polyline([[newRunnerLat, newRunnerLng], [deliveryLat, deliveryLng]], { color: 'blue' }).addTo(map);
+                    });
+                </script>
+                {% endif %}
+            </div>
     </div>
-
-    <div class="return-button">
-        <a href="{{ url_for('buyer_orders') }}">Return to Order List</a>
-    </div>
-
-    <div id="map"></div>
-
-    {% if order.runner_name and order.runner_lat and order.runner_lng %}
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-    <script>
-        var orderId = "{{ order.id }}";
-        var runnerLat = parseFloat("{{ order.runner_lat }}");
-        var runnerLng = parseFloat("{{ order.runner_lng }}");
-        var deliveryLat = parseFloat("{{ order.delivery_lat }}");
-        var deliveryLng = parseFloat("{{ order.delivery_lng }}");
-
-        var map = L.map('map').setView([runnerLat, runnerLng], 13);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-        }).addTo(map);
-
-        // Marker for the runner's location
-        var runnerMarker = L.marker([runnerLat, runnerLng]).addTo(map)
-            .bindPopup("Runner Location")
-            .openPopup();
-
-        // Marker for the delivery address
-        var deliveryMarker = L.marker([deliveryLat, deliveryLng]).addTo(map)
-            .bindPopup("Delivery Address")
-            .openPopup();
-
-        var socket = io();
-
-        socket.on(`runner_location_${orderId}`, function (data) {
-            var newRunnerLat = parseFloat(data.lat);
-            var newRunnerLng = parseFloat(data.lng);
-
-            // Update the runner's marker position
-            runnerMarker.setLatLng([newRunnerLat, newRunnerLng]);
-
-            // Optionally, update the map view if desired
-            map.setView([newRunnerLat, newRunnerLng]);
-
-            // Add a polyline from the runner to the delivery address
-            L.polyline([[newRunnerLat, newRunnerLng], [deliveryLat, deliveryLng]], { color: 'blue' }).addTo(map);
-        });
-    </script>
-    {% endif %}
 </body>
 </html>
