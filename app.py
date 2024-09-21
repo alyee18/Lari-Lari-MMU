@@ -1634,5 +1634,46 @@ def buyer_order_details(order_id):
     
     return render_template('buyer_order_details.html', order=order)
 
+@app.route('/submit_review/<int:order_id>', methods=['POST'])
+def submit_review(order_id):
+    rating = request.form['rating']
+    review = request.form['review']
+    buyer_username = session.get('username') 
+
+    if not buyer_username:
+        flash('You must be logged in to submit a review.', 'error')
+        return redirect(url_for('buyer_order_details', order_id=order_id))
+
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+
+            # Fetch the restaurant name and item name based on the order ID
+            cursor.execute("SELECT restaurant_name, item_name FROM orders WHERE id = ?", (order_id,))
+            order_details = cursor.fetchone()
+
+            if order_details is None:
+                flash('Order not found.', 'error')
+                return redirect(url_for('buyer_order_details', order_id=order_id))
+
+            restaurant_name, item_name = order_details  
+
+            query = """
+                INSERT INTO order_reviews (order_id, buyer_username, restaurant_name, item_name, rating, review)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """
+            cursor.execute(query, (order_id, buyer_username, restaurant_name, item_name, rating, review))
+            conn.commit()
+
+            flash('Your review has been submitted!', 'success')
+    except sqlite3.IntegrityError as e:
+        flash(f'An integrity error occurred: {e}', 'error')
+    except sqlite3.OperationalError as e:
+        flash(f'An operational error occurred while accessing the database: {e}', 'error')
+    except Exception as e:
+        flash(f'An unexpected error occurred: {e}', 'error')
+
+    return redirect(url_for('buyer_home', order_id=order_id))
+
 if __name__ == "__main__":
     socketio.run(app, debug=True)
