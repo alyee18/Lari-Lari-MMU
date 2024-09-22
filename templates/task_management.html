@@ -91,7 +91,7 @@
                                     <button type="submit">Accept Order</button>
                                 </form>
                             {% elif task.order_status == 'current' %}
-                                {% if task.status == 'delivered' %}
+                                {% if task.status == 'ready for pickup' %}
                                 <form action="{{ url_for('update_status', order_id=task.id) }}" method="POST">
                                     <button type="submit">Pick Up</button>
                                 </form>

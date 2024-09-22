@@ -25,10 +25,10 @@
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
+    <div class="container">
     <h1>Add Menu Item for {{ restaurant_name }}</h1>
 
-    <!--adding a menu item -->
-
+    <!-- adding a menu item -->
     <form method="post">
         <!-- menu item -->
         <label for="name">Item Name:</label>
@@ -38,6 +38,21 @@
         <input type="number" id="price" name="price" step="0.01" required><br><br>
         
         <button type="submit" class="button">Add Item</button>
+
+        <!-- category dropdown -->
+         <div class="category">
+            
+         </div>
+        <label for="category">Category:</label>
+        <select id="category" name="category" required>
+            <option value="">Select a category</option>
+            <option value="Main Course">Main Course</option>
+            <option value="Snack">Snack</option>
+            <option value="Daily Necessities">Daily Necessities</option>
+            <option value="Desserts">Desserts</option>
+            <option value="Beverages">Beverages</option>
+        </select><br><br>
+
     </form>
 
     <a href="{{ url_for('seller_home') }}" >Back to Homepage</a>

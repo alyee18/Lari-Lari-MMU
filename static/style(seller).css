@@ -25,6 +25,11 @@ h1{
 .container h1{
     justify-content: center;
 }
+.container input{
+    position: relative;
+    font-size: 30px;
+    padding: 5px;
+}
 .nav-bar{
     background: #f1f3c7;
     border-radius: 1rem;
@@ -77,7 +82,7 @@ a:hover {
 .button{
     display: inline-block;
     padding: 13px 32px;
-    background: #ffdf4f;
+    background: #6e3613;
     border: 2px solid transparent;
     border-radius: 7px;
     color: white;

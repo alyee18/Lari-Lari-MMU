@@ -39,6 +39,11 @@ body{
     font-size: 15px;
     letter-spacing: 1px;
 }
+.cart-item input{
+    position: relative;
+    font-size: 20px;
+    padding: 5px;
+}
 .cart button{
     background-color: #512da8;
     color: #eee;

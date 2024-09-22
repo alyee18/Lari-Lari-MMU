@@ -108,6 +108,7 @@ a{
     font-weight: 500;
     transition: all .6s ease;
     margin-right: 20px;
+    width: 150px;
 }
 .button:hover{
     transform: scale(1.1);

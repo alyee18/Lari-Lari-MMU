@@ -31,7 +31,6 @@ def createtables():
                 name TEXT NOT NULL UNIQUE,
                 cuisine TEXT NOT NULL,
                 price_range TEXT NOT NULL,
-                delivery_time INTEGER NOT NULL,
                 owner_username TEXT NOT NULL,
                 FOREIGN KEY (owner_username) REFERENCES users(username)
             )
@@ -46,6 +45,8 @@ def createtables():
                 restaurant_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 price REAL NOT NULL,
+                category TEXT NOT NULL,
+                estimated_time INTEGER NOT NULL,
                 FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
             )
         """
@@ -73,6 +74,23 @@ def createtables():
             )
             """
         )
+ # Create for rate & review
+        cursor.execute(
+            """
+            CREATE TABLE order_reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER,
+            buyer_username TEXT NOT NULL,
+            restaurant_name TEXT NOT NULL,
+            item_name TEXT NOT NULL,
+            order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+            rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+            review TEXT,
+            FOREIGN KEY(order_id) REFERENCES orders(id)
+            )   
+            """
+        )
+        
 
         # Commit the transaction and close the connection
         conn.commit()
