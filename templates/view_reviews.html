@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews for {{ restaurant.name }}</title>
+    <link rel="stylesheet" type="text/css" href="../static/style(restaurant).css">
+</head>
+<body>
+    <h1>Reviews for {{ restaurant.name }}</h1>
+    <div class="reviews-container">
+        {% if reviews %}
+            <ul>
+                {% for review in reviews %}
+                    <li>
+                        <p><strong>{{ review.buyer_username }}</strong>: {{ review.rating }} stars</p>
+                        <p>{{ review.review }}</p>
+                        <p><em>{{ review.order_date }}</em></p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No reviews yet for this restaurant.</p>
+        {% endif %}
+        <p><a href="{{ url_for('restaurant_list') }}">Back to Restaurant List</a></p>
+    </div>
+</body>
+</html>
