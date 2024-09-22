@@ -1296,8 +1296,8 @@ def update_seller_order_status(order_id):
             flash('Order not found.', 'error')
             return redirect(url_for('seller_orders'))
         
-        if order[0] != 'current':
-            flash('Order status cannot be updated from its current state.', 'error')
+        if order[0] == 'picked up':
+            flash('Order has already been picked up. Status cannot be updated.', 'error')
             return redirect(url_for('seller_orders'))
         
         cursor.execute("""
@@ -1306,6 +1306,7 @@ def update_seller_order_status(order_id):
             WHERE id = ?
         """, (new_status, order_id))
         conn.commit()
+        
         flash('Order status updated successfully.', 'success')
     except sqlite3.Error as e:
         print(f"Error updating order status: {e}")
