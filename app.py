@@ -1247,18 +1247,25 @@ def seller_progress_tracking():
 @app.route('/seller_orders')
 @login_required(role='seller')
 def seller_orders():
+    seller_username = session['username']
+    
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        # Fetch all orders for the seller's restaurant
+        # Fetch orders for the correct seller's restaurant
         cursor.execute("""
-            SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, order_status, status
-            FROM orders
-            ORDER BY order_date DESC
-        """)
+            SELECT o.id, o.buyer_username, o.restaurant_name, o.item_name, o.total_price, 
+                   o.quantity, o.order_date, o.order_status, o.status
+            FROM orders o
+            JOIN restaurants r ON o.restaurant_name = r.name
+            WHERE r.owner_username = ?
+            ORDER BY o.order_date DESC
+        """, (seller_username,))
         orders = cursor.fetchall()
-        print(f"Orders fetched: {orders}")
+        
+        if not orders:
+            print("No orders found for this seller's restaurant.")
         
     except sqlite3.Error as e:
         orders = []
@@ -1267,7 +1274,6 @@ def seller_orders():
         conn.close()
 
     return render_template('seller_orders.html', orders=orders)
-
 @app.route('/update_seller_order_status/<int:order_id>', methods=['POST'])
 @login_required(role='seller')
 def update_seller_order_status(order_id):
