@@ -5,17 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reviews for {{ restaurant.name }}</title>
     <link rel="stylesheet" type="text/css" href="../static/style(restaurant).css">
+    <!--------------------------box-icon-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Bubbles&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+    <!--------------------------aos-animation-link---------------------------------------------------->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
-    <h1>Reviews for {{ restaurant.name }}</h1>
+    <h1 data-aos="zoom-in-right" data-aos-duration="1800" data-aos-delay="200">Reviews for {{ restaurant.name }}</h1>
     <div class="reviews-container">
         {% if reviews %}
             <ul>
                 {% for review in reviews %}
-                    <li>
-                        <p><strong>{{ review.buyer_username }}</strong>: {{ review.rating }} stars</p>
-                        <p>{{ review.review }}</p>
-                        <p><em>{{ review.order_date }}</em></p>
+                    <li class="review-card">
+                        <p><i class="ri-chat-2-line"></i> {{ review.buyer_username }}: <strong>{{ review.rating }}</strong> stars</p>
+                        <span>{{ review.review }}</span><br>
+                        <span><em>{{ review.order_date }}</em></span>
                     </li>
                 {% endfor %}
             </ul>
@@ -24,5 +45,9 @@
         {% endif %}
         <p><a href="{{ url_for('restaurant_list') }}">Back to Restaurant List</a></p>
     </div>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init({offset: 1,});
+    </script>
 </body>
 </html>

@@ -60,24 +60,27 @@
     border-color: #fff;
  }
  
- .inputbox label{
-    position: absolute;
-    top: 0;
-    height: 100%;
-    transform: translateY(-50%);
-    color:#eee;
- }
- .inputbox input{
-    width: 100%;
-    height: 50px;
-    background-color: #c7cde1;
-    border: none;
-    outline-color: #512da8;
-    font-size: 1em;
-    padding: 0 35px 0 5px;
-    color: #0c0c0c;
- }
- .inputbox i{
-    position:center;
-    right: 30px;
- }
+ .inputbox {
+   position: relative; 
+   width: 100%; 
+   margin-bottom: 15px;
+}
+
+.inputbox input {
+   width: 100%;
+   height: 50px;
+   background-color: #c7cde1;
+   border: none;
+   outline-color: #512da8;
+   font-size: 1em;
+   padding: 0 35px 0 5px; 
+   color: #0c0c0c;
+}
+
+.inputbox i {
+   position: absolute; 
+   right: 10px; 
+   top: 50%; 
+   transform: translateY(-50%); 
+   color: #0c0c0c; 
+}

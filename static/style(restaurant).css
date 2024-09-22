@@ -24,6 +24,7 @@ h1 {
     text-align: center;
     margin: 20px 0 0 0;
     font-size: 50px;
+    font-family: "Rubik Bubbles", system-ui;
 }
 
 .button {
@@ -166,4 +167,42 @@ ul {
     .restaurant-container {
         grid-template-columns: repeat(3, 1fr);
     }
+}
+
+.reviews-container {
+    max-width: 600px; 
+    margin: 0 auto; 
+    padding: 20px; 
+    background-color: #ef852f; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    margin-top: 20px;
+}
+
+.review-card {
+    background-color: #fff; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+    padding: 15px; 
+    margin-bottom: 15px;
+}
+
+.review-card p {
+    margin: 5px 0;
+    font-size: 20px; 
+}
+.review-card strong{
+    color: #002e9f;
+    font-size: 25px;
+}
+.review-card span{
+    font-family: "PT Sans", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    padding: 25px;
+}
+.review-card em{
+    font-family: "PT Sans", sans-serif;
+    font-size: 13px;
+    color: #585656;
 }
