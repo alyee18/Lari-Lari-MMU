@@ -17,7 +17,7 @@ app = Flask(__name__,
             static_url_path='/static',
             static_folder='static',
             template_folder='templates')
-app.secret_key = os.getenv('SECRET_KEY')
+app.secret_key = "alice"
 socketio = SocketIO(app)
 
 def get_db_connection():
