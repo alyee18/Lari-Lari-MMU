@@ -20,6 +20,7 @@
         .star-rating .active {
             color: #f5b301;
         }
+        
     </style>
     <link rel="stylesheet" type="text/css" href="../static/style(BP).css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
@@ -52,25 +53,43 @@
                 {% if order.order_status == 'completed' %}
                     <p class="status-message">Your order is successfully completed</p>
 
-                    <!-- Show rating and review form only when the order is complete -->
-                    <h3>Rate and Review Your Experience</h3>
-                    <form action="{{ url_for('submit_review', order_id=order.id) }}" method="POST" id="rating-form">
-                        
-                        <!-- Star Rating System -->
-                        <div class="star-rating" id="star-rating">
-                            <label data-value="1">&#9733;</label>
-                            <label data-value="2">&#9733;</label>
-                            <label data-value="3">&#9733;</label>
-                            <label data-value="4">&#9733;</label>
-                            <label data-value="5">&#9733;</label>
+                    {% if submitted_review %}
+                    <div class="submitted-review">
+                        <h3>Thank you for your review!</h3>
+                        <p><strong>Your Rating:</strong></p>
+                        <div class="star-rating">
+                            {% for i in range(1, 6) %}
+                                {% if i <= submitted_review[0] %}
+                                    <label class="active">&#9733;</label>
+                                {% else %}
+                                    <label>&#9734;</label>
+                                {% endif %}
+                            {% endfor %}
                         </div>
-                        <input type="hidden" name="rating" id="rating-value" required><br><br>
+                        <p><strong>Your Review:</strong> {{ submitted_review[1] }}</p>
+                    </div>
+                    
+                    {% else %}
+                        <!-- Show rating and review form only when the order is complete and no review has been submitted -->
+                        <h3>Rate and Review Your Experience</h3>
+                        <form action="{{ url_for('submit_review', order_id=order.id) }}" method="POST" id="rating-form">
+                            
+                            <!-- Star Rating System -->
+                            <div class="star-rating" id="star-rating">
+                                <label data-value="1">&#9733;</label>
+                                <label data-value="2">&#9733;</label>
+                                <label data-value="3">&#9733;</label>
+                                <label data-value="4">&#9733;</label>
+                                <label data-value="5">&#9733;</label>
+                            </div>
+                            <input type="hidden" name="rating" id="rating-value" required><br><br>
 
-                        <label for="review">Review:</label><br>
-                        <textarea name="review" id="review" rows="4" cols="50" placeholder="Write your review here..." required></textarea><br><br>
+                            <label for="review">Review:</label><br>
+                            <textarea name="review" id="review" rows="4" cols="50" placeholder="Write your review here..." required></textarea><br><br>
 
-                        <button type="submit" class="button">Submit Review</button>
-                    </form>
+                            <button type="submit" class="button">Submit Review</button>
+                        </form>
+                    {% endif %}
 
                 {% elif order.status == 'picked up' %}
                     <p class="status-message">Runner is delivering your order</p>

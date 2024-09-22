@@ -1616,23 +1616,31 @@ def buyer_orders():
 
 @app.route('/buyer_order_details/<int:order_id>', methods=['GET'])
 def buyer_order_details(order_id):
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # Fetch order details
     query = """
         SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, delivery_address, delivery_lat, delivery_lng, runner_lat, runner_lng, runner_name, status, order_status
         FROM orders
         WHERE id = ?
-        """
+    """
     cursor.execute(query, (order_id,))
     order = cursor.fetchone()
-    conn.close()
 
     if order is None:
         return redirect(url_for('buyer_orders'))
-    
-    return render_template('buyer_order_details.html', order=order)
+
+    # Fetch review details if they exist
+    cursor.execute("""
+        SELECT rating, review FROM order_reviews 
+        WHERE order_id = ? AND buyer_username = ?
+    """, (order_id, session.get('username')))
+    submitted_review = cursor.fetchone()
+
+    conn.close()
+
+    return render_template('buyer_order_details.html', order=order, submitted_review=submitted_review)
 
 @app.route('/submit_review/<int:order_id>', methods=['POST'])
 def submit_review(order_id):
