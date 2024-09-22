@@ -34,7 +34,16 @@
             <ul>
                 {% for review in reviews %}
                     <li class="review-card">
-                        <p><i class="ri-chat-2-line"></i> {{ review.buyer_username }}: <strong>{{ review.rating }}</strong> stars</p>
+                        <p><i class="ri-chat-2-line"></i> {{ review.buyer_username }}: 
+                        <!-- Star Rating -->
+                        {% for i in range(1, 6) %}
+                            {% if i <= review.rating %}
+                                <i class="ri-star-fill" style="color: gold;"></i>
+                            {% else %}
+                                <i class="ri-star-line"></i>
+                            {% endif %}
+                        {% endfor %}
+                        </p>
                         <span>{{ review.review }}</span><br>
                         <span><em>{{ review.order_date }}</em></span>
                     </li>

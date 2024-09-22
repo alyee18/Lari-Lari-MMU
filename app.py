@@ -995,7 +995,6 @@ def logout():
 ######### SellerPage ##########
 @app.route('/seller_home')
 @login_required(role='seller')
-@login_required(role='seller')
 def seller_home():
     conn = get_db_connection()
     cursor = conn.cursor()
