@@ -1331,7 +1331,13 @@ def restaurant_list():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM restaurants")
+    # Adjust this query to calculate average ratings
+    cursor.execute("""
+        SELECT r.*, AVG(o.rating) as average_rating
+        FROM restaurants r
+        LEFT JOIN order_reviews o ON r.name = o.restaurant_name
+        GROUP BY r.id
+    """)
     restaurants = cursor.fetchall()
     conn.close()
 
@@ -1682,6 +1688,28 @@ def submit_review(order_id):
         flash(f'An unexpected error occurred: {e}', 'error')
 
     return redirect(url_for('buyer_home', order_id=order_id))
+
+@app.route('/view_reviews/<int:restaurant_id>')
+@login_required(role='buyer')
+def view_reviews(restaurant_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch the restaurant details
+    cursor.execute("SELECT * FROM restaurants WHERE id = ?", (restaurant_id,))
+    restaurant = cursor.fetchone()
+
+    if not restaurant:
+        flash("Restaurant not found.", "error")
+        return redirect(url_for('restaurant_list'))
+
+    # Fetch reviews for the restaurant
+    cursor.execute("SELECT * FROM order_reviews WHERE restaurant_name = ?", (restaurant['name'],))
+    reviews = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('view_reviews.html', restaurant=restaurant, reviews=reviews)
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)

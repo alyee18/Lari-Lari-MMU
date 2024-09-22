@@ -6,20 +6,19 @@
     <link rel="stylesheet" type="text/css" href="../static/style(restaurant).css">
     <title>Restaurants List</title>
 
-<!--------------------------box-icon-link---------------------------------------------------->
+    <!--------------------------box-icon-link---------------------------------------------------->
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
 
-<!--------------------------remix-icon-link---------------------------------------------------->
-<link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
-    
-<!--------------------------google-font-link---------------------------------------------------->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+    <!--------------------------remix-icon-link---------------------------------------------------->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
 
-<!--------------------------aos-animation-link---------------------------------------------------->
+    <!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+
+    <!--------------------------aos-animation-link---------------------------------------------------->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-
 </head>
 <body>
     <h1>Restaurants</h1>
@@ -31,17 +30,26 @@
                     <li class="restaurant-card">
                         <strong><a href="{{ url_for('restaurant_detail', restaurant_id=restaurant.id) }}" class="restaurant-name">{{ restaurant.name }}</a></strong>
                         <div class="card-data">
-                            <span class="card-discription">
+                            <span class="card-description">
                                 <p><strong>Cuisine:</strong> {{ restaurant.cuisine }}</p>
                                 <p><strong>Price Range:</strong> {{ restaurant.price_range }}</p>
+                                <p>
+                                    <strong>Rating:</strong>
+                                    {% if restaurant.average_rating %}
+                                        {% for star in range(1, 6) %}
+                                            <i class="bx {{ 'bxs-star' if star <= restaurant.average_rating else 'bx-star' }}"></i>
+                                        {% endfor %}
+                                    {% else %}
+                                        No ratings yet
+                                    {% endif %}
+                                </p>
                             </span>
                         </div>
                     </li>
                 {% endfor %}
-                <p><a href="{{ url_for('buyer_home') }}" >Back to Home</a></p>
-            </ul>
+                <p><a href="{{ url_for('buyer_home') }}">Back to Home</a></p>
+            </ul>            
         </div>   
     </div>
-    
 </body>
 </html>
