@@ -17,9 +17,6 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from flask_socketio import SocketIO, emit
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
-import sqlite3
-
-DATABASE = "database.db"
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
@@ -937,7 +934,6 @@ def login():
         if user and check_password_hash(user["password"], password):
             session["username"] = username
             session["role"] = user["role"]
-            session["restaurant_name"] = user.get("restaurant_name")
             flash("Login successful!", "success")
 
             print(f"Logged in as: {username}")
@@ -1253,22 +1249,20 @@ def seller_progress_tracking():
 def seller_orders():
     conn = get_db_connection()
     cursor = conn.cursor()
-    
-    restaurant_name = session.get('restaurant_name')
-  
-    try:
-        cursor.execute(""" 
-            SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, order_status, status 
-            FROM orders 
-            WHERE restaurant_name = ? 
-            ORDER BY order_date DESC
-        """, (restaurant_name,))
-        
-        orders = cursor.fetchall()
 
+    try:
+        # Fetch all orders for the seller's restaurant
+        cursor.execute("""
+            SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, order_status, status
+            FROM orders
+            ORDER BY order_date DESC
+        """)
+        orders = cursor.fetchall()
+        print(f"Orders fetched: {orders}")
+        
     except sqlite3.Error as e:
+        orders = []
         print(f"Database error: {e}")
-        orders = []  
     finally:
         conn.close()
 
@@ -1320,27 +1314,8 @@ def update_seller_order_status(order_id):
 def select_restaurant():
     restaurant_id = request.form.get('restaurant_id')
     if restaurant_id:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM restaurants WHERE id = ?", (restaurant_id,))
-        restaurant = cursor.fetchone()
-        
-        if restaurant:
-            session['restaurant_name'] = restaurant[0]  
-            session['restaurant_id'] = restaurant_id
+        session['restaurant_id'] = restaurant_id 
     return redirect(url_for('seller_orders'))
-
-def check_orders():
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders")
-    orders = cursor.fetchall()
-    for order in orders:
-        print(order)
-    conn.close()
-
-if __name__ == "__main__":
-    check_orders()
 
 ######### Buyer Page ##########
 @app.route('/buyer_home')
