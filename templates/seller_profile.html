@@ -44,7 +44,7 @@
             </ul>
         </nav>
 
-        <div class="profile-management">
+        <div class="profile-container">
             <h1>Manage Your Profile</h1>
 
             {% with messages = get_flashed_messages(with_categories=True) %}
@@ -55,7 +55,7 @@
                 {% endif %}
             {% endwith %}
 
-            <div id="profile-update">
+            <div id="edit-profile">
                 <h2>Edit Profile</h2>
                 <form action="{{ url_for('update_profile') }}" method="post">
                     <div class="input-container">

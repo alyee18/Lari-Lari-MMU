@@ -3,28 +3,25 @@ import os
 import json
 import sqlite3
 import logging
-logging.basicConfig(level=logging.DEBUG)
-import logging
-logging.basicConfig(level=logging.DEBUG)
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
-from datetime import datetime
-from flask_socketio import SocketIO, emit
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from flask_socketio import SocketIO, emit
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
-app = Flask(__name__)
-app.secret_key = "your_secret_key"
-socketio = SocketIO(app)
+logging.basicConfig(level=logging.DEBUG)
+
+app = Flask(__name__,
+            static_url_path='/static',  
+            static_folder='static',
+            template_folder='templates')
+app.secret_key = "alice"
 socketio = SocketIO(app)
 
 def get_db_connection():
-    con = sqlite3.connect("database.db")
+    con = sqlite3.connect(os.path.join(os.path.dirname(__file__), 'database.db'))
     con.row_factory = sqlite3.Row
     return con
 
@@ -38,7 +35,7 @@ def get_tasks(task_type):
     conn.close()
     return tasks
 
-######### Admin Page Editor##########
+
 ######### Admin Page Editor##########
 def load_content():
     """Load content from content.json."""
@@ -998,7 +995,6 @@ def logout():
 ######### SellerPage ##########
 @app.route('/seller_home')
 @login_required(role='seller')
-@login_required(role='seller')
 def seller_home():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -1306,7 +1302,7 @@ def update_seller_order_status(order_id):
             WHERE id = ?
         """, (new_status, order_id))
         conn.commit()
-        
+
         flash('Order status updated successfully.', 'success')
     except sqlite3.Error as e:
         print(f"Error updating order status: {e}")

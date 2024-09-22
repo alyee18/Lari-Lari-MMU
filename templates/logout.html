@@ -36,15 +36,15 @@
         {% endwith %}
 
         <form method="POST" action="{{ url_for('logout') }}">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
+            <div class="inputbox">
+                <input type="text" id="username" name="username" placeholder="Username" required>
+                <i class="bx bx-user"></i>
             </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+            <div class="inputbox">
+                <input type="password" id="password" name="password" placeholder="Password"  required>
+                <i class="bx bx-lock-alt"></i>
             </div>
-            <div class="form-group">
+            <div class="inputbox">
                 <button type="submit" class="button">Log Out</button>
             </div>
         </form>
