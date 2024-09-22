@@ -1716,4 +1716,4 @@ def view_reviews(restaurant_id):
     return render_template('view_reviews.html', restaurant=restaurant, reviews=reviews)
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, port=5001)
