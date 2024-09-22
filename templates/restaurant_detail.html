@@ -26,7 +26,7 @@
         <h1>{{ restaurant.name }}</h1>
         <p>Cuisine: {{ restaurant.cuisine }}</p>
         <p>Price Range: {{ restaurant.price_range }}</p>
-        <p>Rating: {{ restaurant.rating }}</p>
+        <p><a href="{{ url_for('view_reviews', restaurant_id=restaurant.id) }}" class="view-reviews">View Ratings & Reviews</a></p>
         </div>  
         
         <div class="menu-container">

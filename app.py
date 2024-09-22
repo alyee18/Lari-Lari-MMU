@@ -3,28 +3,25 @@ import os
 import json
 import sqlite3
 import logging
-logging.basicConfig(level=logging.DEBUG)
-import logging
-logging.basicConfig(level=logging.DEBUG)
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
-from datetime import datetime
-from flask_socketio import SocketIO, emit
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from flask_socketio import SocketIO, emit
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
-app = Flask(__name__)
-app.secret_key = "your_secret_key"
-socketio = SocketIO(app)
+logging.basicConfig(level=logging.DEBUG)
+
+app = Flask(__name__,
+            static_url_path='/static',
+            static_folder='static',
+            template_folder='templates')
+app.secret_key = "alice"
 socketio = SocketIO(app)
 
 def get_db_connection():
-    con = sqlite3.connect("database.db")
+    con = sqlite3.connect(os.path.join(os.path.dirname(__file__), 'database.db'))
     con.row_factory = sqlite3.Row
     return con
 
@@ -38,7 +35,7 @@ def get_tasks(task_type):
     conn.close()
     return tasks
 
-######### Admin Page Editor##########
+
 ######### Admin Page Editor##########
 def load_content():
     """Load content from content.json."""
@@ -1281,18 +1278,25 @@ def seller_progress_tracking():
 @app.route('/seller_orders')
 @login_required(role='seller')
 def seller_orders():
+    seller_username = session['username']
+    
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        # Fetch all orders for the seller's restaurant
+        # Fetch orders for the correct seller's restaurant
         cursor.execute("""
-            SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, order_status, status
-            FROM orders
-            ORDER BY order_date DESC
-        """)
+            SELECT o.id, o.buyer_username, o.restaurant_name, o.item_name, o.total_price, 
+                   o.quantity, o.order_date, o.order_status, o.status
+            FROM orders o
+            JOIN restaurants r ON o.restaurant_name = r.name
+            WHERE r.owner_username = ?
+            ORDER BY o.order_date DESC
+        """, (seller_username,))
         orders = cursor.fetchall()
-        print(f"Orders fetched: {orders}")
+        
+        if not orders:
+            print("No orders found for this seller's restaurant.")
         
     except sqlite3.Error as e:
         orders = []
@@ -1301,7 +1305,6 @@ def seller_orders():
         conn.close()
 
     return render_template('seller_orders.html', orders=orders)
-
 @app.route('/update_seller_order_status/<int:order_id>', methods=['POST'])
 @login_required(role='seller')
 def update_seller_order_status(order_id):
@@ -1334,7 +1337,7 @@ def update_seller_order_status(order_id):
             WHERE id = ?
         """, (new_status, order_id))
         conn.commit()
-        
+
         flash('Order status updated successfully.', 'success')
     except sqlite3.Error as e:
         print(f"Error updating order status: {e}")
@@ -1366,7 +1369,13 @@ def restaurant_list():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM restaurants")
+    # Adjust this query to calculate average ratings
+    cursor.execute("""
+        SELECT r.*, AVG(o.rating) as average_rating
+        FROM restaurants r
+        LEFT JOIN order_reviews o ON r.name = o.restaurant_name
+        GROUP BY r.id
+    """)
     restaurants = cursor.fetchall()
     conn.close()
 
@@ -1717,6 +1726,28 @@ def submit_review(order_id):
         flash(f'An unexpected error occurred: {e}', 'error')
 
     return redirect(url_for('buyer_home', order_id=order_id))
+
+@app.route('/view_reviews/<int:restaurant_id>')
+@login_required(role='buyer')
+def view_reviews(restaurant_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch the restaurant details
+    cursor.execute("SELECT * FROM restaurants WHERE id = ?", (restaurant_id,))
+    restaurant = cursor.fetchone()
+
+    if not restaurant:
+        flash("Restaurant not found.", "error")
+        return redirect(url_for('restaurant_list'))
+
+    # Fetch reviews for the restaurant
+    cursor.execute("SELECT * FROM order_reviews WHERE restaurant_name = ?", (restaurant['name'],))
+    reviews = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('view_reviews.html', restaurant=restaurant, reviews=reviews)
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)
