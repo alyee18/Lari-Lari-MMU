@@ -14,7 +14,7 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__,
-            static_url_path='/static',
+            static_url_path='/static',  
             static_folder='static',
             template_folder='templates')
 app.secret_key = "alice"
@@ -992,40 +992,6 @@ def logout():
 
     return render_template("logout.html")
 
-######### Reset Password ##########
-@app.route('/reset_password', methods=["GET", "POST"])
-def reset_password():
-    if request.method == "POST":
-        current_password = request.form.get('current_password')
-        new_password = request.form.get('new_password')
-        comfirm_password = request.form.get('comfirm_password')
-
-        if new_password != comfirm_password:
-            return render_template(
-                "seller_profile.html",massage="New password and comfirm password DO NOT SAME!"
-            )
-        con = get_db_connection()
-        cur = con.cursor()
-        cur.execute('SELECT password FROM users WHERE id = ?', (session["id"],))
-        user_data = cur.fetchone()
-
-        if not user_data or not bcrypt.checkpw(
-            current_password.encode('utf-8'), user_data['password'].encode('utf-8')
-        ):
-            return render_template('seller_profile.html',massage="INCORRECT current password")
-        
-        hashed_new_password = hash_password(new_password)
-        cur.execute(
-            "Upate users set password = ? WHERE id = ?",
-            (hashed_new_password, session["id"]),
-        )
-        con.commit()
-        con.close()
-
-        return redirect("/seller_profile")
-    else:
-        return render_template("seller_profile.html")
-
 ######### SellerPage ##########
 @app.route('/seller_home')
 @login_required(role='seller')
@@ -1750,4 +1716,4 @@ def view_reviews(restaurant_id):
     return render_template('view_reviews.html', restaurant=restaurant, reviews=reviews)
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, port=5001)
+    socketio.run(app, debug=True)
