@@ -1616,23 +1616,72 @@ def buyer_orders():
 
 @app.route('/buyer_order_details/<int:order_id>', methods=['GET'])
 def buyer_order_details(order_id):
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # Fetch order details
     query = """
         SELECT id, buyer_username, restaurant_name, item_name, total_price, quantity, order_date, delivery_address, delivery_lat, delivery_lng, runner_lat, runner_lng, runner_name, status, order_status
         FROM orders
         WHERE id = ?
-        """
+    """
     cursor.execute(query, (order_id,))
     order = cursor.fetchone()
-    conn.close()
 
     if order is None:
         return redirect(url_for('buyer_orders'))
-    
-    return render_template('buyer_order_details.html', order=order)
+
+    # Fetch review details if they exist
+    cursor.execute("""
+        SELECT rating, review FROM order_reviews 
+        WHERE order_id = ? AND buyer_username = ?
+    """, (order_id, session.get('username')))
+    submitted_review = cursor.fetchone()
+
+    conn.close()
+
+    return render_template('buyer_order_details.html', order=order, submitted_review=submitted_review)
+
+@app.route('/submit_review/<int:order_id>', methods=['POST'])
+def submit_review(order_id):
+    rating = request.form['rating']
+    review = request.form['review']
+    buyer_username = session.get('username') 
+
+    if not buyer_username:
+        flash('You must be logged in to submit a review.', 'error')
+        return redirect(url_for('buyer_order_details', order_id=order_id))
+
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+
+            # Fetch the restaurant name and item name based on the order ID
+            cursor.execute("SELECT restaurant_name, item_name FROM orders WHERE id = ?", (order_id,))
+            order_details = cursor.fetchone()
+
+            if order_details is None:
+                flash('Order not found.', 'error')
+                return redirect(url_for('buyer_order_details', order_id=order_id))
+
+            restaurant_name, item_name = order_details  
+
+            query = """
+                INSERT INTO order_reviews (order_id, buyer_username, restaurant_name, item_name, rating, review)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """
+            cursor.execute(query, (order_id, buyer_username, restaurant_name, item_name, rating, review))
+            conn.commit()
+
+            flash('Your review has been submitted!', 'success')
+    except sqlite3.IntegrityError as e:
+        flash(f'An integrity error occurred: {e}', 'error')
+    except sqlite3.OperationalError as e:
+        flash(f'An operational error occurred while accessing the database: {e}', 'error')
+    except Exception as e:
+        flash(f'An unexpected error occurred: {e}', 'error')
+
+    return redirect(url_for('buyer_home', order_id=order_id))
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)
