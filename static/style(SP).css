@@ -185,7 +185,7 @@ thead th{
     position: sticky;
     top: 0;
     left: 0;
-    background-color: #e5daff;
+    background-color: #f8e58d;
     border-radius: .1rem;
     width: auto;
 }
@@ -194,4 +194,34 @@ tbody tr:nth-child(even) {
 }
 tbody tr:hover{
     background-color: #fff6;    
+}
+.profile-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background:#d2c176;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px;
+    max-width: 900px;
+    width: 100%;
+}
+
+.profile-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.profile-options {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.profile-container input{
+    position: relative;
+    font-size: 20px;
+    padding: 15px;
 }

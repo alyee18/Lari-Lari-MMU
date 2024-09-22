@@ -4,8 +4,12 @@
     font-family: "Protest Guerrilla", sans-serif; 
 } 
 body{
-    background-color: #e9ffe9 ;
-    background:linear-gradient(to right , #e2e2e2,#e9ffc9) ;
+    background-color: #a8e0b7 ;
+    background:linear-gradient(to right , #cbead1,#73c088) ;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 h1{
     justify-content: center;
@@ -13,13 +17,11 @@ h1{
 .container{
     display: flex;
     font-size: 20px;
-    background-color: #e9ffe9 ;
-    background:linear-gradient(to right , #e2e2e2,#e9ffc9) ;
     justify-content: center;
 }
 
 .nav-bar{
-    background: #edffed;
+    background: #cbead1;
     border-radius: 1rem;
     box-shadow: 0 10px 25px rgba(0,0,0,0.35);
     justify-content: center;
@@ -46,7 +48,7 @@ a{
     position: absolute;
     padding: 1rem 0.5rem;
     margin: 0.5rem -0.5rem;
-    background: #c1f277;
+    background: #73c088;
     color: black;
     box-shadow: 0 10px 25px rgba(0,0,0,0.35);
     border-radius: 0.5rem;
@@ -54,6 +56,7 @@ a{
     display: none;
     align-items: baseline;
     letter-spacing: 0.5px;
+    z-index: 10;
 }
 .nav-link:hover{
     color:#8abe3b;
@@ -120,9 +123,10 @@ a{
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
+    padding-left: 5px;
 }
 .input-container input{
-    padding-left: 2.5rem;
+    padding-left: 20px;
     font-size: 16px;
     width: 100%;
     box-sizing: border-box;
@@ -131,10 +135,13 @@ a{
     outline-color: #8abe3b;
 }
 
-.input-container .icon {
+.input-container i{
     position: absolute;
     left: 0.75rem; 
-    font-size: 20px;
+    font-size: 25px;
+}
+.input-container:hover i{
+    transform: scale(1.1);
 }
 .profile-container {
     position: relative;
@@ -142,7 +149,7 @@ a{
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #e9ffc9;
+    background: #cbead1;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
@@ -161,38 +168,79 @@ a{
     justify-content: space-between;
     width: 100%;
 }
-
-.card {
-    flex: 1;
-    margin-top: 50px;
-    background: #f9f9f9;
-    border-radius: 30px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    box-sizing: border-box;
+.profile-container input{
+    position: relative;
+    font-size: 20px;
+    padding: 15px;
+    padding-left: 40px;
 }
-
-.card h2 {
-    font-size: 1.5rem;
-    margin-bottom: 15px;
-}
-
-.card form {
+.task-container{
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    background: #e9ffc9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px;
+    max-width: 900px;
+    width: 100%
+}
+form button{
+    display: inline-block;
+    padding: 13px 32px;
+    background: #8abe3b;
+    border: 2px solid transparent;
+    border-radius: 7px;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all .6s ease;
+    margin-right: 20px;
+}
+.button:hover{
+    transform: scale(1.1);
+    background-color: #cbf58b;
 }
 
-.card form input[type="text"],
-.card form input[type="email"] {
-    padding: 10px;
-    border: 1px solid #ddd;
+.location-container {
+    text-align: center;
+    background: #73a9ad;
+    border-radius: 30px;
+    width: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 15%;
+}
+
+.icon1 {
+    font-size: 5em;
+    color: rgb(250, 247, 215);
+}
+
+.start{
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+.start button{
+    position: relative;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    background-color: #cbf58b;
     border-radius: 5px;
-    font-size: 1rem;
+    margin-top: 10px;
+    margin-right: 10px;
+    cursor: pointer;
 }
-
-.card p {
-    font-size: 1rem;
-    margin-bottom: 15px;
+.hidden {
+    display: none;
+}
+select{
+    font-size: 15px;
+    padding: 5px;
 }
 
