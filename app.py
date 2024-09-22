@@ -673,7 +673,7 @@ def update_status(order_id):
         if result:
             current_status, order_status = result
 
-            if order_status == 'current' and current_status == 'delivered':
+            if order_status == 'current' and current_status == 'ready for pickup':
                 cursor.execute(
                     "UPDATE orders SET status = 'picked up', runner_name = ? WHERE id = ?", 
                     (session['username'], order_id)
@@ -1273,7 +1273,7 @@ def seller_orders():
 def update_seller_order_status(order_id):
     new_status = request.form['status']
 
-    if new_status not in ['preparing', 'delivered']:
+    if new_status not in ['preparing', 'ready for pickup']:
         flash('Invalid status selected.', 'error')
         return redirect(url_for('seller_orders'))
 
