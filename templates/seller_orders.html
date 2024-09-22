@@ -80,7 +80,7 @@
                                     <form method="POST" action="{{ url_for('update_seller_order_status', order_id=order.id) }}">
                                         <select name="status">
                                             <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
-                                            <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                            <option value="ready for pickup" {% if order.status == 'ready for pickup' %}selected{% endif %}>Ready for pickup</option>
                                         </select>
                                         <button type="submit">Update Status</button>
                                     </form>

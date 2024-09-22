@@ -25,17 +25,18 @@
         <p><strong>Runner Name:</strong> {{ order.runner_name }}</p>
         {% endif %}
     
-        {% if order.status == 'picked up' %}
-        <p class="status-message">Runner is delivering your order</p>
-        {% elif order.order_status == 'completed' %}
+        {% if order.order_status == 'completed' %}
         <p class="status-message">Your order is successfully completed</p>
+        {% elif order.status == 'picked up' %}
+        <p class="status-message">Runner is delivering your order</p>
         {% elif order.status == 'preparing' %}
         <p class="status-message">Seller is preparing your food</p>
-        {% elif order.status == 'delivered' %}
+        {% elif order.status == 'ready for pickup' %}
         <p class="status-message">Your food is ready for runner to pick up</p>
         {% else %}
-            <p class="status-message">Order status: {{ order.status }}</p>
+        <p class="status-message">Order status: {{ order.status }}</p>
         {% endif %}
+
     </div>
 
     <div class="return-button">
