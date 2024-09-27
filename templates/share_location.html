@@ -43,44 +43,51 @@
 
 
     <script>
-        var orderId = "{{ order_id }}"; // Ensure order_id is set correctly
+        var orderId = "{{ order_id }}"; 
         var socket = io();
-
+    
+        setInterval(() => {
+            socket.emit('ping', { message: 'keep_alive' });
+        }, 10000); 
+    
         document.getElementById('start').addEventListener('click', function () {
-            if (navigator.geolocation) {
+            
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by this browser.");
+            } else {
                 navigator.geolocation.watchPosition(function (position) {
                     var latitude = position.coords.latitude;
                     var longitude = position.coords.longitude;
-
+    
                     socket.emit('share_location', {
                         order_id: orderId,
                         lat: latitude,
                         lng: longitude
                     });
-
+    
                     console.log('Location sent: ', { order_id: orderId, lat: latitude, lng: longitude });
+    
                 }, function (error) {
+                    alert("Location access denied. Please enable location services.");
                     console.error("Error occurred. Error code: " + error.code + ", Message: " + error.message);
                 }, {
                     enableHighAccuracy: true,
                     timeout: 10000,
                     maximumAge: 0
                 });
-            } else {
-                alert("Geolocation is not supported by this browser.");
             }
         });
-
+    
         socket.on('location_received', function (data) {
             if (data.status === 'success') {
                 console.log("Location successfully received by buyer.");
                 document.getElementById('return').classList.remove('hidden');
             }
         });
-
+    
         document.getElementById('return').addEventListener('click', function () {
             window.location.href = "{{ url_for('task_management', task_type='current') }}";  // Redirect to the current deliveries page
         });
-    </script>
+    </script>    
 </body>
 </html>
