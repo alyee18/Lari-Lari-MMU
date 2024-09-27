@@ -6,6 +6,21 @@
     <title>Live GPS Tracking with OpenStreetMap</title>
 
     <!-- Leaflet CSS -->
+    <link rel="stylesheet" type="text/css" href="../static/style4(RP).css">
+
+    <!--------------------------box-icon-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    
+    <!--------------------------remix-icon-link---------------------------------------------------->
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/> 
+        
+    <!--------------------------google-font-link---------------------------------------------------->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=Protest+Guerrilla&display=swap" rel="stylesheet">
+    
+    <!--------------------------aos-animation-link---------------------------------------------------->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
     <!-- Leaflet JS -->
@@ -67,9 +82,8 @@
     </nav>
   </div>
     <h1>Live Delivery Tracking</h1>
-    <div id="map"></div>
-
-    <script>
+    <div class="map" id="map">
+      <script>
         // Initialize the map and set its view to an initial location and zoom level
         var map = L.map('map').setView([51.505, -0.09], 13); // Initial coordinates (London)
 
@@ -113,6 +127,9 @@
         }
 
         window.onload = startTracking;
-    </script>
+      </script>
+    </div>
+
+    
 </body>
 </html>
