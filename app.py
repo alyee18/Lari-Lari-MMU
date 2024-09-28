@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, redirect, url_for, session, flash, request, jsonify
 import os
 import json
@@ -13,15 +14,12 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 logging.basicConfig(level=logging.DEBUG)
 
-app = Flask(__name__,
-            static_url_path='/static',  
-            static_folder='static',
-            template_folder='templates')
-app.secret_key = "alice"
+app = Flask(__name__)
+app.secret_key = "your_secret_key"
 socketio = SocketIO(app)
 
 def get_db_connection():
-    con = sqlite3.connect(os.path.join(os.path.dirname(__file__), 'database.db'))
+    con = sqlite3.connect("database.db")
     con.row_factory = sqlite3.Row
     return con
 
