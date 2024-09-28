@@ -235,3 +235,69 @@ tbody tr:hover{
     left: 10px; 
     font-size: 25px;
 }
+
+#map {
+    height: 600px;
+    width: 90%;
+    margin: 20px 30px 20px 30px;
+}
+
+.star-rating {
+    display: inline-flex;
+    font-size: 2em;
+    justify-content: center;
+}
+.star-rating label {
+    color: #ddd;
+    cursor: pointer;
+}
+.star-rating .active {
+    color: #f5b301;
+}
+
+.table-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.order-details,
+.review-table {
+    flex: 1; 
+    margin-right: 10px; 
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.order-details:last-child,
+.review-table:last-child {
+    margin-right: 0; 
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    color: black;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+.return-button {
+    margin-top: 20px;
+}
