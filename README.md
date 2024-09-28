@@ -7,3 +7,7 @@ This system has different roles including
 "buyer"
 "runner"
 with each having unique features
+
+Buyer : Can browse restaurants , add item in cart , place order and track order detail status
+Seller : Manage their restaurant's menu , update order status
+Runner : Handle delivery by pick up and delivering orders , and update their live location for tracking
