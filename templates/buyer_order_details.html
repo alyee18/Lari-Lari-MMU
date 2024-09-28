@@ -37,120 +37,166 @@
 </head>
 <body>
     <div class="container">
-        <div class="table">
-            <div class="table-header">
-                <h2>Order Details</h2>
+        <div class="table-container">
+            <div class="order-details">
+                <div class="table-header">
+                    <h2>Order Details</h2>
+                </div>
+                <div class="table-body">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td><strong>Order ID:</strong></td>
+                                <td>{{ order.id }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Buyer Username:</strong></td>
+                                <td>{{ order.buyer_username }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Restaurant Name:</strong></td>
+                                <td>{{ order.restaurant_name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Item Name:</strong></td>
+                                <td>{{ order.item_name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Quantity:</strong></td>
+                                <td>{{ order.quantity }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Price:</strong></td>
+                                <td>{{ order.total_price }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Order Date:</strong></td>
+                                <td>{{ order.order_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Delivery Address:</strong></td>
+                                <td>{{ order.delivery_address }}</td>
+                            </tr>
+                            {% if order.runner_name %}
+                            <tr>
+                                <td><strong>Runner Name:</strong></td>
+                                <td>{{ order.runner_name }}</td>
+                            </tr>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td><strong>Order Status:</strong></td>
+                            <td>
+                                {% if order.status == 'completed' %}
+                                    <p class="status-message">Your order is successfully completed</p>
+                                {% elif order.status == 'picked up' %}
+                                    <p class="status-message">Runner is delivering your order</p>
+                                {% elif order.status == 'preparing' %}
+                                    <p class="status-message">Seller is preparing your food</p>
+                                {% elif order.status == 'delivered' %}
+                                    <p class="status-message">Your food is ready for runner to pick up</p>
+                                {% else %}
+                                    <p class="status-message">Order status: {{ order.status }}</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-            <div class="table-body">
-                <div class="order-summary">
-                    <p><strong>Order ID:</strong> {{ order.id }}</p>
-                    <p><strong>Buyer Username:</strong> {{ order.buyer_username }}</p>
-                    <p><strong>Restaurant Name:</strong> {{ order.restaurant_name }}</p>
-                    <p><strong>Item Name:</strong> {{ order.item_name }}</p>
-                    <p><strong>Quantity:</strong> {{ order.quantity }}</p>
-                    <p><strong>Total Price:</strong> {{ order.total_price }}</p>
-                    <p><strong>Order Date:</strong> {{ order.order_date }}</p>
-                    <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
-            
-                    {% if order.runner_name %}
-                    <p><strong>Runner Name:</strong> {{ order.runner_name }}</p>
-                    {% endif %}
-                
-                    {% if order.order_status == 'completed' %}
-                        <p class="status-message">Your order is successfully completed</p>
 
-                        {% if submitted_review %}
-                        <div class="submitted-review">
-                            <h3>Thank you for your review!</h3>
-                            <p><strong>Your Rating:</strong></p>
-                            <div class="star-rating">
-                                {% for i in range(1, 6) %}
-                                    {% if i <= submitted_review[0] %}
-                                        <label class="active">&#9733;</label>
-                                    {% else %}
-                                        <label>&#9734;</label>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            <p><strong>Your Review:</strong> {{ submitted_review[1] }}</p>
+            <div class="review-table">
+                <div class="table-header">
+                    <h3>Rate and Review Your Experience</h3>
+                </div>
+                <div class="table-body">
+                    <table>
+                        <tbody>
+                            {% if submitted_review %}
+                            <tr>
+                                <td><strong>Your Rating:</strong></td>
+                                <td>
+                                    <div class="star-rating">
+                                        {% for i in range(1, 6) %}
+                                            <label class="{{ 'active' if i <= submitted_review[0] else '' }}">&#9733;</label>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Your Review:</strong></td>
+                                <td>{{ submitted_review[1] }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="2">You have not submitted a review yet.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if order.order_status == 'completed' and not submitted_review %}
+                <div class="rate-review-form">
+                    <h4>Submit Your Review</h4>
+                    <form action="{{ url_for('submit_review', order_id=order.id) }}" method="POST" id="rating-form">
+                        <div class="star-rating" id="star-rating">
+                            <label data-value="1">&#9733;</label>
+                            <label data-value="2">&#9733;</label>
+                            <label data-value="3">&#9733;</label>
+                            <label data-value="4">&#9733;</label>
+                            <label data-value="5">&#9733;</label>
                         </div>
-                        
-                        {% else %}
-                            <!-- Show rating and review form only when the order is complete and no review has been submitted -->
-                            <h3>Rate and Review Your Experience</h3>
-                            <form action="{{ url_for('submit_review', order_id=order.id) }}" method="POST" id="rating-form">
-                                
-                                <!-- Star Rating System -->
-                                <div class="star-rating" id="star-rating">
-                                    <label data-value="1">&#9733;</label>
-                                    <label data-value="2">&#9733;</label>
-                                    <label data-value="3">&#9733;</label>
-                                    <label data-value="4">&#9733;</label>
-                                    <label data-value="5">&#9733;</label>
-                                </div>
-                                <input type="hidden" name="rating" id="rating-value" required><br><br>
-
-                                <label for="review">Review:</label><br>
-                                <textarea name="review" id="review" rows="4" cols="50" placeholder="Write your review here..." required></textarea><br><br>
-
-                                <button type="submit" class="button">Submit Review</button>
-                            </form>
-                        {% endif %}
-
-                    {% elif order.status == 'picked up' %}
-                        <p class="status-message">Runner is delivering your order</p>
-                    {% elif order.status == 'preparing' %}
-                        <p class="status-message">Seller is preparing your food</p>
-                    {% elif order.status == 'delivered' %}
-                        <p class="status-message">Your food is ready for runner to pick up</p>
-                    {% else %}
-                        <p class="status-message">Order status: {{ order.status }}</p>
-                    {% endif %}
+                        <input type="hidden" name="rating" id="rating-value" required><br><br>
+                        <label for="review">Review:</label><br>
+                        <textarea name="review" id="review" rows="4" cols="50" placeholder="Write your review here..." required></textarea><br><br>
+                        <button type="submit" class="button">Submit Review</button>
+                    </form>
                 </div>
-
-                <div class="return-button">
-                    <a href="{{ url_for('buyer_orders') }}" class="button">Return to Order List</a>
-                </div>
-            
-                {% if order.order_status != 'completed' and order.runner_name and order.runner_lat and order.runner_lng %}
-                <div id="map"></div>
-
-                <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-                <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-                <script>
-                    var orderId = "{{ order.id }}";
-                    var runnerLat = parseFloat("{{ order.runner_lat }}");
-                    var runnerLng = parseFloat("{{ order.runner_lng }}");
-                    var deliveryLat = parseFloat("{{ order.delivery_lat }}");
-                    var deliveryLng = parseFloat("{{ order.delivery_lng }}");
-
-                    var map = L.map('map').setView([runnerLat, runnerLng], 13);
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                    }).addTo(map);
-
-                    var runnerMarker = L.marker([runnerLat, runnerLng]).addTo(map)
-                        .bindPopup("Runner Location")
-                        .openPopup();
-
-                    var deliveryMarker = L.marker([deliveryLat, deliveryLng]).addTo(map)
-                        .bindPopup("Delivery Address")
-                        .openPopup();
-
-                    var socket = io();
-
-                    socket.on(`runner_location_${orderId}`, function (data) {
-                        var newRunnerLat = parseFloat(data.lat);
-                        var newRunnerLng = parseFloat(data.lng);
-                        runnerMarker.setLatLng([newRunnerLat, newRunnerLng]);
-                        map.setView([newRunnerLat, newRunnerLng]);
-                        L.polyline([[newRunnerLat, newRunnerLng], [deliveryLat, deliveryLng]], { color: 'blue' }).addTo(map);
-                    });
-                </script>
                 {% endif %}
             </div>
+        </div>
+
+        <div class="return-button">
+            <a href="{{ url_for('buyer_orders') }}" class="button">Return to Order List</a>
+        </div>
+
+        {% if order.order_status != 'completed' and order.runner_name and order.runner_lat and order.runner_lng %}
+        <div id="map"></div>
+        <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+        <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+        <script>
+            var orderId = "{{ order.id }}";
+            var runnerLat = parseFloat("{{ order.runner_lat }}");
+            var runnerLng = parseFloat("{{ order.runner_lng }}");
+            var deliveryLat = parseFloat("{{ order.delivery_lat }}");
+            var deliveryLng = parseFloat("{{ order.delivery_lng }}");
+
+            var map = L.map('map').setView([runnerLat, runnerLng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+            }).addTo(map);
+
+            var runnerMarker = L.marker([runnerLat, runnerLng]).addTo(map)
+                .bindPopup("Runner Location")
+                .openPopup();
+
+            var deliveryMarker = L.marker([deliveryLat, deliveryLng]).addTo(map)
+                .bindPopup("Delivery Address")
+                .openPopup();
+
+            var socket = io();
+
+            socket.on(`runner_location_${orderId}`, function (data) {
+                var newRunnerLat = parseFloat(data.lat);
+                var newRunnerLng = parseFloat(data.lng);
+                runnerMarker.setLatLng([newRunnerLat, newRunnerLng]);
+                map.setView([newRunnerLat, newRunnerLng]);
+                L.polyline([[newRunnerLat, newRunnerLng], [deliveryLat, deliveryLng]], { color: 'blue' }).addTo(map);
+            });
+        </script>
+        {% endif %}
     </div>
 
     <!-- Star Rating Script -->
