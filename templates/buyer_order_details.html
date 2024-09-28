@@ -96,7 +96,7 @@
                                 {% elif order.status == 'delivered' %}
                                     <p class="status-message">Your food is ready for runner to pick up</p>
                                 {% else %}
-                                    <p class="status-message">Order status: {{ order.status }}</p>
+                                    <p class="status-message">{{ order.status }}</p>
                                 {% endif %}
                             </td>
                         </tr>
